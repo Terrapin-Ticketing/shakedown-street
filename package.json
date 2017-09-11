@@ -1,0 +1,29 @@
+{
+  "name": "sugaree",
+  "version": "1.0.0",
+  "description": "terrapin user service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KayBeSee/sugaree.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KayBeSee/sugaree/issues"
+  },
+  "homepage": "https://github.com/KayBeSee/sugaree#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "config": "^1.26.2",
+    "mongoose": "^4.11.11",
+    "pasync": "^1.4.2",
+    "restify": "^5.2.0",
+    "restify-cors-middleware": "^1.0.1",
+    "restify-errors": "^5.0.0",
+    "web3": "^1.0.0-beta.18"
+  }
+}
