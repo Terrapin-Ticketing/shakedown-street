@@ -13,9 +13,9 @@ class UserApi {
 
   getUser(email, password) {
     return new Promise((resolve, reject) => {
-      UserModel.find({email, password}).exec((err, res) => {
+      UserModel.findOne({email, password}).exec((err, res) => {
         if (err) return reject(err);
-        if (res.length === 0) return reject(new Error('no account'));
+        if (!res) return reject(new Error('no account'));
         return resolve(res);
       });
     });

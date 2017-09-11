@@ -4,6 +4,8 @@ var errors = require('restify-errors');
 var pasync = require('pasync');
 var mongoose = require('mongoose');
 var bluebird = require('bluebird');
+var jwt = require('jsonwebtoken');
+
 
 const server = restify.createServer({
   name: 'myapp',
@@ -12,6 +14,7 @@ const server = restify.createServer({
 
 var config = require('./config/default');
 var User = require('./controllers/user');
+let { secret } = config.user;
 
 var user = new User();
 
@@ -35,11 +38,17 @@ server.use(restify.plugins.bodyParser());
 server.post('/login', (req, res, next) => {
   const { email, password } = req.body;
   user.getUser(email, password)
-    .then((userAccount) => {
-      res.send(userAccount);
+    .then((user) => {
+      let { email, walletAddress, privateKey } = user;
+      let token = jwt.sign({ email, walletAddress, privateKey }, secret);
+      let expire = 1000 * 60 * 60 * 24 * 2;
+      res.status(200)
+        .cookie('cookieToken', token, { maxAge: expire })
+        .json({ token });
       return next();
     })
     .catch((err) => {
+      console.log('getUser err: ', err);
       res.send(err);
       return next();
     });
@@ -48,11 +57,17 @@ server.post('/login', (req, res, next) => {
 server.post('/register', (req, res, next) => {
   const { email, password } = req.body;
   return user.register(email, password)
-    .then((userAccount) =>{
-      res.send(userAccount);
+    .then((user) => {
+      let { email, walletAddress, privateKey } = user;
+      let token = jwt.sign({ email, walletAddress, privateKey }, secret);
+      let expire = 1000 * 60 * 60 * 24 * 2;
+      res.status(200)
+        .cookie('cookieToken', token, { maxAge: expire })
+        .json({ token });
       return next();
     })
     .catch((err) => {
+      console.log('register err: ', err);
       res.send(err);
       return next();
     });
