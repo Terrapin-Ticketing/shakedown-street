@@ -4,6 +4,7 @@
   "description": "terrapin user service",
   "main": "index.js",
   "scripts": {
+    "start": "node ./server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/KayBeSee/sugaree#readme",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "bluebird": "^3.5.0",
     "config": "^1.26.2",
     "jsonwebtoken": "^8.0.0",
