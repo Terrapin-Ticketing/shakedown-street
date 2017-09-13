@@ -7,26 +7,24 @@ let { secret } = config.user;
 const User = require('../controllers/user');
 let user = new User();
 
-function sendToken(res, user, next) {
+function sendToken(res, user) {
   let { email, walletAddress, encryptedPrivateKey } = user;
   let token = jwt.sign({ email, walletAddress, encryptedPrivateKey }, secret);
   let expire = 1000 * 60 * 60 * 24 * 2;
-  res.status(200)
-    .cookie('cookieToken', token, { maxAge: expire })
-    .json({ token });
-  return next();
+  return res.status(200)
+    .cookie('cookieToken', token, { maxAge: expire, httpOnly: false })
+    .send({ token });
 }
 
 module.exports = (server) => {
 
-  server.post('/login', (req, res, next) => {
+  server.post('/login', (req, res) => {
     let { email, password } = req.body;
     user.getUser(email, password)
-      .then((user) => sendToken(res, user, next))
+      .then((user) => sendToken(res, user))
       .catch((err) => {
         console.log('login err: ', err);
         res.send(err);
-        return next();
       });
   });
 
@@ -37,7 +35,6 @@ module.exports = (server) => {
       .catch((err) => {
         console.log('register err: ', err);
         res.send(err);
-        return next();
       });
   });
 
