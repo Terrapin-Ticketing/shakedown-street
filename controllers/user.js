@@ -17,24 +17,11 @@ function symmetricEncrypt(key, text) {
   let inputEncoding = 'utf8';
   let outputEncoding = 'hex';
 
-  console.log('Ciphering "%s" with key "%s" using %s', text, key, algorithm);
-
   let cipher = crypto.createCipher(algorithm, key);
   let ciphered = cipher.update(text, inputEncoding, outputEncoding);
   ciphered += cipher.final(outputEncoding);
 
-  console.log('Result in %s is "%s"', outputEncoding, ciphered);
-
   return ciphered;
-
-  // * SYM DECRYPT *
-  //
-  // var decipher = crypto.createDecipher(algorithm, key);
-  // var deciphered = decipher.update(ciphered, outputEncoding, inputEncoding);
-  // deciphered += decipher.final(inputEncoding);
-  //
-  // console.log(deciphered);
-  // assert.equal(deciphered, text, 'Deciphered text does not match!');
 }
 
 class UserApi {

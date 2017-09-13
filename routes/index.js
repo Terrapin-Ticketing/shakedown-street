@@ -28,10 +28,10 @@ module.exports = (server) => {
       });
   });
 
-  server.post('/register', (req, res, next) => {
+  server.post('/register', (req, res) => {
     let { email, password } = req.body;
     return user.register(email, password)
-      .then((user) => sendToken(res, user, next))
+      .then((user) => sendToken(res, user))
       .catch((err) => {
         console.log('register err: ', err);
         res.send(err);

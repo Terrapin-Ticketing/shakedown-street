@@ -5,9 +5,10 @@ const bluebird = require('bluebird');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
+const config = require('config');
 
 let app = express();
-
 
 app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -27,7 +28,7 @@ mongoose.connect('mongodb://localhost/terrapin', { useMongoClient: true, promise
 app.use((req, res, next) => {
   // if the user sends us a webtoken, decode it
   if (req.cookies && req.cookies.cookieToken) {
-    jwt.verify(req.cookies.cookieToken, secret, (err, decoded) => {
+    jwt.verify(req.cookies.cookieToken, config.user.secret, (err, decoded) => {
       if (!err) req.user = decoded;
       return next();
     });
@@ -35,8 +36,6 @@ app.use((req, res, next) => {
     next();
   }
 });
-
-
 
 routes(app); // initialize routes
 
