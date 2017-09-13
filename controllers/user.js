@@ -51,11 +51,19 @@ class UserApi {
   }
 
   getUser(email, password) {
+    console.log('email: ', email);
+    console.log('password: ', password);
     return new Promise((resolve, reject) => {
-      UserModel.findOne({email, password}).exec((err, res) => {
-        if (err) return reject(err);
-        if (!res) return reject(new Error('no account'));
-        return resolve(res);
+      UserModel.findOne({email}).exec((err, user) => {
+        console.log('user: ', user);
+        if (!user) return reject(new Error('No User'));
+        bcrypt.compare(password, user.password, (err, success) => {
+          console.log('bcrypt err: ', err);
+          console.log('bcrypt success: ', success);
+          if (err) return reject(err);
+          if (!success) return reject(new Error('Wrong Password'));
+          return resolve(user);
+        });
       });
     });
   }

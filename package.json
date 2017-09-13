@@ -21,10 +21,12 @@
     "bcrypt": "^1.0.3",
     "bluebird": "^3.5.0",
     "config": "^1.26.2",
+    "express": "^4.15.4",
     "jsonwebtoken": "^8.0.0",
     "mongoose": "^4.11.11",
     "pasync": "^1.4.2",
     "restify": "^5.2.0",
+    "restify-cookies": "^0.2.2",
     "restify-cors-middleware": "^1.0.1",
     "restify-errors": "^5.0.0",
     "web3": "^1.0.0-beta.18"

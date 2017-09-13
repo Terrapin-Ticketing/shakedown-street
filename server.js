@@ -1,28 +1,33 @@
-const restify = require('restify');
-const corsMiddleware = require('restify-cors-middleware');
+const express = require('express');
 const routes = require('./routes');
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
+const helmet = require('helmet');
+const cookieParser = require('cookieParser');
+const bodyParser = 'body-parser';
 
-let server = restify.createServer({
-  name: 'myapp',
-  version: '1.0.0'
-});
+let app = express();
+
+app.use(helmet());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({limit: '3mb'}));
+app.use(cookieParser());
 
 mongoose.connect('mongodb://localhost/terrapin', { useMongoClient: true, promiseLibrary: bluebird });
 
-const cors = corsMiddleware({
-  origins: ['http://localhost:3000'],
-  allowHeaders: ['*']
-  // exposeHeaders: ['API-Token-Expiry']
+app.use((req, res, next) => {
+  // if the user sends us a webtoken, decode it
+  if (req.cookies && req.cookies.cookieToken) {
+    jwt.verify(req.cookies.cookieToken, secret, (err, decoded) => {
+      if (!err) req.user = decoded;
+      return next();
+    });
+  } else {
+    next();
+  }
 });
 
-server.pre(cors.preflight);
-server.use(cors.actual);
 
-server.use(restify.plugins.acceptParser(server.acceptable));
-server.use(restify.plugins.queryParser());
-server.use(restify.plugins.bodyParser());
 
 routes(server); // initialize routes
 
