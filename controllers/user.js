@@ -27,7 +27,8 @@ function symmetricEncrypt(key, text) {
 
   return ciphered;
 
-  // sym decrypt
+  // * SYM DECRYPT *
+  //
   // var decipher = crypto.createDecipher(algorithm, key);
   // var deciphered = decipher.update(ciphered, outputEncoding, inputEncoding);
   // deciphered += decipher.final(inputEncoding);

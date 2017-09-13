@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const bluebird = require('bluebird');
 
 let server = restify.createServer({
-  name: 'myapp',
+  name: 'shakedown',
   version: '1.0.0'
 });
 
