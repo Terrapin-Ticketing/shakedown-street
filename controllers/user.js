@@ -25,7 +25,7 @@ function symmetricEncrypt(key, text) {
 }
 
 class UserApi {
-  register(email, password) {
+  signup(email, password) {
     let wallet = web3.eth.accounts.create();  // create wallet
 
     let encryptedPrivateKey = symmetricEncrypt(password, wallet.privateKey);
@@ -39,15 +39,10 @@ class UserApi {
   }
 
   getUser(email, password) {
-    console.log('email: ', email);
-    console.log('password: ', password);
     return new Promise((resolve, reject) => {
       UserModel.findOne({email}).exec((err, user) => {
-        console.log('user: ', user);
-        if (!user) return reject(new Error('No User'));
+        if (!user) return reject(new Error('This user doesn\'t exist.'));
         bcrypt.compare(password, user.password, (err, success) => {
-          console.log('bcrypt err: ', err);
-          console.log('bcrypt success: ', success);
           if (err) return reject(err);
           if (!success) return reject(new Error('Wrong Password'));
           return resolve(user);
