@@ -5,8 +5,11 @@ const bluebird = require('bluebird');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
 let app = express();
+
+const { secret } = require('./config/default').user;
 
 
 app.use(helmet());
