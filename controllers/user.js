@@ -38,7 +38,7 @@ function symmetricEncrypt(key, text) {
 }
 
 class UserApi {
-  register(email, password) {
+  signup(email, password) {
     let wallet = web3.eth.accounts.create();  // create wallet
 
     let encryptedPrivateKey = symmetricEncrypt(password, wallet.privateKey);
