@@ -32,7 +32,7 @@ module.exports = (server) => {
     return user.signup(email, password)
       .then((user) => {
         console.log('user: ', user);
-        sendToken(res, user, next)
+        return sendToken(res, user, next)
       })
       .catch((err) => {
         console.log('signup err: ', err);
