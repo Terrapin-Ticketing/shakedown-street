@@ -23,14 +23,17 @@ module.exports = (server) => {
       .then((user) => sendToken(res, user))
       .catch((err) => {
         console.log('login err: ', err);
-        res.send(err);
+        res.send(500);
       });
   });
 
   server.post('/signup', (req, res, next) => {
     let { email, password } = req.body;
     return user.signup(email, password)
-      .then((user) => sendToken(res, user, next))
+      .then((user) => {
+        console.log('user: ', user);
+        sendToken(res, user, next)
+      })
       .catch((err) => {
         console.log('signup err: ', err);
         res.send(500);
