@@ -28,11 +28,10 @@ module.exports = (server) => {
   });
 
   server.post('/signup', (req, res, next) => {
-    let { email, password } = req.body;
-    return user.signup(email, password)
+    let { email, password, privateKey } = req.body;
+    return user.signup(email, password, privateKey)
       .then((user) => {
-        console.log('user: ', user);
-        return sendToken(res, user, next)
+        return sendToken(res, user, next);
       })
       .catch((err) => {
         console.log('signup err: ', err);

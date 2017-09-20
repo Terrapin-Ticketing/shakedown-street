@@ -25,17 +25,34 @@ function symmetricEncrypt(key, text) {
 }
 
 class UserApi {
-  signup(email, password) {
-    let wallet = web3.eth.accounts.create();  // create wallet
+  signup(email, password, privateKey) {
+    let wallet;
+    if (privateKey) {
+      wallet = web3.eth.accounts.privateKeyToAccount(privateKey);
+      console.log(wallet);
+    } else {
+      wallet = web3.eth.accounts.create();  // create wallet
+    }
 
     let encryptedPrivateKey = symmetricEncrypt(password, wallet.privateKey);
 
-    return UserModel.create({
-      email,
-      password: saltPassword(password),
-      walletAddress: wallet.address,
-      encryptedPrivateKey
+    return web3.eth.getBalance(wallet.address).then((data) => {
+      console.log('BALANCE:', data);
+
+      return UserModel.create({
+        email,
+        password: saltPassword(password),
+        walletAddress: wallet.address,
+        encryptedPrivateKey
+      });
     });
+
+    // return UserModel.create({
+    //   email,
+    //   password: saltPassword(password),
+    //   walletAddress: wallet.address,
+    //   encryptedPrivateKey
+    // });
   }
 
   getUser(email, password) {
