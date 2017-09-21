@@ -28,7 +28,7 @@ class UserApi {
   signup(email, password, privateKey) {
     let wallet;
     if (privateKey) {
-      wallet = web3.eth.accounts.privateKeyToAccount(privateKey);
+      wallet = web3.eth.accounts.privateKeyToAccount(`0x${privateKey}`);
       console.log(wallet);
     } else {
       wallet = web3.eth.accounts.create();  // create wallet
