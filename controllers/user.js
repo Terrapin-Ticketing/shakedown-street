@@ -31,7 +31,7 @@ class UserApi {
       wallet = web3.eth.accounts.privateKeyToAccount(`0x${privateKey}`);
       console.log(wallet);
     } else {
-      wallet = web3.eth.accounts.create();  // create wallet
+      wallet = web3.eth.accounts.create(); // create wallet
     }
 
     let encryptedPrivateKey = symmetricEncrypt(password, wallet.privateKey);
