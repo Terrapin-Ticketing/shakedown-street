@@ -39,6 +39,6 @@ app.use((req, res, next) => {
 
 routes(app); // initialize routes
 
-app.listen(8080, () => {
-  console.log('%s listening at %s', 'Shakedown Street', '8080');
+app.listen(config.port, () => {
+  console.log('%s listening at %s', 'Shakedown Street', config.port);
 });
