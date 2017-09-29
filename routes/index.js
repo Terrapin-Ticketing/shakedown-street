@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 // const errors = require('restify-errors');
 
-const config = require('../config/default');
+const config = require('config');
 let { secret } = config.user;
 
 const User = require('../controllers/user');

@@ -1,0 +1,8 @@
+{
+  "web3": {
+    "httpProvider": "http://138.197.106.138:8545"
+  },
+  "user": {
+    "secret": "nershi4prez"
+  }
+}
