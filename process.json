@@ -1,0 +1,10 @@
+{
+  "name" : "Shakedown Street",
+  "script" : "server.js",
+  "env_production" : {
+    "NODE_ENV": "production"
+  },
+  "env_demo" : {
+    "NODE_ENV": "demo"
+  }
+}
