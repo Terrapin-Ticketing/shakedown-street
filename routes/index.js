@@ -7,6 +7,9 @@ let { secret } = config.user;
 const User = require('../controllers/user');
 let user = new User();
 
+const Event = require('../controllers/event');
+let event = new Event();
+
 function sendToken(res, user) {
   let { email, walletAddress, encryptedPrivateKey } = user;
   let token = jwt.sign({ email, walletAddress, encryptedPrivateKey }, secret);
@@ -36,6 +39,19 @@ module.exports = (server) => {
       .catch((err) => {
         console.log('signup err: ', err);
         res.send(500);
+      });
+  });
+
+  server.get('/event/:eventAddress', (req, res, next) => {
+    let { eventAddress } = req.params;
+    console.log('hits1', eventAddress);
+    return event.getEventInfo(eventAddress)
+      .then((event) => {
+        console.log('event: ', event);
+        return res.send({ event });
+      })
+      .catch((err) => {
+        res.sendStatus(500);
       });
   });
 
