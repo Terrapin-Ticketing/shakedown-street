@@ -1,0 +1,10 @@
+{
+  "port": 8080,
+  "web3": {
+    "httpProvider": "https://ropsten.infura.io/ErkMqD1W4xWqfkfqNBnt"
+  },
+  "user": {
+    "secret": "nershi4prez"
+  },
+  "allowOrigin": "http://165.227.127.93"
+}
