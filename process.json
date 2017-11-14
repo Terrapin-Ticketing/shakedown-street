@@ -6,5 +6,8 @@
   },
   "env_demo" : {
     "NODE_ENV": "demo"
+  },
+  "env_ropsten" : {
+    "NODE_ENV": "ropsten"
   }
 }
