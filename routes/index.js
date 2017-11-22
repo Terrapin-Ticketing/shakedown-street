@@ -42,12 +42,10 @@ module.exports = (server) => {
       });
   });
 
-  server.get('/event/:eventAddress', (req, res, next) => {
+  server.get('/event/:eventAddress', (req, res) => {
     let { eventAddress } = req.params;
-    console.log('hits1', eventAddress);
     return event.getEventInfo(eventAddress)
       .then((event) => {
-        console.log('event: ', event);
         return res.send({ event });
       })
       .catch((err) => {
