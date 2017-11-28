@@ -44,6 +44,7 @@ module.exports = (server) => {
 
   server.get('/event/:eventAddress', (req, res) => {
     let { eventAddress } = req.params;
+    console.log('eventAddress', eventAddress);
     return event.getEventInfo(eventAddress)
       .then((event) => {
         return res.send({ event });
