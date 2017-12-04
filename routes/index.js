@@ -5,7 +5,7 @@ const config = require('config');
 let { secret } = config.user;
 
 const User = require('../controllers/user');
-let user = new User();
+let userCol = new User();
 
 const Event = require('../controllers/event');
 let event = new Event();
@@ -20,38 +20,37 @@ function sendToken(res, user) {
 }
 
 module.exports = (server) => {
-  server.post('/login', (req, res) => {
+  server.post('/login', async(req, res) => {
     let { email, password } = req.body;
-    user.getUser(email, password)
-      .then((user) => sendToken(res, user))
-      .catch((err) => {
-        console.log('login err: ', err);
-        res.send(500);
-      });
+    try {
+      let user = await userCol.getUser(email, password);
+      sendToken(res, user);
+    } catch (err) {
+      console.log('login err: ', err);
+      res.send(500);
+    }
   });
 
-  server.post('/signup', (req, res, next) => {
+  server.post('/signup', async(req, res, next) => {
     let { email, password, privateKey } = req.body;
-    return user.signup(email, password, privateKey)
-      .then((user) => {
-        return sendToken(res, user, next);
-      })
-      .catch((err) => {
-        console.log('signup err: ', err);
-        res.send(500);
-      });
+    try {
+      let user = await userCol.signup(email, password, privateKey);
+      sendToken(res, user, next);
+    } catch (err) {
+      console.log('signup err: ', err);
+      res.send(500);
+    }
   });
 
-  server.get('/event/:eventAddress', (req, res) => {
-    let { eventAddress } = req.params;
-    console.log('eventAddress', eventAddress);
-    return event.getEventInfo(eventAddress)
-      .then((event) => {
-        return res.send({ event });
-      })
-      .catch((err) => {
-        res.sendStatus(500);
-      });
+  server.get('/event/:id', async(req, res) => {
+    let { id } = req.params;
+    console.log('id', id);
+    try {
+      let event = await event.getEventInfo(id);
+      res.send({ event });
+    } catch (e) {
+      res.sendStatus(500);
+    }
   });
 
 };
