@@ -1,22 +1,22 @@
-const Event = require('../controllers/event');
-let eventCol = new Event();
-
-let requireAuth = '../utils/requireAuth';
+const EventApi = require('../controllers/event');
+let eventController = new EventApi();
 
 module.exports = (server) => {
   server.get('/event/:id', async(req, res) => {
     let { id } = req.params;
-    console.log('id', id);
     try {
-      let event = await eventCol.getEventInfo(id);
+      let event = await eventController.getEventInfo(id);
       res.send({ event });
     } catch (e) {
       res.sendStatus(500);
     }
   });
 
-  server.post('/events', async(req) => {
+  server.post('/events', async(req, res) => {
+    if (!req.user) return res.send(401);
     let { event } = req.body;
-    console.log(event);
+    console.log(eventController);
+    await eventController.createEvent(event);
+    res.send(200);
   });
 };
