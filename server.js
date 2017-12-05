@@ -5,7 +5,6 @@ const bluebird = require('bluebird');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
 const config = require('config');
 
 let app = express();
@@ -23,19 +22,15 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect('mongodb://localhost/terrapin', { useMongoClient: true, promiseLibrary: bluebird });
+// app.use(function(err, req, res, next) {
+//   if (err.name === 'UnauthorizedError') {
+//     res.status(401).send('invalid token...');
+//   } else {
+//     // next();
+//   }
+// });
 
-app.use((req, res, next) => {
-  // if the user sends us a webtoken, decode it
-  if (req.cookies && req.cookies.cookieToken) {
-    jwt.verify(req.cookies.cookieToken, config.user.secret, (err, decoded) => {
-      if (!err) req.user = decoded;
-      return next();
-    });
-  } else {
-    next();
-  }
-});
+mongoose.connect('mongodb://localhost/terrapin', { useMongoClient: true, promiseLibrary: bluebird });
 
 routes(app); // initialize routes
 
