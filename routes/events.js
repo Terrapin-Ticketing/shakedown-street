@@ -15,7 +15,6 @@ module.exports = (server) => {
   server.post('/events', async(req, res) => {
     if (!req.user) return res.send(401);
     let { event } = req.body;
-    console.log(eventController);
     await eventController.createEvent(event);
     res.send(200);
   });
