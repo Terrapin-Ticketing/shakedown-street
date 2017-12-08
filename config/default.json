@@ -6,5 +6,6 @@
   "user": {
     "secret": "nershi4prez"
   },
-  "allowOrigin": "http://localhost:3000"
+  "allowOrigin": "http://localhost:3000",
+  "adminId": "5a29650bd0acd3c8ddbc77a1"
 }
