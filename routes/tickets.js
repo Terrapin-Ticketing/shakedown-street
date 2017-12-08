@@ -28,11 +28,11 @@ module.exports = (server) => {
 
   // print ticket
   server.post('/events/:eventId/tickets', async(req, res) => {
-    if (!req.user) return res.send(401);
+    if (!req.user) return res.sendStatus(401);
     let { eventId } = req.params;
 
     let callerIsEventOwner = await eventController.isEventOwner(req.user._id, eventId);
-    if (!callerIsEventOwner) return res.send(401);
+    if (!callerIsEventOwner) return res.sendStatus(401);
 
     let { ticket, ownerId } = req.body;
     try {
@@ -44,12 +44,12 @@ module.exports = (server) => {
   });
 
   server.post('/tickets/:id/transfer', async(req, res) => {
-    if (!req.user) return res.send(401);
+    if (!req.user) return res.sendStatus(401);
     let { id } = req.params;
     let { email } = req.body;
     try {
       let transferedTicket = await ticketController.transferTicket(id, email, req.user);
-      if (!transferedTicket) return res.send(403);
+      if (!transferedTicket) return res.sendStatus(403);
       res.send({ ticket: transferedTicket });
     } catch (e) {
       res.sendStatus(500);
@@ -57,12 +57,12 @@ module.exports = (server) => {
   });
 
   server.post('/tickets/:id/sell', async(req, res) => {
-    if (!req.user) return res.send(401);
+    if (!req.user) return res.sendStatus(401);
     let { id } = req.params;
     let { isForSale } = req.body;
     try {
       let ticket = await ticketController.setIsForSale(id, isForSale, req.user);
-      if (!ticket) return res.send(403);
+      if (!ticket) return res.sendStatus(403);
       res.send({ ticket });
     } catch (e) {
       res.sendStatus(500);
