@@ -56,6 +56,19 @@ class TicketApi {
     transferedTicket.barcode = null;
     return transferedTicket;
   }
+
+  async setIsForSale(ticketId, isForSale, user) {
+    let ticket = await this.getTicketById(ticketId, user);
+    if (`${ticket.ownerId}` !== `${user._id}`) return false;
+
+    ticket = TicketModel.findOneAndUpdate({ _id: ticketId }, {
+      $set: {
+        isForSale
+      }
+    }, { new: true });
+
+    return ticket;
+  }
 }
 
 module.exports = TicketApi;

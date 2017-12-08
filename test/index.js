@@ -190,4 +190,27 @@ describe('User & Auth', function() {
     assert(res.statusCode === 403);
   });
 
+  it('should allow user to set their ticket for sale', async function() {
+    let { user, token } = this.users[0];
+    let { ticket: printedTicket } = (await printTicket(this.eventId, user._id, token)).body;
+
+    let { body } = await req(`tickets/${printedTicket._id}/sell`, {
+      isForSale: true
+    }, token);
+
+    assert(body.ticket.isForSale === true);
+  });
+
+  it('should not allow user to sell a ticket they dont own', async function() {
+    let { user, token } = this.users[0];
+    let { ticket: printedTicket } = (await printTicket(this.eventId, user._id, token)).body;
+
+    let customer1 = this.users[1];
+    let res = await req(`tickets/${printedTicket._id}/sell`, {
+      isForSale: true
+    }, customer1.token);
+
+    assert(res.statusCode === 403);
+  });
+
 });

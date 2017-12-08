@@ -6,7 +6,8 @@ let TicketSchema = new mongoose.Schema({
   publicId: { type: String, unique: true, required: true },
   price: { type: Number, required: true },
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  isRedeemed: { type: Boolean, required: true, default: false }
+  isRedeemed: { type: Boolean, required: true, default: false },
+  isForSale: { type: Boolean, required: true, default: false }
 });
 
 let TicketModel = mongoose.model('Ticket', TicketSchema);

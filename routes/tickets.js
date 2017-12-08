@@ -54,7 +54,19 @@ module.exports = (server) => {
     } catch (e) {
       res.sendStatus(500);
     }
-    //
+  });
+
+  server.post('/tickets/:id/sell', async(req, res) => {
+    if (!req.user) return res.send(401);
+    let { id } = req.params;
+    let { isForSale } = req.body;
+    try {
+      let ticket = await ticketController.setIsForSale(id, isForSale, req.user);
+      if (!ticket) return res.send(403);
+      res.send({ ticket });
+    } catch (e) {
+      res.sendStatus(500);
+    }
   });
 
 };
