@@ -11,6 +11,7 @@ module.exports = (server) => {
       let event = await eventController.getEventInfo(id);
       res.send({ event });
     } catch (e) {
+      console.error(e);
       res.sendStatus(500);
     }
   });
@@ -22,6 +23,19 @@ module.exports = (server) => {
       let newEvent = await eventController.createEvent(event, req.user._id);
       res.send(newEvent);
     } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
+  });
+
+  server.post('/events/find', async(req, res) => {
+    if (!req.user) return res.sendStatus(401);
+    let { query } = req.body;
+    try {
+      let events = await eventController.find(query);
+      res.send({ events });
+    } catch (e) {
+      console.error(e);
       res.sendStatus(500);
     }
   });
@@ -36,7 +50,7 @@ module.exports = (server) => {
       if (!success) return res.sendStatus(403);
       res.sendStatus(200);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       res.sendStatus(500);
     }
   });

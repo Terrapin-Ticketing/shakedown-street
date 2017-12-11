@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 const uuidv1 = require('uuid/v4');
 
+import EventModel from '../models/event';
 import TicketModel from '../models/ticket';
 import UserModel from '../models/user';
 
@@ -43,7 +44,7 @@ class TicketApi {
     let transferToUser = await UserModel.findOne({ email: transferToEmail });
     // if user doesn't exist create one
     if (!transferToUser) {
-      transferToUser = await userController.signup(transferToEmail, uuidv1());
+      transferToUser = await userController.createPlaceholderUser(transferToEmail, user.email);
     }
 
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
@@ -67,6 +68,56 @@ class TicketApi {
       }
     }, { new: true });
 
+    return ticket;
+  }
+
+  async registerTicket(ticket, eventId, user) {
+    /*
+    lookup ticket to make sure it's real
+    get tickets price
+    */
+    let price = 10; // TODO:
+
+    let event = await EventModel.findOne({ _id: eventId });
+
+    // create new ticket for this event
+    let newTicket = await TicketModel.create({
+      ...ticket,
+      price,
+      ownerId: mongoose.mongo.ObjectId(user._id),
+      eventId: event._id
+    });
+
+    await EventModel.findOneAndUpdate({ _id: eventId }, {
+      $push: {
+        tickets: newTicket._id
+      }
+    });
+
+    await UserModel.findOneAndUpdate({ _id: user._id }, {
+      $push: {
+        tickets: newTicket._id
+      }
+    });
+
+    return newTicket;
+  }
+
+  async find(query, user) {
+    let tickets = await TicketModel.find(query);
+    return tickets.map((ticket) => {
+      if (ticket.ownerId !== user._id) {
+        ticket.barcode = null;
+      }
+      return ticket;
+    });
+  }
+
+  async findOne(id, user) {
+    let ticket = await TicketModel.findOne({ _id: id });
+    if (ticket.ownerId !== user._id) {
+      ticket.barcode = null;
+    }
     return ticket;
   }
 }

@@ -20,32 +20,33 @@ class EventApi {
   }
 
   async printTicket(callerId, eventId, ticket, ownerId) {
-    try {
-      let user = await UserModel.findOne({ _id: ownerId });
+    let user = await UserModel.findOne({ _id: ownerId });
 
-      let publicId = uuidv1();
-      let barcode = uuidv1();
-      let newTicket = await TicketModel.create({
-        ...ticket,
-        publicId,
-        barcode,
-        ownerId: mongoose.mongo.ObjectId(user._id)
-      });
+    let barcode = uuidv1();
+    let newTicket = await TicketModel.create({
+      ...ticket,
+      barcode,
+      ownerId: mongoose.mongo.ObjectId(user._id)
+    });
 
-      let event = await EventModel.findOneAndUpdate(
-        { _id: eventId },
-        { $push: {
-          tickets: newTicket._id
-        } },
-        { upsert: true }
-      );
-      event.tickets.push(newTicket._id);
-      // don't need to remove barcode since this printTicket must
-      // be called by the event creater
-      return newTicket;
-    } catch (e) {
-      console.log('logger', e);
-    }
+    let event = await EventModel.findOneAndUpdate(
+      { _id: eventId },
+      { $push: {
+        tickets: newTicket._id
+      } }
+    );
+
+    await TicketModel.findOneAndUpdate({
+      _id: newTicket._id
+    }, {
+      $set: {
+        eventId: event._id
+      }
+    });
+    // event.tickets.push(newTicket._id);
+    // don't need to remove barcode since this printTicket must
+    // be called by the event creater
+    return newTicket;
   }
 
   async getTicketsByEventId(eventId) {
@@ -53,8 +54,18 @@ class EventApi {
     return event.tickets;
   }
 
+  async getEventByUrlSafe(urlSafe) {
+    let event = await EventModel.findOne({ urlSafe });
+    return event;
+  }
+
   async getEvent(eventId) {
     return await EventModel.findOne({ _id: eventId });
+  }
+
+  async find(query) {
+    let events = await EventModel.find(query);
+    return events;
   }
 }
 

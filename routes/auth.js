@@ -21,9 +21,9 @@ module.exports = (server) => {
     try {
       let user = await userCol.getUser(email, password);
       sendToken(res, user);
-    } catch (err) {
-      console.log('login err: ', err);
-      res.send(500);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
     }
   });
 
@@ -32,9 +32,9 @@ module.exports = (server) => {
     try {
       let user = await userCol.signup(email, password, privateKey);
       sendToken(res, user);
-    } catch (err) {
-      console.log('signup err: ', err);
-      res.send(500);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
     }
   });
 };

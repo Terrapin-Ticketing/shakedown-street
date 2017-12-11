@@ -1,6 +1,9 @@
 const bcrypt = require('bcrypt');
 
 const UserModel = require('../models/user');
+const uuidv1 = require('uuid/v4');
+
+import { ticketReceived } from '../utils/requireEmail';
 
 function saltPassword(password) {
   let salt = bcrypt.genSaltSync(10);
@@ -26,6 +29,13 @@ class UserApi {
         });
       });
     });
+  }
+
+  async createPlaceholderUser(email, fromUser, eventName) {
+    // await ticketReceived(email, )
+    let user = await this.signup(email, uuidv1());
+    // send 'account created' email
+    return user;
   }
 }
 
