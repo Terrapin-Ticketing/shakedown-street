@@ -4,10 +4,11 @@ import shortid from 'shortid';
 import request from 'request';
 import jwt from 'jsonwebtoken';
 import pasync from 'pasync';
+import url from 'url';
 
 const uuidv1 = require('uuid/v4');
 
-let baseUrl = `http://localhost:${config.port}`;
+let baseUrl = config.domain;
 let NUM_USERS = 10;
 
 async function req(route, body, cookieValue, method = 'POST', json = true) {
@@ -15,9 +16,10 @@ async function req(route, body, cookieValue, method = 'POST', json = true) {
   let jar = request.jar();
   let cookie = request.cookie(`cookieToken=${cookieValue}`);
   jar.setCookie(cookie, baseUrl);
+  let uri = url.resolve(baseUrl, route);
   let options = {
     method,
-    uri: `${baseUrl}/${route}`,
+    uri,
     body,
     json,
     jar
@@ -210,21 +212,6 @@ describe('User & Auth', function() {
     assert(res.statusCode === 403);
   });
 
-  it('should allow user to transfer ticket to another user', async function() {
-    let eventCreater = this.users[0];
-    let customer1 = this.users[1];
-    let { ticket: customer1Ticket } = (await printTicket(
-      this.event._id, customer1.user._id, eventCreater.token)
-    ).body;
-    assert(customer1Ticket.ownerId === customer1.user._id);
-
-    let { body: { ticket: transferTicket } } = await req(`tickets/${customer1Ticket._id}/transfer`, {
-      email: 'newUser@gmail.com'
-    }, customer1.token);
-
-    assert(transferTicket.ownerId !== customer1.user._id);
-  });
-
   it('should not allow user to transfer ticket if they dont own it', async function() {
     let eventCreater = this.users[0];
     let customer1 = this.users[1];
@@ -263,19 +250,7 @@ describe('User & Auth', function() {
     assert(res.statusCode === 403);
   });
 
-  it('should register ticket', async function() {
-    let { token } = this.users[0];
-    let res = await req(`${this.event.urlSafe}/register-ticket`, {
-      ticket: {
-        barcode: uuidv1(),
-        code: 1234
-      }
-    }, token);
-    // assert ticket was created
-    assert(res.body.registeredTicket);
-  });
-
-  it('should transfer ticket to nonexistant user', async function() {
+  it('should allow user to transfer ticket to another user', async function() {
     let eventCreater = this.users[0];
     let customer1 = this.users[1];
     let { ticket: customer1Ticket } = (await printTicket(
@@ -288,5 +263,32 @@ describe('User & Auth', function() {
     }, customer1.token);
 
     assert(transferTicket.ownerId !== customer1.user._id);
+  });
+
+
+  it('should register ticket', async function() {
+    let { token } = this.users[0];
+    let res = await req(`${this.event.urlSafe}/register-ticket`, {
+      ticket: {
+        barcode: uuidv1(),
+        code: 1234
+      }
+    }, token);
+    // assert ticket was created
+    assert(res.body.registeredTicket);
+  });
+
+  it('should change user password', async function() {
+    // this.setTimeout(5000);
+    let { user, login } = this.users[2];
+    let { body: passwordChangeUrl } = await req('forgot-password', {
+      email: login.email
+    });
+    passwordChangeUrl = passwordChangeUrl.replace(3000, 8080);
+    let { body } = await req(passwordChangeUrl, {
+      password: 'new password'
+    });
+
+    assert(user.password !== body.password);
   });
 });

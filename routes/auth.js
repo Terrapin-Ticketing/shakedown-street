@@ -28,10 +28,33 @@ module.exports = (server) => {
   });
 
   server.post('/signup', async(req, res) => {
-    let { email, password, privateKey } = req.body;
+    let { email, password } = req.body;
     try {
-      let user = await userCol.signup(email, password, privateKey);
+      let user = await userCol.signup(email, password);
       sendToken(res, user);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
+  });
+
+  server.post('/forgot-password', async(req, res) => {
+    let { email } = req.body;
+    try {
+      let passwordChangeUrl = await userCol.requestPasswordChange(email);
+      res.send(passwordChangeUrl);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
+  });
+
+  server.post('/forgot-password/:token', async(req, res) => {
+    let { token } = req.params;
+    let { password } = req.body;
+    try {
+      let user = await userCol.changePassword(token, password);
+      return res.send(user);
     } catch (e) {
       console.error(e);
       res.sendStatus(500);

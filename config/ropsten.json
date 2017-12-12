@@ -6,5 +6,5 @@
   "user": {
     "secret": "nershi4prez"
   },
-  "allowOrigin": "https://terrapintickets.io"
+  "clientDomain": "https://terrapintickets.io"
 }

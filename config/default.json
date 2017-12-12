@@ -1,11 +1,12 @@
 {
   "port": 8080,
+  "domain": "http://localhost:8080",
+  "env": "development",
   "web3": {
     "httpProvider": "http://localhost:8545"
   },
   "user": {
     "secret": "nershi4prez"
   },
-  "allowOrigin": "http://localhost:3000",
-  "adminId": "5a29650bd0acd3c8ddbc77a1"
+  "clientDomain": "http://localhost:3000"
 }

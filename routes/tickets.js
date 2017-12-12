@@ -4,8 +4,8 @@ let eventController = new EventApi();
 const TicketApi = require('../controllers/ticket');
 let ticketController = new TicketApi();
 
-const UserApi = require('../controllers/user');
-let userController = new UserApi();
+// const UserApi = require('../controllers/user');
+// let userController = new UserApi();
 
 module.exports = (server) => {
   server.get('/events/:id/tickets', async(req, res) => {
@@ -21,18 +21,6 @@ module.exports = (server) => {
 
   server.get('/events/:id/tickets/:ticketId', async(req, res) => {
 
-    let { ticketId } = req.params;
-    try {
-      let ticket = await ticketController.getTicketById(ticketId, req.user);
-      res.send({ ticket });
-    } catch (e) {
-      console.error(e);
-      res.sendStatus(500);
-    }
-  });
-
-  server.get('/events/:id/tickets/:ticketId/:query', async(req, res) => {
-    console.log(req.params);
     let { ticketId } = req.params;
     try {
       let ticket = await ticketController.getTicketById(ticketId, req.user);
