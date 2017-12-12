@@ -70,7 +70,15 @@ describe('User & Auth', function() {
     this.event = {
       name: `test event ${shortid.generate()}`,
       urlSafe: `TestEvent ${shortid.generate()}`,
-      description: 'testing'
+      description: 'testing',
+      venue: {
+        name: 'Test Location',
+        address: '123 Fake Street',
+        city: 'Fake City',
+        state: 'OH',
+        zip: 12345
+      },
+      imageUrl: 'https://terrapinticketing.com/img/phish1.png'
     };
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
@@ -99,7 +107,15 @@ describe('User & Auth', function() {
       event: {
         name: `hawkins snow ball ${shortid.generate()}`,
         urlSafe: `HawkinsSnowBall ${shortid.generate()}`,
-        description: 'testing'
+        description: 'testing',
+        venue: {
+          name: 'Test Location',
+          address: '123 Fake Street',
+          city: 'Fake City',
+          state: 'OH',
+          zip: 12345
+        },
+        imageUrl: 'https://terrapinticketing.com/img/phish1.png'
       }
     }, token);
     assert(res.statusCode === 200);

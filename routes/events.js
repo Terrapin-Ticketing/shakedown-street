@@ -8,7 +8,7 @@ module.exports = (server) => {
   server.get('/events/:id', async(req, res) => {
     let { id } = req.params;
     try {
-      let event = await eventController.getEventInfo(id);
+      let event = await eventController.getEvent(id);
       res.send({ event });
     } catch (e) {
       console.error(e);
@@ -17,7 +17,6 @@ module.exports = (server) => {
   });
 
   server.post('/events', async(req, res) => {
-    if (!req.user) return res.sendStatus(401);
     let { event } = req.body;
     try {
       let newEvent = await eventController.createEvent(event, req.user._id);
