@@ -49,6 +49,11 @@ class EventApi {
     return newTicket;
   }
 
+  async getEventById(eventId) {
+    let event = await EventModel.findOne({ _id: eventId });
+    return event;
+  }
+
   async getTicketsByEventId(eventId) {
     let event = await EventModel.findOne({ _id: eventId });
     return event.tickets;

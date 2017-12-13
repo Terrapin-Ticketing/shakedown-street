@@ -7,16 +7,19 @@ let EventSchema = new mongoose.Schema({
     default: config.adminId
   },
   createrId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
 
+  tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
   name: { type: String, unique: true, required: true },
   urlSafe: { type: String, unique: true, required: true },
   description: { type: String },
-  venueName: { type: String },
-  venueAddress: { type: String },
-  venueState: { type: String },
-  venueCity: { type: String },
-  venueZip: { type: String },
+
+  venue: {
+    name: { type: String },
+    address: { type: String },
+    state: { type: String },
+    city: { type: String },
+    zip: { type: String }
+  },
 
   primaryColor: { type: String },
   textColor: { type: String },

@@ -8,7 +8,7 @@ module.exports = (server) => {
   server.get('/events/:id', async(req, res) => {
     let { id } = req.params;
     try {
-      let event = await eventController.getEventInfo(id);
+      let event = await eventController.getEventById(id);
       res.send({ event });
     } catch (e) {
       console.error(e);

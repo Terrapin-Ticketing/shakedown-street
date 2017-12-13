@@ -80,6 +80,7 @@ describe('User & Auth', function() {
     let { token } = this.users[0];
     this.tickets = [];
     this.tickets.owner = this.users[1];
+    console.log('Ticket Owner:', this.users[1].login);
     await pasync.eachSeries(Array(10), async() => {
       let res = await printTicket(this.event._id, this.users[1].user._id, token);
       let { ticket } = res.body;
@@ -259,12 +260,11 @@ describe('User & Auth', function() {
     assert(customer1Ticket.ownerId === customer1.user._id);
 
     let { body: { ticket: transferTicket } } = await req(`tickets/${customer1Ticket._id}/transfer`, {
-      email: 'newUser@gmail.com'
+      email: 'reeder@terrapinticketing.com'
     }, customer1.token);
 
     assert(transferTicket.ownerId !== customer1.user._id);
   });
-
 
   it('should register ticket', async function() {
     let { token } = this.users[0];
@@ -279,16 +279,28 @@ describe('User & Auth', function() {
   });
 
   it('should change user password', async function() {
-    // this.setTimeout(5000);
-    let { user, login } = this.users[2];
+    this.timeout(5000);
+    let initialLogin = this.users[2].login;
+    let { body: { token } } = await req('login', { ...initialLogin });
+    let decodedUser = jwt.decode(token);
+
     let { body: passwordChangeUrl } = await req('forgot-password', {
-      email: login.email
+      email: initialLogin.email
     });
     passwordChangeUrl = passwordChangeUrl.replace(3000, 8080);
-    let { body } = await req(passwordChangeUrl, {
-      password: 'new password'
+
+    assert(passwordChangeUrl);
+
+    let newPassword = 'new password';
+    await req(passwordChangeUrl, {
+      password: newPassword
     });
 
-    assert(user.password !== body.password);
+    initialLogin.password = newPassword;
+    let { body: { token: newToken } } = await req('login', { ...initialLogin });
+    let newDecodedUser = jwt.decode(newToken);
+
+    assert(decodedUser.password !== newDecodedUser.password);
   });
+
 });
