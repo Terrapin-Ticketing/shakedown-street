@@ -12,7 +12,6 @@ let EventSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
   urlSafe: { type: String, unique: true, required: true },
   description: { type: String },
-
   venue: {
     name: { type: String },
     address: { type: String },
@@ -20,7 +19,6 @@ let EventSchema = new mongoose.Schema({
     city: { type: String },
     zip: { type: String }
   },
-
   primaryColor: { type: String },
   textColor: { type: String },
   imageUrl: { type: String },

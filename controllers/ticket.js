@@ -22,7 +22,7 @@ class TicketApi {
   }
 
   async redeemTicket(eventId, ticketId, userId) {
-    let event = await eventController.getEvent(eventId);
+    let event = await eventController.getEventById(eventId);
     // make sure the user calling this function owns the event
     if (`${event.createrId}` !== `${userId}`) return false;
 

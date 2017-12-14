@@ -64,10 +64,6 @@ class EventApi {
     return event;
   }
 
-  async getEvent(eventId) {
-    return await EventModel.findOne({ _id: eventId });
-  }
-
   async find(query) {
     let events = await EventModel.find(query);
     return events;
