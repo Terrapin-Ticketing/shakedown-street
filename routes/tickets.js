@@ -20,7 +20,6 @@ module.exports = (server) => {
   });
 
   server.get('/events/:id/tickets/:ticketId', async(req, res) => {
-
     let { ticketId } = req.params;
     try {
       let ticket = await ticketController.getTicketById(ticketId, req.user);
@@ -48,7 +47,6 @@ module.exports = (server) => {
       res.sendStatus(500);
     }
   });
-
 
   server.post('/tickets/find', async(req, res) => {
     if (!req.user) return res.sendStatus(401);

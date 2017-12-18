@@ -204,7 +204,7 @@ describe('User & Auth', function() {
     assert(ticket.barcode);
   });
 
-  it('should redeem ticket when called from event creater', async function() {
+  it.only('should redeem ticket when called from event creater', async function() {
     let { user, token } = this.users[0];
     let { ticket: printedTicket } = (await printTicket(this.event._id, user._id, token)).body;
 
@@ -268,6 +268,7 @@ describe('User & Auth', function() {
   });
 
   it('should allow user to transfer ticket to another user', async function() {
+    this.timeout(5000);
     let eventCreater = this.users[0];
     let customer1 = this.users[1];
     let { ticket: customer1Ticket } = (await printTicket(

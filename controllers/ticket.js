@@ -31,9 +31,15 @@ class TicketApi {
 
     let redeemedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
-        isRedeemed: true
+        isRedeemed: true,
+        $push: {
+          history: { type: 'IS_REDEEMED', isRedeemed: true }
+        }
       }
     }, { new: true });
+
+    console.log(redeemedTicket);
+
     return !!redeemedTicket;
   }
 
@@ -57,6 +63,17 @@ class TicketApi {
 
     transferedTicket.barcode = null;
     return transferedTicket;
+  }
+
+  async setTicketOwner(ticketId, user) {
+    let ticket = TicketModel.findOneAndUpdate({ _id: ticketId }, {
+      $set: {
+        isForSale: false,
+        ownerId: user._id
+      }
+    }, { new: true });
+
+    return ticket;
   }
 
   async setIsForSale(ticketId, isForSale, user) {
