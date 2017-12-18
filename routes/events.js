@@ -7,8 +7,9 @@ let ticketController = new TicketApi();
 module.exports = (server) => {
   server.get('/events/:id', async(req, res) => {
     let { id } = req.params;
+    if (id === 'checkout') return res.sendStatus(500);
     try {
-      let event = await eventController.getEvent(id);
+      let event = await eventController.getEventById(id);
       res.send({ event });
     } catch (e) {
       console.error(e);

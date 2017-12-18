@@ -4,8 +4,6 @@ import config from 'config';
 
 const uuidv1 = require('uuid/v4');
 
-const UserApi = require('../controllers/user');
-
 let client = redis.createClient();
 
 let transporter = nodemailer.createTransport({
@@ -44,7 +42,6 @@ export const emailTicketReceived = async(toEmail, fromUser, eventName) => {
   await new Promise((resolve) => {
     client.hset('forgot-password', token, toEmail, resolve);
   });
-  console.log('set', token);
 
   // userCol.requestPasswordChange(toEmail);
 
@@ -61,7 +58,7 @@ export const emailTicketReceived = async(toEmail, fromUser, eventName) => {
     subject: `You're going to ${eventName}!`, // Subject line
     html: `
 <p>
-  go to this link to change your password: https://${config.domain}/forgot-email/${token}
+  go to this link to claim your ticket: ${config.clientDomain}/forgot-password/${token}
 </p>`// plain text body
   };
 

@@ -85,6 +85,44 @@ class UserApi {
 
     return user;
   }
+
+  async setStripe(userId, stripe) {
+    let user = await UserModel.findOneAndUpdate({ _id: userId }, {
+      $set: {
+        ...stripe,
+        charges: {
+          $push: {
+            charges: stripe.charge
+          }
+        }
+      }
+    }, { new: true });
+    return user;
+  }
+
+  async setStripeId(userId, stripeId) {
+    let user = await UserModel.findOneAndUpdate({ _id: userId }, {
+      $set: {
+        stripe: {
+          id: stripeId
+        }
+      }
+    }, { new: true });
+    return user;
+  }
+
+  async addCharge(userId, charge) {
+    let user = await UserModel.findOneAndUpdate({ _id: userId }, {
+      $set: {
+        charges: {
+          $push: {
+            charges: charge
+          }
+        }
+      }
+    }, { new: true });
+    return user;
+  }
 }
 
 module.exports = UserApi;

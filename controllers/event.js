@@ -49,6 +49,11 @@ class EventApi {
     return newTicket;
   }
 
+  async getEventById(eventId) {
+    let event = await EventModel.findOne({ _id: eventId });
+    return event;
+  }
+
   async getTicketsByEventId(eventId) {
     let event = await EventModel.findOne({ _id: eventId });
     return event.tickets;
@@ -57,10 +62,6 @@ class EventApi {
   async getEventByUrlSafe(urlSafe) {
     let event = await EventModel.findOne({ urlSafe });
     return event;
-  }
-
-  async getEvent(eventId) {
-    return await EventModel.findOne({ _id: eventId });
   }
 
   async find(query) {

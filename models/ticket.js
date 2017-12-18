@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+// enum
+
 let TicketSchema = new mongoose.Schema({
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
   barcode: { type: String, unique: true, required: true },
@@ -12,7 +14,27 @@ let TicketSchema = new mongoose.Schema({
 
 let TicketModel = mongoose.model('Ticket', TicketSchema);
 
-module.exports = TicketModel;
+export default TicketModel;
+
+export const txTypes = [
+  {
+    type: 'OWNER_CHANGE',
+    ownerId: mongoose.Schema.Types.ObjectId
+  }, {
+    type: 'PRICE_CHANGE',
+    newPrice: Number
+  }, {
+    type: 'IS_FOR_SALE_CHANGE',
+    isForSale: Boolean
+  }, {
+    type: 'IS_REDEEMED',
+    isRedeemed: Boolean
+  }, {
+    type: 'BARCODE_CHANGE',
+    barcode: String
+  }
+];
+
 
 
 /*
