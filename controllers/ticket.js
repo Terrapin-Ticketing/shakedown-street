@@ -67,7 +67,7 @@ class TicketApi {
       $set: {
         isForSale
       }
-    }, { new: true });
+    }, { new: true }).populate('eventId');
 
     return ticket;
   }
@@ -105,7 +105,7 @@ class TicketApi {
   }
 
   async find(query, user) {
-    let tickets = await TicketModel.find(query);
+    let tickets = await TicketModel.find(query).populate('eventId');
     return tickets.map((ticket) => {
       if (ticket.ownerId !== user._id) {
         ticket.barcode = null;
@@ -115,7 +115,7 @@ class TicketApi {
   }
 
   async findOne(id, user) {
-    let ticket = await TicketModel.findOne({ _id: id });
+    let ticket = await TicketModel.findOne({ _id: id }).populate('eventId');
     if (ticket.ownerId !== user._id) {
       ticket.barcode = null;
     }

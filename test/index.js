@@ -39,7 +39,8 @@ async function reqGET(route, token = {}) {
 async function printTicket(eventId, ownerId, token) {
   return await req(`events/${eventId}/tickets`, {
     ticket: {
-      price: 1000
+      price: 1000,
+      type: 'General Admission'
     },
     ownerId
   }, token);
@@ -68,6 +69,7 @@ describe('User & Auth', function() {
     let { login } = this.users[0];
     let { body: { token } } = await req('login', login);
     this.event = {
+      date: '3/4/2018',
       name: `test event ${shortid.generate()}`,
       urlSafe: `TestEvent ${shortid.generate()}`,
       description: 'testing',
@@ -80,6 +82,7 @@ describe('User & Auth', function() {
       },
       imageUrl: 'https://terrapinticketing.com/img/phish1.png'
     };
+    console.log('this.user[1].login: ', this.users[1].login);
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
   });
@@ -105,6 +108,7 @@ describe('User & Auth', function() {
     let { token } = this.users[0];
     let res = await req('events', {
       event: {
+        date: '3/4/2018',
         name: `hawkins snow ball ${shortid.generate()}`,
         urlSafe: `HawkinsSnowBall ${shortid.generate()}`,
         description: 'testing',
@@ -132,7 +136,8 @@ describe('User & Auth', function() {
     let { user, token } = this.users[1];
     let res = await req(`events/${this.event._id}/tickets`, {
       ticket: {
-        price: 1000
+        price: 1000,
+        type: 'General Admission'
       },
       ownerId: user._id
     }, token);
@@ -287,7 +292,8 @@ describe('User & Auth', function() {
     let res = await req(`${this.event.urlSafe}/register-ticket`, {
       ticket: {
         barcode: uuidv1(),
-        code: 1234
+        code: 1234,
+        type: 'General Admission'
       }
     }, token);
     // assert ticket was created

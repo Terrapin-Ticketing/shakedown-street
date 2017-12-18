@@ -8,7 +8,7 @@ let EventSchema = new mongoose.Schema({
   },
   createrId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
-
+  date: { type: String, required: true },
   name: { type: String, unique: true, required: true },
   urlSafe: { type: String, unique: true, required: true },
   description: { type: String },
@@ -17,7 +17,7 @@ let EventSchema = new mongoose.Schema({
     address: { type: String },
     state: { type: String },
     city: { type: String },
-    zip: { type: String },
+    zip: { type: String }
   },
   primaryColor: { type: String },
   textColor: { type: String },
