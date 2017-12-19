@@ -24,6 +24,11 @@ class UserApi {
     });
   }
 
+  async getUserByEmail(email) {
+    let user = UserModel.findOne({ email });
+    return user;
+  }
+
   async getUser(email, password) {
     return await new Promise((resolve, reject) => {
       UserModel.findOne({email}).exec((err, user) => {
@@ -37,18 +42,24 @@ class UserApi {
     });
   }
 
-  async createPlaceholderUser(email, fromUser, eventName) {
-    await emailTicketReceived(email, fromUser, eventName);
-    let user = await this.signup(email, uuidv1());
+  // async createPlaceholderUser(email, fromUser, eventName) {
+  //   await emailTicketReceived(email, fromUser, eventName);
+  //   let user = await this.signup(email, uuidv1());
+  //   return user;
+  // }
+
+  async createPlaceholderUser(email) {
+    let placeHolderPass = uuidv1();
+    let user = await this.signup(email, placeHolderPass);
     return user;
   }
 
   async requestPasswordChange(email) {
     let token = uuidv1();
     await new Promise((resolve) => {
-      client.hset('forgot-password', token, email, resolve);
+      client.hset('set-password', token, email, resolve);
     });
-    let passwordChangeUrl = `${config.clientDomain}/forgot-password/${token}`;
+    let passwordChangeUrl = `${config.clientDomain}/set-password/${token}`;
     // send email
     await emailPasswordChange(email, passwordChangeUrl);
     //   email: { accepted: [ 'reeder@terrapinticketing.com' ],
@@ -67,7 +78,7 @@ class UserApi {
   async changePassword(token, password) {
     // update password of given token
     let user = await new Promise((resolve, reject) => {
-      client.hget('forgot-password', token, async(err, email) => {
+      client.hget('set-password', token, async(err, email) => {
         if (err) return reject(err);
         let user = await UserModel.findOneAndUpdate({ email }, {
           $set: {
@@ -80,7 +91,7 @@ class UserApi {
 
     // unset client token
     await new Promise((resolve) => {
-      client.hset('forgot-password', token, false, resolve);
+      client.hset('set-password', token, false, resolve);
     });
 
     return user;

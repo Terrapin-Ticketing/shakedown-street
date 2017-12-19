@@ -29,7 +29,6 @@ module.exports = (server) => {
   });
 
   server.post('/events/find', async(req, res) => {
-    if (!req.user) return res.sendStatus(401);
     let { query } = req.body;
     try {
       let events = await eventController.find(query);

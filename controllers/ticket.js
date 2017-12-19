@@ -13,7 +13,7 @@ let userController = new UserApi();
 
 class TicketApi {
   async getTicketById(ticketId, user) {
-    let ticket = await TicketModel.findOne({ _id: ticketId });
+    let ticket = await TicketModel.findOne({ _id: ticketId }).populate('eventId');
     // only return the ticket barcode if the it is owned by the caller
     if (!user || `${ticket.ownerId}` !== `${user._id}`) {
       ticket.barcode = null;
@@ -37,8 +37,6 @@ class TicketApi {
         }
       }
     }, { new: true });
-
-    console.log(redeemedTicket);
 
     return !!redeemedTicket;
   }
@@ -89,38 +87,6 @@ class TicketApi {
     return ticket;
   }
 
-  async registerTicket(ticket, eventId, user) {
-    /*
-    lookup ticket to make sure it's real
-    get tickets price
-    */
-    let price = 10; // TODO:
-
-    let event = await EventModel.findOne({ _id: eventId });
-
-    // create new ticket for this event
-    let newTicket = await TicketModel.create({
-      ...ticket,
-      price,
-      ownerId: mongoose.mongo.ObjectId(user._id),
-      eventId: event._id
-    });
-
-    await EventModel.findOneAndUpdate({ _id: eventId }, {
-      $push: {
-        tickets: newTicket._id
-      }
-    });
-
-    await UserModel.findOneAndUpdate({ _id: user._id }, {
-      $push: {
-        tickets: newTicket._id
-      }
-    });
-
-    return newTicket;
-  }
-
   async find(query, user) {
     let tickets = await TicketModel.find(query).populate('eventId');
     return tickets.map((ticket) => {
@@ -136,6 +102,18 @@ class TicketApi {
     if (ticket.ownerId !== user._id) {
       ticket.barcode = null;
     }
+    return ticket;
+  }
+
+  async activateThirdPartyTicket(eventId, barcode, user) {
+    // TODO: put jamie stuff here
+    let price = 1000;
+    let ticket = await eventController.createTicket(eventId, user._id, barcode, price);
+    return ticket;
+  }
+
+  async getTicketByBarcode(barcode) {
+    let ticket = await TicketModel.findOne({ barcode }).populate('eventId');
     return ticket;
   }
 }

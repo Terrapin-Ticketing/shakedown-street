@@ -71,7 +71,7 @@ describe('User & Auth', function() {
     this.event = {
       date: '3/4/2018',
       name: `test event ${shortid.generate()}`,
-      urlSafe: `TestEvent ${shortid.generate()}`,
+      urlSafe: `TestEvent${shortid.generate()}`,
       description: 'testing',
       venue: {
         name: 'Test Location',
@@ -82,7 +82,6 @@ describe('User & Auth', function() {
       },
       imageUrl: 'https://terrapinticketing.com/img/phish1.png'
     };
-    console.log('this.user[1].login: ', this.users[1].login);
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
   });
@@ -288,26 +287,13 @@ describe('User & Auth', function() {
     assert(transferTicket.ownerId !== customer1.user._id);
   });
 
-  it('should register ticket', async function() {
-    let { token } = this.users[0];
-    let res = await req(`${this.event.urlSafe}/register-ticket`, {
-      ticket: {
-        barcode: uuidv1(),
-        code: 1234,
-        type: 'General Admission'
-      }
-    }, token);
-    // assert ticket was created
-    assert(res.body.registeredTicket);
-  });
-
   it('should change user password', async function() {
     this.timeout(5000);
     let initialLogin = this.users[2].login;
     let { body: { token } } = await req('login', { ...initialLogin });
     let decodedUser = jwt.decode(token);
 
-    let { body: passwordChangeUrl } = await req('forgot-password', {
+    let { body: passwordChangeUrl } = await req('set-password', {
       email: initialLogin.email
     });
     passwordChangeUrl = passwordChangeUrl.replace(3000, 8080);
@@ -324,6 +310,17 @@ describe('User & Auth', function() {
     let newDecodedUser = jwt.decode(newToken);
 
     assert(decodedUser.password !== newDecodedUser.password);
+  });
+
+
+  it('should activate a ticket', async function() {
+    let { login } = this.users[3];
+    let { urlSafe } = this.event;
+    let { body } = await req(`${urlSafe}/activate`, {
+      barcode: uuidv1(),
+      email: login.email
+    });
+    assert(body.ticket);
   });
 
 });

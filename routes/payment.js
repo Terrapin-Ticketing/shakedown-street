@@ -32,7 +32,6 @@ module.exports = (server) => {
   });
 
   server.post('/payment/:ticketId', async(req, res) => {
-    if (!req.user) return res.sendStatus(401);
     let { ticketId } = req.params;
     let { token: stripeToken } = req.body;
     let parsedToken = stripeToken.token;
@@ -40,12 +39,28 @@ module.exports = (server) => {
     let user = req.user;
     try {
       let ticket = await ticketController.getTicketById(ticketId);
-      if (!ticket.isForSale) return res.send({ error: 'Ticket Not for sale' });
+      if (!ticket || !ticket.isForSale) return res.send({ error: 'No ticket found' });
 
       let charge = await paymentController.createCharge(user, parsedToken, ticket.price);
       if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
 
+      // notify us that we need to venmo
+
+      // deactivate jamie ticket
+      // issue new jamie ticket
+      // save new barcode in our system ticketController.setBarcode()
+
+      if (!user) {
+        user = userController.createPlaceholderUser()
+      }
+
       let purchasedTicket = await ticketController.setTicketOwner(ticketId, user);
+
+      // send "you recieved a ticket" email
+      // userController.sendEmail(email, type)
+
+      // send "you sold your ticket and will be payed soon" email
+
       return res.send({ charge, ticket: purchasedTicket });
     } catch (e) {
       console.error(e);

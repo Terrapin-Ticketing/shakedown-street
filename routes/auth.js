@@ -38,7 +38,7 @@ module.exports = (server) => {
     }
   });
 
-  server.post('/forgot-password', async(req, res) => {
+  server.post('/set-password', async(req, res) => {
     let { email } = req.body;
     try {
       let passwordChangeUrl = await userCol.requestPasswordChange(email);
@@ -49,12 +49,12 @@ module.exports = (server) => {
     }
   });
 
-  server.post('/forgot-password/:token', async(req, res) => {
+  server.post('/set-password/:token', async(req, res) => {
     let { token } = req.params;
     let { password } = req.body;
     try {
       let user = await userCol.changePassword(token, password);
-      return res.send(user);
+      return sendToken(res, user);
     } catch (e) {
       console.error(e);
       res.sendStatus(500);

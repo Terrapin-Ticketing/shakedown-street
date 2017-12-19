@@ -9,7 +9,8 @@ let TicketSchema = new mongoose.Schema({
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   isRedeemed: { type: Boolean, required: true, default: false },
   isForSale: { type: Boolean, required: true, default: false },
-  type: { type: String, required: true }
+  type: { type: String, required: true, default: 'General Admission' },
+  dateIssued: { type: Date, required: true }
 });
 
 let TicketModel = mongoose.model('Ticket', TicketSchema);

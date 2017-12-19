@@ -19,6 +19,32 @@ class EventApi {
     return `${event.createrId}` === `${userId}`;
   }
 
+  async createTicket(eventId, ownerId, barcode, price) {
+    let newTicket = await TicketModel.create({
+      barcode,
+      ownerId: mongoose.mongo.ObjectId(ownerId),
+      dateIssued: new Date(),
+      price
+    });
+
+    let event = await EventModel.findOneAndUpdate(
+      { _id: eventId },
+      { $push: {
+        tickets: newTicket._id
+      } }
+    );
+
+    newTicket = await TicketModel.findOneAndUpdate({
+      _id: newTicket._id
+    }, {
+      $set: {
+        eventId: event._id
+      }
+    }, { new: true });
+
+    return newTicket;
+  }
+
   async printTicket(callerId, eventId, ticket, ownerId) {
     let user = await UserModel.findOne({ _id: ownerId });
 
@@ -26,6 +52,7 @@ class EventApi {
     let newTicket = await TicketModel.create({
       ...ticket,
       barcode,
+      dateIssued: new Date(),
       ownerId: mongoose.mongo.ObjectId(user._id)
     });
 

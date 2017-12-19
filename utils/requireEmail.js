@@ -40,13 +40,13 @@ export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
 export const emailTicketReceived = async(toEmail, fromUser, eventName) => {
   let token = uuidv1();
   await new Promise((resolve) => {
-    client.hset('forgot-password', token, toEmail, resolve);
+    client.hset('set-password', token, toEmail, resolve);
   });
 
   // userCol.requestPasswordChange(toEmail);
 
   // await new Promise((resolve, reject) => {
-  //   client.hget('forgot-password', toEmail, (err, token) => {
+  //   client.hget('set-password', toEmail, (err, token) => {
   //     if (err) return reject(err);
   //     resolve(token);
   //   });
@@ -58,7 +58,7 @@ export const emailTicketReceived = async(toEmail, fromUser, eventName) => {
     subject: `You're going to ${eventName}!`, // Subject line
     html: `
 <p>
-  go to this link to claim your ticket: ${config.clientDomain}/forgot-password/${token}
+  go to this link to claim your ticket: ${config.clientDomain}/set-password/${token}
 </p>`// plain text body
   };
 
