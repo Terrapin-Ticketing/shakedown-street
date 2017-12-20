@@ -54,14 +54,14 @@ class UserApi {
     return user;
   }
 
-  async requestPasswordChange(email) {
+  async requestPasswordChange(email, sendEmail = true) {
     let token = uuidv1();
     await new Promise((resolve) => {
       client.hset('set-password', token, email, resolve);
     });
     let passwordChangeUrl = `${config.clientDomain}/set-password/${token}`;
     // send email
-    await emailPasswordChange(email, passwordChangeUrl);
+    if (sendEmail) await emailPasswordChange(email, passwordChangeUrl);
     //   email: { accepted: [ 'reeder@terrapinticketing.com' ],
     // rejected: [],
     // envelopeTime: 138,
