@@ -37,7 +37,7 @@ export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
   return await sendMail(mailOptions);
 };
 
-export const emailTicketReceived = async(toEmail, fromUser, eventName) => {
+export const emailTransferTicket = async(toEmail, fromUser, eventName) => {
   let token = uuidv1();
   await new Promise((resolve) => {
     client.hset('set-password', token, toEmail, resolve);
@@ -63,5 +63,34 @@ export const emailTicketReceived = async(toEmail, fromUser, eventName) => {
   };
 
   // return await sendMail(mailOptions);
+  return await sendMail(mailOptions);
+};
+
+export const emailRecievedTicket = async(email, event) => {
+  const mailOptions = {
+    from: 'info@terrapinticketing.com', // sender address
+    to: email, // list of receivers
+    subject: `You're going to ${event.name}!`, // Subject line
+    html: `
+<p>
+  go to this link view your tickets: ${config.clientDomain}/my-profile
+</p>`// plain text body
+  };
+
+  return await sendMail(mailOptions);
+};
+
+export const emailSoldTicket = async(email, ticket) => {
+  let event = ticket.eventId;
+  const mailOptions = {
+    from: 'info@terrapinticketing.com', // sender address
+    to: email, // list of receivers
+    subject: 'You sold your ticket!', // Subject line
+    html: `
+<p>
+  You sold your ticket for ${event.name}
+</p>`// plain text body
+  };
+
   return await sendMail(mailOptions);
 };

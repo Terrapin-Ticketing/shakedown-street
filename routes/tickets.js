@@ -90,9 +90,9 @@ module.exports = (server) => {
   server.post('/tickets/:id/sell', async(req, res) => {
     if (!req.user) return res.sendStatus(401);
     let { id } = req.params;
-    let { isForSale } = req.body;
+    let { isForSale, price } = req.body;
     try {
-      let ticket = await ticketController.setIsForSale(id, isForSale, req.user);
+      let ticket = await ticketController.setIsForSale(id, isForSale, price, req.user);
       if (!ticket) return res.sendStatus(403);
       res.send({ ticket });
     } catch (e) {
@@ -124,7 +124,7 @@ module.exports = (server) => {
       let user = await userController.getUserByEmail(email);
       if (!user) {
         user = await userController.createPlaceholderUser(email);
-        passwordChangeUrl = await userController.requestPasswordChange(email);
+        passwordChangeUrl = await userController.requestPasswordChange(email, false);
       }
 
       let ticket = await ticketController.getTicketByBarcode(barcode);

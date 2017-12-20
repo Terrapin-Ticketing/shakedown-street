@@ -41,9 +41,10 @@ module.exports = (server) => {
 
     let user = req.user;
     if (!user) {
+      user = await userController.getUserByEmail(stripeToken.email);
+      if (user) return res.send({ error: 'Email already in use' });
       user = await userController.createPlaceholderUser(stripeToken.email);
       passwordChangeUrl = await userController.requestPasswordChange(stripeToken.email);
-
     }
 
     try {
@@ -60,12 +61,12 @@ module.exports = (server) => {
       // deactivate jamie ticket
       // issue new jamie ticket
       // save new barcode in our system ticketController.setBarcode()
-
+      let originalOwner = await userController.getUserById(ticket.ownerId);
       let purchasedTicket = await ticketController.setTicketOwner(ticketId, user);
-      // send "you recieved a ticket" email
-      // userController.sendEmail(email, type)
 
-      // send "you sold your ticket and will be payed soon" email
+      // send "you recieved a ticket" email
+      userController.sendRecievedTicketEmail(user, purchasedTicket);
+      userController.sendSoldTicketEmail(originalOwner, purchasedTicket);
 
       return res.send({
         charge,

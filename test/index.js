@@ -281,7 +281,7 @@ describe('User & Auth', function() {
     assert(customer1Ticket.ownerId === customer1.user._id);
 
     let { body: { ticket: transferTicket } } = await req(`tickets/${customer1Ticket._id}/transfer`, {
-      email: 'reeder@terrapinticketing.com'
+      email: 'testing@terrapinticketing.com'
     }, customer1.token);
 
     assert(transferTicket.ownerId !== customer1.user._id);

@@ -15,7 +15,7 @@ class TicketApi {
   async getTicketById(ticketId, user) {
     let ticket = await TicketModel.findOne({ _id: ticketId }).populate('eventId');
     // only return the ticket barcode if the it is owned by the caller
-    if (!user || `${ticket.ownerId}` !== `${user._id}`) {
+    if (ticket && !user || `${ticket.ownerId}` !== `${user._id}`) {
       ticket.barcode = null;
     }
     return ticket;
@@ -69,18 +69,21 @@ class TicketApi {
         isForSale: false,
         ownerId: user._id
       }
-    }, { new: true });
+    }, { new: true }).populate('eventId');
 
     return ticket;
   }
 
-  async setIsForSale(ticketId, isForSale, user) {
+  async setIsForSale(ticketId, isForSale, price, user) {
     let ticket = await this.getTicketById(ticketId, user);
     if (`${ticket.ownerId}` !== `${user._id}`) return false;
+    // if no price is given, use default price
+    if (!price) price = ticket.price;
 
     ticket = TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
-        isForSale
+        isForSale,
+        price
       }
     }, { new: true }).populate('eventId');
 

@@ -7,7 +7,7 @@ let env = config.env;
 const UserModel = require('../models/user');
 const uuidv1 = require('uuid/v4');
 
-import { emailTicketReceived, emailPasswordChange } from '../utils/requireEmail';
+import { emailRecievedTicket, emailPasswordChange, emailSoldTicket } from '../utils/requireEmail';
 
 let client = redis.createClient();
 
@@ -42,8 +42,12 @@ class UserApi {
     });
   }
 
+  async getUserById(id) {
+    return await UserModel.findOne({ _id: id }).populate('eventId');
+  }
+
   // async createPlaceholderUser(email, fromUser, eventName) {
-  //   await emailTicketReceived(email, fromUser, eventName);
+  //   await emailTransferTicket(email, fromUser, eventName);
   //   let user = await this.signup(email, uuidv1());
   //   return user;
   // }
@@ -133,6 +137,15 @@ class UserApi {
       }
     }, { new: true });
     return user;
+  }
+
+  async sendRecievedTicketEmail(user, ticket) {
+    let event = ticket.eventId;
+    await emailRecievedTicket(user.email, event);
+  }
+
+  async sendSoldTicketEmail(user, ticket) {
+    await emailSoldTicket(user.email, ticket);
   }
 }
 
