@@ -23,11 +23,9 @@ class Payment {
     let source = await stripe.customers.createSource(user.stripe.id, {
       source: token.id
     });
-
     if (config.env === 'development') {
       source = 'tok_visa';
     }
-
     let charge = await stripe.charges.create({
       amount: total,
       currency: 'usd',
@@ -35,9 +33,7 @@ class Payment {
       description: `Deposite made from ${user.email}`,
       metadata
     });
-
     await userController.addCharge(user._id, charge);
-
     return charge;
   }
 }
