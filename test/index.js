@@ -208,7 +208,7 @@ describe('User & Auth', function() {
     assert(ticket.barcode);
   });
 
-  it.only('should redeem ticket when called from event creater', async function() {
+  it('should redeem ticket when called from event creater', async function() {
     let { user, token } = this.users[0];
     let { ticket: printedTicket } = (await printTicket(this.event._id, user._id, token)).body;
 
