@@ -10,7 +10,7 @@ let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'info@terrapinticketing.com',
-    pass: process.env.INFO_PASS
+    pass: config.infopass
   }
 });
 
