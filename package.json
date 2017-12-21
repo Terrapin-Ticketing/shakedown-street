@@ -6,7 +6,7 @@
   "scripts": {
     "start": "babel-node ./server.js",
     "dev": "nodemon --exec npm start",
-    "demo": "pm2 start process.json --interpreter babel-node --env demo",
+    "demo": "pm2 start process.json --env demo",
     "ropsten": "pm2 start process.json --env ropsten",
     "test": "./node_modules/.bin/mocha --compilers js:babel-core/register --no-deprecation"
   },
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/KayBeSee/sugaree#readme",
   "dependencies": {
+    "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.3",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "bcrypt": "^1.0.3",
