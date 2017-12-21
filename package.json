@@ -6,7 +6,7 @@
   "scripts": {
     "start": "babel-node ./server.js",
     "dev": "nodemon --exec npm start",
-    "demo": "pm2 start process.json --env demo",
+    "demo": "pm2 start --interpreter babel-node process.json --env demo",
     "ropsten": "pm2 start process.json --env ropsten",
     "test": "./node_modules/.bin/mocha --compilers js:babel-core/register --no-deprecation"
   },
