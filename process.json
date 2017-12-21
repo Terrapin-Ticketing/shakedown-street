@@ -1,6 +1,6 @@
 {
   "name" : "Shakedown Street",
-  "script" : "babel-node server.js",
+  "script" : "server.js",
   "env_production" : {
     "NODE_ENV": "production"
   },
