@@ -11,6 +11,7 @@ const config = require('config');
 let app = express();
 
 app.use(helmet());
+app.set('trust proxy', 1); // trust first proxy
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({limit: '3mb'}));
 app.use(cookieParser());
