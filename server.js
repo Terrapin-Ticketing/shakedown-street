@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set('trust proxy', 1); // trust first proxy
+// app.set('trust proxy', 1); // trust first proxy
 
 mongoose.connect('mongodb://localhost/terrapin', { useMongoClient: true, promiseLibrary: bluebird });
 
