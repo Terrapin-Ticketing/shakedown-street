@@ -1,7 +1,9 @@
-let stripeSecretKey = 'sk_test_uKIHGA1q5UfwysISFvt6nHto';
-let jwtSecret = 'nershi4prez';
+let stripeSecretKey = process.env.STRIPE_SK;
+let jwtSecret = process.env.JWT_SECRET;
 let infopass = process.env.INFO_PASS;
 
+if (!stripeSecretKey) throw new Error('STRIPE_SK not set');
+if (!jwtSecret) throw new Error('JWT_SECRET not set');
 if (!infopass) throw new Error('INFO_PASS not set');
 
 module.exports = {
