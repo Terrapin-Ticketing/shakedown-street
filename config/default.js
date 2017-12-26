@@ -1,5 +1,8 @@
 let os = require('os');
 let ifaces = os.networkInterfaces();
+let infopass = process.env.INFO_PASS;
+
+if (!infopass) throw new Error('INFO_PASS not set');
 
 function getIpAddress() {
   let ipAddresses = [];
@@ -40,5 +43,6 @@ module.exports = {
   'user': {
     'secret': 'nershi4prez'
   },
+  infopass,
   'clientDomain': `http://${ipAddress}:3000`
 };
