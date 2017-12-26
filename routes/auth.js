@@ -41,8 +41,8 @@ module.exports = (server) => {
   server.post('/set-password', async(req, res) => {
     let { email } = req.body;
     try {
-      let passwordChangeUrl = await userCol.requestPasswordChange(email);
-      res.send(passwordChangeUrl);
+      await userCol.requestPasswordChange(email);
+      res.sendStatus(200);
     } catch (e) {
       console.error(e);
       res.sendStatus(500);
