@@ -5,7 +5,7 @@ let UserSchema = mongoose.Schema({
   password: { type: String, required: true },
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
   stripe: {
-    id: { type: String, unique: true },
+    id: { type: String },
     source: { }, // any arbitrary document
     charges: [{ }] // all stripe charges
   }
