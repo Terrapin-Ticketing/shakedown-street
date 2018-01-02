@@ -1,6 +1,7 @@
 let os = require('os');
 let ifaces = os.networkInterfaces();
 let infopass = process.env.INFO_PASS;
+let PORT = 8080;
 
 if (!infopass) throw new Error('INFO_PASS not set');
 
@@ -31,8 +32,8 @@ function getIpAddress() {
 let ipAddress = getIpAddress()[0].address;
 
 module.exports = {
-  'port': 8080,
-  'domain': `http://${ipAddress}:8080`,
+  'port': PORT,
+  'domain': `http://${ipAddress}:${PORT}`,
   'env': 'development',
   'web3': {
     'httpProvider': `http://${ipAddress}:8545`
