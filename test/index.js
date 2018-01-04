@@ -287,32 +287,6 @@ describe('User & Auth', function() {
     assert(transferTicket.ownerId !== customer1.user._id);
   });
 
-  it('should change user password', async function() {
-    this.timeout(5000);
-    let initialLogin = this.users[2].login;
-    let { body: { token } } = await req('login', { ...initialLogin });
-    let decodedUser = jwt.decode(token);
-
-    let { body: passwordChangeUrl } = await req('set-password', {
-      email: initialLogin.email
-    });
-    passwordChangeUrl = passwordChangeUrl.replace(3000, 8080);
-
-    assert(passwordChangeUrl);
-
-    let newPassword = 'new password';
-    await req(passwordChangeUrl, {
-      password: newPassword
-    });
-
-    initialLogin.password = newPassword;
-    let { body: { token: newToken } } = await req('login', { ...initialLogin });
-    let newDecodedUser = jwt.decode(newToken);
-
-    assert(decodedUser.password !== newDecodedUser.password);
-  });
-
-
   it('should activate a ticket', async function() {
     let { login } = this.users[3];
     let { urlSafe } = this.event;
