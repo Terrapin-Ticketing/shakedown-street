@@ -108,21 +108,19 @@ describe('User & Auth', function() {
       this.voidedBarcode = '7854772863441586';
     });
 
-    it.only('should activate valid ticket id and reject duplicate upload', async function() {
+    it('should activate valid ticket id and reject duplicate upload', async function() {
       let { login } = this.users[3];
       let { urlSafe } = this.event;
       let { body } = await req(`${urlSafe}/activate`, {
         barcode: this.barcode,
         email: login.email
       });
-      console.log(body);
       assert(body.ticket);
 
       let rejectBody = (await req(`${urlSafe}/activate`, {
         barcode: this.barcode,
         email: login.email
       })).body;
-      console.log(rejectBody);
       assert(rejectBody.error);
     });
 

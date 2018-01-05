@@ -100,7 +100,7 @@ class CincyTicket {
     await new Promise((resolve) => {
       csv().fromString(csvExport)
         .on('csv', (row) => {
-          let ticketNum = row[2].substring(1, row[1].length);
+          let ticketNum = row[2].substring(1, row[2].length);
           let ticketEntry = ticketLookupTable[ticketNum] = {};
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
