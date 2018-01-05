@@ -79,7 +79,7 @@ module.exports = (server) => {
     let { email } = req.body;
     try {
       let transferedTicket = await ticketController.transferTicket(id, email, req.user);
-      if (!transferedTicket) return res.sendStatus(403);
+      if (transferedTicket.error) return res.send({ error: transferedTicket.error });
       res.send({ ticket: transferedTicket });
     } catch (e) {
       console.error(e);
@@ -136,7 +136,7 @@ module.exports = (server) => {
 
       let event = await eventController.getEventByUrlSafe(urlSafe);
       let transferedTicket = await ticketController.activateThirdPartyTicket(event, barcode, user);
-      if (transferedTicket.error) return res.send(transferedTicket.error);
+      if (transferedTicket.error) return res.send({ error: transferedTicket.error });
 
       res.send({
         passwordChangeUrl,

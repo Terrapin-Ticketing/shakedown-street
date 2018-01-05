@@ -108,7 +108,7 @@ describe('User & Auth', function() {
       this.voidedBarcode = '7854772863441586';
     });
 
-    it('should activate valid ticket id and reject duplicate upload', async function() {
+    before(async function() {
       this.timeout(5000);
       let { login } = this.users[3];
       let { urlSafe } = this.event;
@@ -116,13 +116,17 @@ describe('User & Auth', function() {
         barcode: this.barcode,
         email: login.email
       });
-      assert(body.ticket);
+      this.activatedTicket = body.ticket;
+    });
 
-      let rejectBody = (await req(`${urlSafe}/activate`, {
-        barcode: this.barcode,
-        email: login.email
-      })).body;
-      assert(rejectBody.error);
+    it('should allow user to transfer succesfully uploaded ticket', async function() {
+      this.timeout(6000);
+      let customer = this.users[3];
+      let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
+        email: 'testing@terrapinticketing.com'
+      }, customer.token);
+
+      assert(body.ticket);
     });
 
     it('should check validity of ticket', async function() {
@@ -152,7 +156,7 @@ describe('User & Auth', function() {
         barcode: uuidv1(),
         email: login.email
       });
-      assert(body === 'Invalid Ticket ID');
+      assert(body.error === 'Invalid Ticket ID');
     });
   });
 
@@ -303,7 +307,7 @@ describe('User & Auth', function() {
     let res = await req(`tickets/${customer1Ticket._id}/transfer`, {
       email: customer2.login.email
     }, customer2.token);
-    assert(res.statusCode === 403);
+    assert(res.body.error);
   });
 
   it('should allow user to set their ticket for sale', async function() {
@@ -327,21 +331,5 @@ describe('User & Auth', function() {
     }, customer1.token);
 
     assert(res.statusCode === 403);
-  });
-
-  it('should allow user to transfer ticket to another user', async function() {
-    this.timeout(5000);
-    let eventCreater = this.users[0];
-    let customer1 = this.users[1];
-    let { ticket: customer1Ticket } = (await printTicket(
-      this.event._id, customer1.user._id, eventCreater.token)
-    ).body;
-    assert(customer1Ticket.ownerId === customer1.user._id);
-
-    let { body: { ticket: transferTicket } } = await req(`tickets/${customer1Ticket._id}/transfer`, {
-      email: 'testing@terrapinticketing.com'
-    }, customer1.token);
-
-    assert(transferTicket.ownerId !== customer1.user._id);
   });
 });

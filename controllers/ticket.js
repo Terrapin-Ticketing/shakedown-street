@@ -50,7 +50,7 @@ class TicketApi {
 
   async transferTicket(ticketId, transferToEmail, user) {
     let ticket = await this.getTicketById(ticketId, user);
-    if (`${ticket.ownerId}` !== `${user._id}`) return false;
+    if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
 
     let transferToUser = await UserModel.findOne({ email: transferToEmail });
     // if user doesn't exist create one
@@ -59,10 +59,21 @@ class TicketApi {
       transferToUser = await userController.createTransferPlaceholderUser(transferToEmail, user.email, event.name);
     }
 
+    let event = await EventModel.findOne({ _id: ticket.eventId });
+    let newBarcode = uuidv1(); // used for non third party events
+    if (event.isThirdParty) {
+      let thirdPartyEvent = thirdPartyControllers[event.eventManager];
+      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
+      if (!success) return { error: 'Deactivation Failed' };
+
+      newBarcode = await thirdPartyEvent.issueTicket(ticket.barcode);
+      if (!newBarcode) return { error: 'Ticket Creation Failed' };
+    }
+
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
         ownerId: transferToUser._id,
-        barcode: uuidv1()
+        barcode: newBarcode
       }
     }, { new: true });
 

@@ -68,21 +68,42 @@ class CincyTicket {
     let ticketInfo = await this.getTicketInfo(barcode);
     if (!ticketInfo) return false;
 
-    let res = await reqPOST('/merchant/products/2/manage/tickets', {
-      name: '1first 1last',
+    // all properties are required
+    await reqPOST('/merchant/products/2/manage/tickets', {
+      name: ticketInfo['Ticket Holder'],
       status: 'void',
-      scanned: 0,
+      scanned: ticketInfo['Scanned'],
       cmd: 'edit',
-      id: ticketInfo.lookupId,
-      query: `registrations?cmd=view&id=${ticketInfo.regId}`
+      id: ticketInfo.lookupId
     }, sessionId);
 
-    return true;
+    let isValidTicket = await this.isValidTicket(
+      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length));
+    // success if ticket became invalid
+    let success = !isValidTicket;
+    return success;
   }
 
-  async isValidTicket(barcode) {
+  async issueTicket(barcode) {
+    let sessionId = await this._login();
+    let ticketInfo = await this.getTicketInfo(barcode);
+    if (!ticketInfo) return false;
+
+    // all properties are required
+    await reqPOST('/merchant/products/2/manage/tickets', {
+      name: ticketInfo['Ticket Holder'],
+      status: 'active',
+      scanned: ticketInfo['Scanned'],
+      cmd: 'edit',
+      id: ticketInfo.lookupId
+    }, sessionId);
+
+    return uuidv1();
+  }
+
+  async isValidTicket(ticketId) {
     let tickets = await this._getTickets();
-    return tickets[barcode].Status === 'active';
+    return tickets[ticketId] && tickets[ticketId].Status === 'active';
   }
 
   async _getOrderDetails(orderNumber) {
@@ -113,7 +134,9 @@ class CincyTicket {
       csv().fromString(csvExport)
         .on('csv', async(row) => {
           let ticketNum = row[2].substring(1, row[2].length);
-          let ticketEntry = ticketLookupTable[ticketNum] = {};
+          let ticketEntry = ticketLookupTable[ticketNum] = {
+            lookupId: ticketNum.substring(9, ticketNum.length)
+          };
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
             if (fields[i] === 'Order Number') {
