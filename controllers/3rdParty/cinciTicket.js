@@ -10,6 +10,35 @@ if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (use
 
 let domain = 'https://terrapin.cincyregister.com';
 
+let fields = [
+  'Ticket Holder',
+  'Ticket Level',
+  'Ticket Number',
+  'Status',
+  'Scanned',
+  'Creation Date',
+  'Billing First Name',
+  'Billing Last Name',
+  'Billing Address',
+  'Billing City',
+  'Billing Country',
+  'Billing State',
+  'Billing Zip Code',
+  'Billing Phone',
+  'Billing Date',
+  'Card/Account',
+  'Order Number',
+  'Email Address',
+  'IP Address',
+  'Campaign',
+  'Registration ID',
+  'Transaction ID',
+  'Gateway Name',
+  'Gateway Label'
+];
+
+let requestFields = 'tick.name,layout.name,tick.id,tick.status,tick.scanned,tick.created,trx.first_name,trx.last_name,trx.address,trx.city,trx.country,trx.state,trx.zip_code,trx.phone,trx.payment_date,trx.account,trx.order_number,reg.email,trx.ip_address,form.name,reg.id,trx.id,gateway.label,gateway.name';
+
 async function reqPOST(route, formData, cookieValue) {
   let jar = request.jar();
   let cookie = request.cookie(`session_id=${cookieValue}`);
@@ -54,7 +83,7 @@ class CincyTicket {
 
   async isValidTicket(barcode) {
     let tickets = await this._getTickets();
-    return tickets[barcode].status === 'active';
+    return tickets[barcode].Status === 'active';
   }
 
   async _getTickets() {
@@ -62,7 +91,7 @@ class CincyTicket {
     let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
       from: 'January 3, 2018 2:35 PM',
       to: 'January 4, 2018 2:35 PM',
-      fields: 'tick.name,tick.id,tick.status,reg.id',
+      fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
     }, sessionId)).body;
@@ -71,14 +100,11 @@ class CincyTicket {
     await new Promise((resolve) => {
       csv().fromString(csvExport)
         .on('csv', (row) => {
-          let ticketNum = row[1].substring(1, row[1].length);
-          ticketLookupTable[ticketNum] = {
-            name: row[0],
-            id: ticketNum,
-            lookupId: row[1].substring(10, row[1].length),
-            status: row[2],
-            regId: row[3]
-          };
+          let ticketNum = row[2].substring(1, row[1].length);
+          let ticketEntry = ticketLookupTable[ticketNum] = {};
+          for (let i = 0; i < row.length; i++) {
+            ticketEntry[fields[i]] = row[i];
+          }
         })
         .on('done', resolve);
     });

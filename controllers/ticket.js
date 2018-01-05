@@ -129,7 +129,7 @@ class TicketApi {
 
     let thirdPartyEvent = thirdPartyControllers[eventManager];
     let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode);
-    if (!ticketInfo || ticketInfo.status === 'void') return { error: 'Invalid Ticket ID' };
+    if (!ticketInfo || ticketInfo.Status === 'void') return { error: 'Invalid Ticket ID' };
 
     // at this
     let price = 1000;
