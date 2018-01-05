@@ -68,19 +68,22 @@ describe('User & Auth', function() {
   before(async function() {
     let { login } = this.users[0];
     let { body: { token } } = await req('login', login);
+    let uniqueId = shortid.generate();
     this.event = {
       date: '3/4/2018',
-      name: `test event ${shortid.generate()}`,
-      urlSafe: `TestEvent${shortid.generate()}`,
-      description: 'testing',
+      name: `TF Columbus Brewgrass Festival at The Bluestone (${uniqueId})`,
+      urlSafe: `TFBrewgrass${uniqueId}`,
+      description: 'test fest description',
       venue: {
-        name: 'Test Location',
-        address: '123 Fake Street',
-        city: 'Fake City',
+        name: 'The Bluestone',
+        address: '583 E Broad St',
+        city: 'Columbus',
         state: 'OH',
-        zip: 12345
+        zip: 43215
       },
-      imageUrl: 'https://terrapinticketing.com/img/phish1.png'
+      imageUrl: 'https://terrapinticketing.com/img/phish1.png',
+      isThirdParty: true,
+      eventManager: 'CINCI_TICKET'
     };
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
@@ -95,6 +98,60 @@ describe('User & Auth', function() {
       let res = await printTicket(this.event._id, this.users[1].user._id, token);
       let { ticket } = res.body;
       this.tickets.push(ticket);
+    });
+  });
+
+  describe('Cinci Ticket (Test Fest)', async function() {
+    before(function() {
+      this.barcode = '7237762933441512';
+      this.barcode2 = '7830666703441550';
+      this.voidedBarcode = '7854772863441586';
+    });
+
+    it('should activate valid ticket id and reject duplicate upload', async function() {
+      let { login } = this.users[3];
+      let { urlSafe } = this.event;
+      let { body } = await req(`${urlSafe}/activate`, {
+        barcode: this.barcode,
+        email: login.email
+      });
+      assert(body.ticket);
+
+      let rejectBody = (await req(`${urlSafe}/activate`, {
+        barcode: this.barcode,
+        email: login.email
+      })).body;
+      assert(rejectBody.error);
+    });
+
+    it('should check validity of ticket', async function() {
+      let { login } = this.users[3];
+      let { urlSafe } = this.event;
+      let { body } = await req(`${urlSafe}/validate`, {
+        barcode: this.barcode2,
+        email: login.email
+      });
+      assert(body.isValidTicket);
+    });
+
+    it('should reject voided ticket', async function() {
+      let { login } = this.users[3];
+      let { urlSafe } = this.event;
+      let { body } = await req(`${urlSafe}/validate`, {
+        barcode: this.voidedBarcode,
+        email: login.email
+      });
+      assert(!body.isValidTicket);
+    });
+
+    it('should reject invalid ticket id', async function() {
+      let { login } = this.users[3];
+      let { urlSafe } = this.event;
+      let { body } = await req(`${urlSafe}/activate`, {
+        barcode: uuidv1(),
+        email: login.email
+      });
+      assert(body === 'Invalid Ticket ID');
     });
   });
 
@@ -286,15 +343,4 @@ describe('User & Auth', function() {
 
     assert(transferTicket.ownerId !== customer1.user._id);
   });
-
-  it('should activate a ticket', async function() {
-    let { login } = this.users[3];
-    let { urlSafe } = this.event;
-    let { body } = await req(`${urlSafe}/activate`, {
-      barcode: uuidv1(),
-      email: login.email
-    });
-    assert(body.ticket);
-  });
-
 });

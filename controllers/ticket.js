@@ -11,6 +11,12 @@ let eventController = new EventApi();
 const UserApi = require('../controllers/user');
 let userController = new UserApi();
 
+const ThirdPartyControllers = require('./3rdParty').default;
+let thirdPartyControllers = {};
+Object.keys(ThirdPartyControllers).forEach((key) => {
+  thirdPartyControllers[key] = new ThirdPartyControllers[key]();
+});
+
 class TicketApi {
   async getTicketById(ticketId, user) {
     let ticket = await TicketModel.findOne({ _id: ticketId }).populate('eventId');
@@ -109,10 +115,25 @@ class TicketApi {
     return ticket;
   }
 
-  async activateThirdPartyTicket(eventId, barcode, user) {
-    // TODO: put jamie stuff here
+  async isValidTicket(event, barcode) {
+    if (!event.isThirdParty) return { error: 'Invalid Event' };
+    let { eventManager } = event;
+
+    let thirdPartyEvent = thirdPartyControllers[eventManager];
+    return await thirdPartyEvent.isValidTicket(barcode);
+  }
+
+  async activateThirdPartyTicket(event, barcode, user) {
+    if (!event.isThirdParty) return { error: 'Invalid Event' };
+    let { _id, eventManager } = event;
+
+    let thirdPartyEvent = thirdPartyControllers[eventManager];
+    let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode);
+    if (!ticketInfo || ticketInfo.status === 'void') return { error: 'Invalid Ticket ID' };
+
+    // at this
     let price = 1000;
-    let ticket = await eventController.createTicket(eventId, user._id, barcode, price);
+    let ticket = await eventController.createTicket(_id, user._id, barcode, price);
     return ticket;
   }
 
