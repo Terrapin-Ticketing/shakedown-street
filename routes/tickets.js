@@ -118,7 +118,7 @@ module.exports = (server) => {
 
   server.post('/:urlSafe/activate', async(req, res) => {
     let { urlSafe } = req.params;
-    let { email, barcode } = req.body;
+    let { email, ticketNumber: barcode } = req.body;
     let passwordChangeUrl;
     try {
       let user = await userController.getUserByEmail(email);
