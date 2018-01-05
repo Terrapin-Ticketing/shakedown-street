@@ -109,6 +109,7 @@ describe('User & Auth', function() {
     });
 
     it('should activate valid ticket id and reject duplicate upload', async function() {
+      this.timeout(5000);
       let { login } = this.users[3];
       let { urlSafe } = this.event;
       let { body } = await req(`${urlSafe}/activate`, {

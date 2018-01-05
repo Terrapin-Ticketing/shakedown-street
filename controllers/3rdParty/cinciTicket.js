@@ -77,13 +77,25 @@ class CincyTicket {
       query: `registrations?cmd=view&id=${ticketInfo.regId}`
     }, sessionId);
 
-    console.log(res);
     return true;
   }
 
   async isValidTicket(barcode) {
     let tickets = await this._getTickets();
     return tickets[barcode].Status === 'active';
+  }
+
+  async _getOrderDetails(orderNumber) {
+    // let sessionId = await this._login();
+
+    // let res = await reqPOST('/merchant/products/2/manage/transactions', {
+    //   from: 'January 3, 2018 2:35 PM',
+    //   to: 'January 4, 2018 2:35 PM',
+    //   fields: requestFields,
+    //   filename: 'export.csv',
+    //   cmd: 'export'
+    // }, sessionId);
+    return false;
   }
 
   async _getTickets() {
@@ -99,11 +111,14 @@ class CincyTicket {
     let ticketLookupTable = {};
     await new Promise((resolve) => {
       csv().fromString(csvExport)
-        .on('csv', (row) => {
+        .on('csv', async(row) => {
           let ticketNum = row[2].substring(1, row[2].length);
           let ticketEntry = ticketLookupTable[ticketNum] = {};
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
+            if (fields[i] === 'Order Number') {
+              ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
+            }
           }
         })
         .on('done', resolve);
