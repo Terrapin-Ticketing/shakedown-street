@@ -101,20 +101,24 @@ module.exports = (server) => {
     }
   });
 
-  // server.post('/:urlSafe/register-ticket', async(req, res) => {
-  //   if (!req.user) return res.sendStatus(401);
-  //   let { urlSafe } = req.params;
-  //   let { ticket } = req.body;
-  //
-  //   try {
-  //     let event = await eventController.getEventByUrlSafe(urlSafe);
-  //     let registeredTicket = await ticketController.registerTicket(ticket, event._id, req.user);
-  //     res.send({ registeredTicket });
-  //   } catch (e) {
-  //     console.error(e);
-  //     res.sendStatus(500);
-  //   }
-  // });
+  server.post('/:urlSafe/validate', async(req, res) => {
+    let { urlSafe } = req.params;
+    let { barcode } = req.body;
+    try {
+      let ticket = await ticketController.getTicketByBarcode(barcode);
+      if (ticket) return res.send({ error: 'This ticket has already been activated' });
+
+      let event = await eventController.getEventByUrlSafe(urlSafe);
+      let isValidTicket = await ticketController.isValidTicket(event, barcode);
+
+      res.send({
+        isValidTicket
+      });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
+  });
 
   server.post('/:urlSafe/activate', async(req, res) => {
     let { urlSafe } = req.params;
@@ -131,8 +135,8 @@ module.exports = (server) => {
       if (ticket) return res.send({ error: 'This ticket has already been activated' });
 
       let event = await eventController.getEventByUrlSafe(urlSafe);
-      let transferedTicket = await ticketController.activateThirdPartyTicket(event._id, barcode, user);
-      if (!transferedTicket) return res.sendStatus(403);
+      let transferedTicket = await ticketController.activateThirdPartyTicket(event, barcode, user);
+      if (transferedTicket.error) return res.send(transferedTicket.error);
 
       res.send({
         passwordChangeUrl,

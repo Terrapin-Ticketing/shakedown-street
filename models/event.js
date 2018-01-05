@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
-import config from 'config';
+// import config from 'config';
 
 let EventSchema = new mongoose.Schema({
-  adminId: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'User',
-    default: config.adminId
-  },
+  // adminId: {
+  //   type: mongoose.Schema.Types.ObjectId, ref: 'User',
+  //   default: config.adminId
+  // },
   createrId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
   date: { type: String, required: true },
@@ -23,7 +23,12 @@ let EventSchema = new mongoose.Schema({
   textColor: { type: String },
   imageUrl: { type: String },
   website: { type: String },
-  backgroundColor: { type: String }
+  backgroundColor: { type: String },
+
+  isThirdParty: { type: Boolean, required: true, default: false },
+  eventManager: { type: String }
+  // loginDomain: { type: Boolean, required: true, default: false },
+  // domain: { type: String }
 });
 
 let EventModel = mongoose.model('Event', EventSchema);
