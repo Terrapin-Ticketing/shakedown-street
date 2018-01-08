@@ -66,7 +66,7 @@ class TicketApi {
       let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
       if (!success) return { error: 'Deactivation Failed' };
 
-      newBarcode = await thirdPartyEvent.issueTicket(ticket.barcode);
+      newBarcode = await thirdPartyEvent.issueTicket();
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 

@@ -8,6 +8,14 @@ import url from 'url';
 
 const uuidv1 = require('uuid/v4');
 
+let cincyTicketUsername = process.env.CINCI_UN;
+if (!process.env.CINCI_UN) throw new Error('process.env.CINCI_UN is not set (password)');
+let cincyTicketPassword = process.env.CINCI_PW;
+if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (username)');
+
+let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
+let domain = 'https://terrapin.cincyregister.com';
+
 let baseUrl = config.domain;
 let NUM_USERS = 10;
 
@@ -36,6 +44,16 @@ async function reqGET(route, token = {}) {
   return (await req(route, {}, token, 'GET')).body;
 }
 
+// async function reqGET(route) {
+//   return await new Promise((resolve, reject) => {
+//     return request(route, (err, res) => {
+//       if (err) return reject(err);
+//       resolve(res);
+//     });
+//   });
+// }
+
+
 async function printTicket(eventId, ownerId, token) {
   return await req(`events/${eventId}/tickets`, {
     ticket: {
@@ -44,6 +62,102 @@ async function printTicket(eventId, ownerId, token) {
     },
     ownerId
   }, token);
+}
+
+async function getSValue() {
+  let ticketPage = await reqGET(ticketPortal);
+  let lineMatch = ticketPage.match(/.*\bname[ \t]*="s".*\b/)[0];
+  let sVal = lineMatch.match(/value=(["'])(?:(?=(\\?))\2.)*?\1/)[0].substring(7, 39);
+  return sVal;
+}
+
+async function reqPOST(route, formData, cookieValue) {
+  let jar = request.jar();
+  let cookie = request.cookie(`session_id=${cookieValue}`);
+  jar.setCookie(cookie, domain);
+  let fullUrl = url.resolve(domain, route);
+  let options = {
+    method: 'POST',
+    url: fullUrl,
+    formData,
+    jar,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+  return await new Promise((resolve, reject) => { // eslint-disable-line
+    request(options, (err, res) => {
+      if (err) return reject(err);
+      resolve(res);
+    });
+  });
+}
+
+// function getTicketNum(resHTML) {
+//   let pngURL = resHTML.match(/(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?.png/)[0];
+//   let ticketNum = pngURL.substr(pngURL.lastIndexOf('/') + 1).replace('.png', '');
+//   return ticketNum;
+// }
+
+async function issueTicket() {
+  let sessionId = await login();
+  let sVal = await getSValue();
+
+  await reqPOST('/testfest', {
+    s: sVal,
+    step: 0,
+    r: 0,
+    vip_2day: 1,
+    vip_single_day_121: 0,
+    vip_single_day_122: 0,
+    general_admission: 0,
+    gen_121: 0,
+    gen_122: 0,
+    first_name: 'test',
+    last_name: 'test',
+    address: 'test',
+    city: 'tet',
+    state: 'OH',
+    zip_code: 45209,
+    email_address: 'reeder@terrapinticketing.com',
+    _email_address: 'reeder@terrapinticketing.com',
+    'cmd=forward': 'SUBMIT ORDER'
+  }, sessionId);
+
+  // USER sVal ORDER to print ticket
+  let printableTicket = (await reqPOST('/testfest', {
+    s: sVal,
+    step: 1,
+    r: 0,
+    'cmd=tprint': 'Print Tickets'
+  }, sessionId)).body;
+  let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
+
+  return ticketNum;
+}
+
+async function login() {
+  let fullUrl = 'https://cp.cincyregister.com/';
+  let options = {
+    method: 'POST',
+    url: fullUrl,
+    formData: {
+      username: cincyTicketUsername,
+      password: cincyTicketPassword
+    },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+  return await new Promise((resolve, reject) => { // eslint-disable-line
+    request(options, (err, res) => {
+      if (err) return reject(err);
+      let cookies = res.headers['set-cookie'][0].split(';');
+      let sessionCookie = cookies[0];
+      let sessionId = sessionCookie.split('=')[1];
+      resolve(sessionId);
+    });
+  });
 }
 
 describe('User & Auth', function() {
@@ -102,9 +216,10 @@ describe('User & Auth', function() {
   });
 
   describe('Cinci Ticket (Test Fest)', async function() {
-    before(function() {
-      this.barcode = '7237762933441512';
-      this.barcode2 = '7830666703441550';
+    before(async function() {
+      this.timeout(10000);
+      this.barcode = await issueTicket();
+      this.barcode2 = await issueTicket();
       this.voidedBarcode = '7854772863441586';
     });
 
@@ -117,6 +232,7 @@ describe('User & Auth', function() {
         email: login.email
       });
       this.activatedTicket = body.ticket;
+      if (body.error) console.error('before hook error:', body);
     });
 
     it('should allow user to transfer succesfully uploaded ticket', async function() {

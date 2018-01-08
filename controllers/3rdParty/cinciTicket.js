@@ -8,6 +8,7 @@ if (!process.env.CINCI_UN) throw new Error('process.env.CINCI_UN is not set (pas
 let cincyTicketPassword = process.env.CINCI_PW;
 if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (username)');
 
+let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
 let domain = 'https://terrapin.cincyregister.com';
 
 let fields = [
@@ -61,6 +62,21 @@ async function reqPOST(route, formData, cookieValue) {
   });
 }
 
+async function reqGET(route) {
+  return await new Promise((resolve, reject) => {
+    return request(route, (err, res) => {
+      if (err) return reject(err);
+      resolve(res);
+    });
+  });
+}
+
+async function getSValue() {
+  let ticketPage = (await reqGET(ticketPortal)).body;
+  let lineMatch = ticketPage.match(/.*\bname[ \t]*="s".*\b/)[0];
+  let sVal = lineMatch.match(/value=(["'])(?:(?=(\\?))\2.)*?\1/)[0].substring(7, 39);
+  return sVal;
+}
 
 class CincyTicket {
   async deactivateTicket(barcode) {
@@ -84,21 +100,43 @@ class CincyTicket {
     return success;
   }
 
-  async issueTicket(barcode) {
+  async issueTicket() {
     let sessionId = await this._login();
-    let ticketInfo = await this.getTicketInfo(barcode);
-    if (!ticketInfo) return false;
+    let sVal = await getSValue();
 
-    // all properties are required
-    await reqPOST('/merchant/products/2/manage/tickets', {
-      name: ticketInfo['Ticket Holder'],
-      status: 'active',
-      scanned: ticketInfo['Scanned'],
-      cmd: 'edit',
-      id: ticketInfo.lookupId
+
+    // SUBMIT this sVal ORDER
+    await reqPOST('/testfest', {
+      s: sVal,
+      step: 0,
+      r: 0,
+      vip_2day: 1,
+      vip_single_day_121: 0,
+      vip_single_day_122: 0,
+      general_admission: 0,
+      gen_121: 0,
+      gen_122: 0,
+      first_name: 'test',
+      last_name: 'test',
+      address: 'test',
+      city: 'tet',
+      state: 'OH',
+      zip_code: 45209,
+      email_address: 'reeder@terrapinticketing.com',
+      _email_address: 'reeder@terrapinticketing.com',
+      'cmd=forward': 'SUBMIT ORDER'
     }, sessionId);
 
-    return uuidv1();
+    // USER sVal ORDER to print ticket
+    let printableTicket = (await reqPOST('/testfest', {
+      s: sVal,
+      step: 1,
+      r: 0,
+      'cmd=tprint': 'Print Tickets'
+    }, sessionId)).body;
+    let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
+
+    return ticketNum;
   }
 
   async isValidTicket(ticketId) {
@@ -119,11 +157,12 @@ class CincyTicket {
     return false;
   }
 
+  // expensive
   async _getTickets() {
     let sessionId = await this._login();
     let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
       from: 'January 3, 2018 2:35 PM',
-      to: 'January 4, 2018 2:35 PM',
+      to: 'January 10, 2018 2:35 PM',
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
