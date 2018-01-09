@@ -5,7 +5,7 @@ import User from '../controllers/user';
 let userCol = new User();
 
 let { secret } = config.user;
-let secure = config.env !== 'development';
+// let secure = config.env !== 'development';
 
 function sendToken(res, user) {
   let { email, password, _id, payout } = user;
@@ -13,9 +13,8 @@ function sendToken(res, user) {
   let expire = 1000 * 60 * 60 * 24 * 2;
   return res.status(200)
     .cookie('cookieToken', token, {
-      maxAge: expire
-      // secure,
-      // httpOnly: false
+      maxAge: expire,
+      httpOnly: false
     })
     .send({ token });
 }
