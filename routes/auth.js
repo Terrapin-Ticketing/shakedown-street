@@ -7,8 +7,6 @@ let userCol = new User();
 let { secret } = config.user;
 let secure = config.env !== 'development';
 
-if (secure) throw new Error('secure for some reson');
-
 function sendToken(res, user) {
   let { email, password, _id, payout } = user;
   let token = jwt.sign({ email, password, _id, payout }, secret); // password is salted, so this is fine
