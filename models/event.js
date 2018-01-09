@@ -26,7 +26,11 @@ let EventSchema = new mongoose.Schema({
   backgroundColor: { type: String },
 
   isThirdParty: { type: Boolean, required: true, default: false },
-  eventManager: { type: String }
+  eventManager: { type: String },
+
+  queryDateStart: { type: Date },
+  queryDateEnd: { type: Date }
+
   // loginDomain: { type: Boolean, required: true, default: false },
   // domain: { type: String }
 });
