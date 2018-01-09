@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const config = require('config');
-const session = require('cookie-session');
+// const session = require('cookie-session');
 
 let app = express();
 
