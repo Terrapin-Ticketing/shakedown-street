@@ -13,8 +13,8 @@ function sendToken(res, user) {
   return res.status(200)
     .cookie('cookieToken', token, {
       maxAge: expire,
-      httpOnly: false,
-      secure: true
+      secure: true,
+      httpOnly: false
     })
     .send({ token });
 }

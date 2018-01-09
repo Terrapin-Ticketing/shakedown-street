@@ -7,19 +7,19 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const config = require('config');
-// const session = require('cookie-session');
+const session = require('cookie-session');
 
 let app = express();
 
 app.use(helmet());
-// app.use(session({
-//   name: config.session.name,
-//   keys: [ 'test' ],
-//   cookie: {
-//     secure: true,
-//     httpOnly: true
-//   }
-// }));
+app.use(session({
+  name: config.session.name,
+  keys: [ 'test' ],
+  cookie: {
+    secure: true,
+    httpOnly: false
+  }
+}));
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({limit: '3mb'}));
