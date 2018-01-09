@@ -115,6 +115,16 @@ class UserApi {
     return user;
   }
 
+  async updatePayoutMethod(userId, method, value) {
+    let payout = (await UserModel.findOne({ _id: userId })).payout;
+    payout[method] = value,
+    payout.default = method;
+    let user = await UserModel.findOneAndUpdate({ _id: userId }, {
+      $set: { payout }
+    }, { new: true });
+    return user;
+  }
+
   async setStripeId(userId, stripeId) {
     let user = await UserModel.findOneAndUpdate({ _id: userId }, {
       $set: {
