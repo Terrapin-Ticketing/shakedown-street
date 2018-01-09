@@ -7,18 +7,15 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const config = require('config');
-// const session = require('cookie-session');
 
 let app = express();
 
-// app.use(helmet());
+app.use(helmet());
+// const session = require('cookie-session');
+// let secure = config.env !== 'development';
 // app.use(session({
 //   name: config.session.name,
-//   keys: [ 'cookieToken' ],
-//   cookie: {
-//     secure: true,
-//     httpOnly: false
-//   }
+//   keys: [ 'key1', 'key2' ]
 // }));
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,7 +31,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set('trust proxy', 1); // trust first proxy (NGINX)
+app.set('trust proxy', 1); // trust first proxy
 
 mongoose.connect('mongodb://localhost/terrapin', { useMongoClient: true, promiseLibrary: bluebird });
 

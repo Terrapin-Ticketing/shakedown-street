@@ -5,6 +5,9 @@ import User from '../controllers/user';
 let userCol = new User();
 
 let { secret } = config.user;
+let secure = config.env !== 'development';
+
+if (secure) throw new Error('secure for some reson');
 
 function sendToken(res, user) {
   let { email, password, _id, payout } = user;
@@ -12,9 +15,9 @@ function sendToken(res, user) {
   let expire = 1000 * 60 * 60 * 24 * 2;
   return res.status(200)
     .cookie('cookieToken', token, {
-      maxAge: expire,
-      // secure: true,
-      httpOnly: false
+      maxAge: expire
+      // secure,
+      // httpOnly: false
     })
     .send({ token });
 }
