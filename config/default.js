@@ -44,6 +44,9 @@ module.exports = {
   'user': {
     'secret': 'nershi4prez'
   },
+  'session': {
+    'secret': 'cherryGarcia'
+  },
   infopass,
   'clientDomain': `http://${ipAddress}:3000`
 };

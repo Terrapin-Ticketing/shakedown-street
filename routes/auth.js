@@ -11,7 +11,11 @@ function sendToken(res, user) {
   let token = jwt.sign({ email, password, _id, payout }, secret); // password is salted, so this is fine
   let expire = 1000 * 60 * 60 * 24 * 2;
   return res.status(200)
-    .cookie('cookieToken', token, { maxAge: expire, httpOnly: false })
+    .cookie('cookieToken', token, {
+      maxAge: expire,
+      httpOnly: false,
+      secure: true
+    })
     .send({ token });
 }
 

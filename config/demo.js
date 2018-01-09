@@ -18,6 +18,9 @@ module.exports = {
   'user': {
     'secret': jwtSecret
   },
+  'session': {
+    name: 'cherryGarcia'
+  },
   infopass,
   'clientDomain': 'https://terrapintickets.io'
 };
