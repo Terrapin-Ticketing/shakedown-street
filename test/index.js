@@ -199,6 +199,7 @@ describe('User & Auth', function() {
       isThirdParty: true,
       eventManager: 'CINCI_TICKET'
     };
+    console.log('Event urlSafe:', `TFBrewgrass${uniqueId}`);
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
   });

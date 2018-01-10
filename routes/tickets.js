@@ -123,8 +123,8 @@ module.exports = (server) => {
   server.post('/:urlSafe/activate', async(req, res) => {
     let { urlSafe } = req.params;
     let { email, barcode } = req.body;
-    let passwordChangeUrl;
     try {
+      let passwordChangeUrl;
       let user = await userController.getUserByEmail(email);
       if (!user) {
         user = await userController.createPlaceholderUser(email);
