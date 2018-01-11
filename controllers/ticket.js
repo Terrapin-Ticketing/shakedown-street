@@ -56,7 +56,7 @@ class TicketApi {
     // if user doesn't exist create one
     if (!transferToUser) {
       let event = await EventModel.findOne({ _id: ticket.eventId });
-      transferToUser = await userController.createTransferPlaceholderUser(transferToEmail, user.email, event.name);
+      transferToUser = await userController.createTransferPlaceholderUser(transferToEmail, user.email, ticket);
     }
 
     let event = await EventModel.findOne({ _id: ticket.eventId });
@@ -138,9 +138,10 @@ class TicketApi {
   async activateThirdPartyTicket(event, barcode, user) {
     if (!event.isThirdParty) return { error: 'Invalid Event' };
     let { _id, eventManager } = event;
-
+    console.log('hits activateThirdPartyTicket');
     let thirdPartyEvent = thirdPartyControllers[eventManager];
     let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode);
+    console.log('ticketInfo: ', ticketInfo);
     if (!ticketInfo || ticketInfo.Status === 'void') return { error: 'Invalid Ticket ID' };
 
     // at this

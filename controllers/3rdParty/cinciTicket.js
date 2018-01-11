@@ -161,8 +161,8 @@ class CincyTicket {
   async _getTickets() {
     let sessionId = await this._login();
     let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
-      from: 'January 3, 2018 2:35 PM',
-      to: 'January 10, 2018 2:35 PM',
+      from: 'January 10, 2018 2:35 PM',
+      to: 'January 13, 2018 2:35 PM',
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
