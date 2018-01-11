@@ -119,8 +119,8 @@ async function issueTicket() {
     city: 'tet',
     state: 'OH',
     zip_code: 45209,
-    email_address: 'reeder@terrapinticketing.com',
-    _email_address: 'reeder@terrapinticketing.com',
+    email_address: 'testing@terrapinticketing.com',
+    _email_address: 'testing@terrapinticketing.com',
     'cmd=forward': 'SUBMIT ORDER'
   }, sessionId);
 
@@ -240,7 +240,7 @@ describe('User & Auth', function() {
       this.timeout(6000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
-        email: 'testing@terrapinticketing.com'
+        email: 'kevin@terrapinticketing.com'
       }, customer.token);
 
       assert(body.ticket);

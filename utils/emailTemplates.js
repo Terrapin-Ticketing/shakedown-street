@@ -1,5 +1,4 @@
-export default (ticket) => {
-  console.log('ticket: ', ticket);
+export default (emailHTML) => {
   return (`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -25,7 +24,7 @@ export default (ticket) => {
 			/* ========== Page Styles ========== */
 
 			#bodyCell{padding:20px;}
-			#templateContainer{width:600px;}
+			#templateContainer{width:600px; font-family: Helvetica;}
 
 			/**
 			* @tab Page
@@ -188,7 +187,7 @@ export default (ticket) => {
 			* @theme header
 			*/
 			#templateHeader{
-				/*@editable*/ background-color:#F4F4F4;
+				/*@editable*/ background-color:#149739;
 				/*@editable*/ border-top:1px solid #FFFFFF;
 				/*@editable*/ border-bottom:1px solid #CCCCCC;
 			}
@@ -204,10 +203,10 @@ export default (ticket) => {
 				/*@editable*/ font-size:20px;
 				/*@editable*/ font-weight:bold;
 				/*@editable*/ line-height:100%;
-				/*@editable*/ padding-top:0;
-				/*@editable*/ padding-right:0;
-				/*@editable*/ padding-bottom:0;
-				/*@editable*/ padding-left:0;
+				/*@editable*/ padding-top:25px;
+				/*@editable*/ padding-right:25px;
+				/*@editable*/ padding-bottom:25px;
+				/*@editable*/ padding-left:25px;
 				/*@editable*/ text-align:left;
 				/*@editable*/ vertical-align:middle;
 			}
@@ -351,6 +350,21 @@ export default (ticket) => {
 				display:inline;
 				height:auto;
 				max-width:260px;
+			}
+
+			.card-action {
+				display: flex;
+				flex-direction: row;
+				border-top: 1px solid hsla(0,0%,63%,.2);
+				padding: 15px 15px;
+			}
+
+			.card-action a {
+				flex: 1;
+				color: #ffab40;
+		    transition: color .3s ease;
+		    text-transform: uppercase;
+				text-decoration: none;
 			}
 
 			/* ========== Footer Styles ========== */
@@ -559,10 +573,10 @@ export default (ticket) => {
 		</style>
     </head>
     <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
-			<center>
+    	<center>
         	<table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
             	<tr>
-                	<td align="center" valign="top" id="templateBody">
+                	<td align="center" valign="top" id="bodyCell">
                     	<!-- BEGIN TEMPLATE // -->
                     	<table border="0" cellpadding="0" cellspacing="0" id="templateContainer">
                         	<tr>
@@ -589,176 +603,53 @@ export default (ticket) => {
                                     <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateHeader">
                                         <tr>
                                             <td valign="top" class="headerContent">
-                                            	<img src="https://terrapinticketing.com/img/tt-logo-white.svg" style="max-width:600px;" id="headerImage" mc:label="header_image" mc:edit="header_image" mc:allowdesigner mc:allowtext />
+                                            	<img src="https://terrapinticketing.com/img/tt-logo-white.svg" width="100%" id="headerImage" mc:label="header_image" mc:edit="header_image" mc:allowdesigner mc:allowtext />
                                             </td>
                                         </tr>
                                     </table>
                                     <!-- // END HEADER -->
                                 </td>
                             </tr>
-                        </table>
-												<table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
-							            	<tr>
-							                	<td align="center" valign="top" id="bodyCell">
-							                    	<!-- BEGIN TEMPLATE // -->
-							                    	<table border="0" cellpadding="0" cellspacing="0" id="templateContainer">
-												<tr>
-														<td align="center" valign="top">
-																<!-- BEGIN COLUMNS // -->
-																	<table border="0" cellpadding="20" cellspacing="0" width="100%" id="templateColumns">
-																		<tr mc:repeatable>
-																				<td align="left" valign="top" style="padding-bottom:0;">
-																						<table align="left" border="0" cellpadding="0" cellspacing="0" class="templateColumnContainer">
-																								<tr>
-																										<td class="leftColumnContent">
-																												<img src=${ticket.eventId.imageUrl} style="max-width:260px;" class="columnImage" mc:label="left_column_image" mc:edit="left_column_image" />
-																											</td>
-																									</tr>
-																							</table>
-																						<table align="right" border="0" cellpadding="0" cellspacing="0" class="templateColumnContainer">
-																									<tr>
-																										<td valign="top" class="rightColumnContent" mc:edit="right_column_content">
-																													<h3>{ticket.eventId.name}</h3>
-																													<a href="http://kb.mailchimp.com/article/how-do-i-work-with-repeatable-content-blocks" target="_blank">Repeatable sections</a> are noted with plus and minus signs so that you can add and subtract content blocks.
-																													<br />
-																													<br />
-																													<div class="venue-info">
-																													{ticket.eventId.venue.name} <br />
-																													{ticket.eventId.venue.address} <br />
-																													{ticket.eventId.venue.city}, {ticket.eventId.venue.state} {ticket.eventId.venue.zip}
-																												</div>
-																											</td>
-																									</tr>
-																							</table>
-																					</td>
-																			</tr>
-																	</table>
-																	<!-- // END COLUMNS -->
-															</td>
-													</tr>
-												</table>
-											</td>
-										</tr>
-
-
-												<table border="0" cellpadding="0" cellspacing="0" id="templateContainer" style="margin-top: 15px">
-														<tr>
-																<td align="center" valign="top">
-																		<!-- BEGIN BODY // -->
-																			<table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBody">
-																					<tr>
-																							<td valign="top" class="bodyContent" mc:edit="body_content00">
-																									<h1>Your Ticket</h1>
-																									<div class="card medium show-on-small hide-on-med-and-up" style={{height: 450}}>
-																										<div class="card-image col s12 m6">
-																											{(ticket.isForSale) ? <div class="ribbon"><span>For Sale</span></div> : null }
-																											<img src=${ticket.eventId.imageUrl} />
-																											<span class="card-title">${ticket.eventId.name}</span>
-																											{/* <a class="btn-floating halfway-fab waves-effect waves-light terrapin-green"><i class="material-icons">share</i></a> */}
-																										</div>
-																										<div class="col s12 m6">
-																											<div class="card-content flow-text">
-																												<a class="card-title">${ticket.eventId.name}</a>
-																												<small>{moment(ticket.eventId.date).format('dddd MMMM Do, YYYY')}</small>
-																												<div class="venue-info">
-																													${ticket.eventId.venue.name} <br />
-																													${ticket.eventId.venue.address} <br />
-																													${ticket.eventId.venue.city}, ${ticket.eventId.venue.state} ${ticket.eventId.venue.zip}
-																												</div>
-																												<div class="card-action">
-																													<Link class="btn-flat waves-effect" to=${`event/${ticket.eventId._id}/ticket/${ticket._id}`}>View</Link>
-																													<Link class="btn-flat waves-effect" onClick={() => this.openTicketSellModal()}>Sell</Link>
-																													<Link class="btn-flat waves-effect" onClick={() => this.openTicketTransferModal()}>Transfer</Link>
-																													{/* <Link class="btn-flat waves-effect">History</Link> */}
-																												</div>
-																											</div>
-																										</div>
-																									</div>
-																									<div class="card horizontal sticky-action small hide-on-small-only">
-																										<div class="card-image col s12 m6">
-																											{(ticket.isForSale) ? <div class="ribbon"><span>For Sale</span></div> : null }
-																											<img src=${ticket.eventId.imageUrl} />
-																											<span class="card-title">${ticket.eventId.name}</span>
-																											{/* <a class="btn-floating halfway-fab waves-effect waves-light terrapin-green"><i class="material-icons">share</i></a> */}
-																										</div>
-																										<div class="card-stacked col s12 m6">
-																											<div class="card-content">
-																												<a class="card-title">${ticket.eventId.name}</a>
-																												<small>{moment(ticket.eventId.date).format('dddd MMMM Do, YYYY')}</small>
-																												<div class="venue-info">
-																													${ticket.eventId.venue.name} <br />
-																													${ticket.eventId.venue.address} <br />
-																													${ticket.eventId.venue.city}, ${ticket.eventId.venue.state} ${ticket.eventId.venue.zip}
-																												</div>
-																											</div>
-																											<div class="card-action">
-																												<Link class="btn-flat waves-effect" to=${`event/${ticket.eventId._id}/ticket/${ticket._id}`}>View</Link>
-																												<Link class="btn-flat waves-effect" onClick={() => this.openTicketSellModal()}>Sell</Link>
-																												<Link class="btn-flat waves-effect" onClick={(e) => this.openTicketTransferModal(ticket)}>Transfer</Link>
-																												{/* <Link class="btn-flat waves-effect">History</Link> */}
-																											</div>
-																										</div>
-																									</div>
-																							</td>
-																					</tr>
-																			</table>
-																			<!-- // END BODY -->
-																	</td>
-															</tr>
-													</table>
-
-												<table border="0" cellpadding="0" cellspacing="0" id="templateContainer" style="margin-top: 15px">
-	                        	<tr>
-	                            	<td align="center" valign="top">
-	                                	<!-- BEGIN BODY // -->
-	                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBody">
-																				<tr>
-																						<td valign="top" class="bodyContent" mc:edit="body_content00">
-																							<img src="https://s3-us-west-2.amazonaws.com/files30.webconnex.com/uploads/form_headers/9ae82bec083126fb45f5eab33eafdc22.png" style="max-width:560px;" id="bodyImage" mc:label="body_image" mc:edit="body_image" mc:allowtext />
-																						</td>
-																				</tr>
-																				<tr>
-                                            <td valign="top" class="bodyContent" mc:edit="body_content00">
-                                                <h1>Designing Your Template</h1>
-                                                <h3>Creating a good-looking email is simple</h3>
-                                                Customize your template by clicking on the style editor tabs up above. Set your fonts, colors, and styles. After setting your styling is all done you can click here in this area, delete the text, and start adding your own awesome content.
+                        	<tr>
+                            	<td align="center" valign="top">
+                                <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBody">
+                                	<!-- BEGIN BODY // -->
+                                    ${emailHTML}
+                                  <!-- // END BODY -->
+                                </table>
+                              </td>
+                            </tr>
+                        	<tr>
+                            	<td align="center" valign="top">
+                                	<!-- BEGIN FOOTER // -->
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateFooter">
+                                        <tr>
+                                            <td valign="top" class="footerContent" mc:edit="footer_content00">
+                                                <a href="*|TWITTER:PROFILEURL|*">Follow on Twitter</a>&nbsp;&nbsp;&nbsp;<a href="*|FACEBOOK:PROFILEURL|*">Friend on Facebook</a>&nbsp;&nbsp;&nbsp;<a href="*|FORWARD|*">Forward to Friend</a>&nbsp;
                                             </td>
                                         </tr>
-																				<tr>
-							                            	<td align="center" valign="top">
-							                                	<!-- BEGIN FOOTER // -->
-							                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateFooter">
-							                                        <tr>
-							                                            <td valign="top" class="footerContent" mc:edit="footer_content00">
-							                                                <a href="*|TWITTER:PROFILEURL|*">Follow on Twitter</a>&nbsp;&nbsp;&nbsp;<a href="*|FACEBOOK:PROFILEURL|*">Friend on Facebook</a>&nbsp;&nbsp;&nbsp;<a href="*|FORWARD|*">Forward to Friend</a>&nbsp;
-							                                            </td>
-							                                        </tr>
-							                                        <tr>
-							                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content01">
-							                                                <em>Copyright &copy; *|CURRENT_YEAR|* *|LIST:COMPANY|*, All rights reserved.</em>
-							                                                <br />
-							                                                *|IFNOT:ARCHIVE_PAGE|* *|LIST:DESCRIPTION|*
-							                                                <br />
-							                                                <br />
-							                                                <strong>Our mailing address is:</strong>
-							                                                <br />
-							                                                *|HTML:LIST_ADDRESS_HTML|* *|END:IF|*
-							                                            </td>
-							                                        </tr>
-							                                        <tr>
-							                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content02">
-							                                            	<a href="*|UNSUB|*">unsubscribe from this list</a>&nbsp;&nbsp;&nbsp;<a href="*|UPDATE_PROFILE|*">update subscription preferences</a>&nbsp;
-							                                            </td>
-							                                        </tr>
-							                                    </table>
-							                                    <!-- // END FOOTER -->
-							                                </td>
-							                            </tr>
-	                                    </table>
-	                                    <!-- // END BODY -->
-	                                </td>
-	                            </tr>
-	                        </table>
+                                        <tr>
+                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content01">
+                                                <em>Copyright &copy; *|CURRENT_YEAR|* *|LIST:COMPANY|*, All rights reserved.</em>
+                                                <br />
+                                                *|IFNOT:ARCHIVE_PAGE|* *|LIST:DESCRIPTION|*
+                                                <br />
+                                                <br />
+                                                <strong>Our mailing address is:</strong>
+                                                <br />
+                                                *|HTML:LIST_ADDRESS_HTML|* *|END:IF|*
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content02">
+                                            	<a href="*|UNSUB|*">unsubscribe from this list</a>&nbsp;&nbsp;&nbsp;<a href="*|UPDATE_PROFILE|*">update subscription preferences</a>&nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // END FOOTER -->
+                                </td>
+                            </tr>
+                        </table>
                         <!-- // END TEMPLATE -->
                     </td>
                 </tr>
