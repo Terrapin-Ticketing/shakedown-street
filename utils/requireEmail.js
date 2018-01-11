@@ -2,6 +2,9 @@ import nodemailer from 'nodemailer';
 import redis from 'redis';
 import config from 'config';
 
+const emailTemplates = require('./emailTemplates');
+
+
 const uuidv1 = require('uuid/v4');
 
 let client = redis.createClient();
@@ -23,6 +26,12 @@ async function sendMail(mailOptions) {
   });
 }
 
+function formatEmail(ticket, token) {
+  console.log('emailTemplates: ', emailTemplates);
+  return emailTemplates.default(ticket);
+}
+
+
 export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
   const mailOptions = {
     from: 'info@terrapinticketing.com', // sender address
@@ -37,7 +46,7 @@ export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
   return await sendMail(mailOptions);
 };
 
-export const emailTransferTicket = async(toEmail, fromUser, eventName) => {
+export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
   let token = uuidv1();
   await new Promise((resolve) => {
     client.hset('set-password', token, toEmail, resolve);
@@ -55,11 +64,8 @@ export const emailTransferTicket = async(toEmail, fromUser, eventName) => {
   const mailOptions = {
     from: 'info@terrapinticketing.com', // sender address
     to: toEmail, // list of receivers
-    subject: `You're going to ${eventName}!`, // Subject line
-    html: `
-<p>
-  go to this link to claim your ticket: ${config.clientDomain}/set-password/${token}
-</p>`// plain text body
+    subject: `You're going to ${ticket.eventId.name}!`, // Subject line
+    html: formatEmail(ticket, token)
   };
 
   // return await sendMail(mailOptions);

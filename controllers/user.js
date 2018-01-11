@@ -47,7 +47,8 @@ class UserApi {
     return await UserModel.findOne({ _id: id }).populate('eventId');
   }
 
-  async createTransferPlaceholderUser(email) {
+  async createTransferPlaceholderUser(email, fromUser, ticket) {
+    await emailTransferTicket(email, fromUser, ticket);
     let user = await this.signup(email, uuidv1());
     return user;
   }
