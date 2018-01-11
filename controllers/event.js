@@ -20,6 +20,9 @@ class EventApi {
   }
 
   async createTicket(eventId, ownerId, barcode, price) {
+    let user = await UserModel.findOne({ _id: ownerId });
+    if (!user) return { error: `Invalid ticket owner ${ownerId}` };
+
     let newTicket = await TicketModel.create({
       barcode,
       ownerId: mongoose.mongo.ObjectId(ownerId),

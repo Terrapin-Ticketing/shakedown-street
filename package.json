@@ -29,6 +29,7 @@
     "body-parser": "^1.18.1",
     "config": "^1.26.2",
     "cookie-parser": "^1.4.3",
+    "cookie-session": "^2.0.0-beta.3",
     "csvtojson": "^1.1.9",
     "eslint": "^4.12.1",
     "express": "^4.15.4",

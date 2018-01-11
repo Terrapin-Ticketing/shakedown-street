@@ -199,6 +199,7 @@ describe('User & Auth', function() {
       isThirdParty: true,
       eventManager: 'CINCI_TICKET'
     };
+    console.log('Event urlSafe:', `TFBrewgrass${uniqueId}`);
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
   });
@@ -288,7 +289,7 @@ describe('User & Auth', function() {
       event: {
         date: '3/4/2018',
         name: `hawkins snow ball ${shortid.generate()}`,
-        urlSafe: `HawkinsSnowBall ${shortid.generate()}`,
+        urlSafe: `HawkinsSnowBall${shortid.generate()}`,
         description: 'testing',
         venue: {
           name: 'Test Location',

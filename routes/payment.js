@@ -11,28 +11,28 @@ const TicketApi = require('../controllers/ticket');
 let ticketController = new TicketApi();
 
 module.exports = (server) => {
-  server.post('/payment', async(req, res) => {
-    if (!req.user) return res.sendStatus(401);
-    // let { token, fees, qty, eventAddress } = req.body;
-    let { token: stripeToken, eventId } = req.body;
-    let parsedToken = stripeToken.token;
-
-    let user = req.user;
-    let total = 5000;
-    try {
-      let charge = await paymentController.createCharge(user, parsedToken, total);
-      if (charge === 'success') {
-        // set tickets to buyer
-        // printTicket(callerId, eventId, ticket, ownerId)
-        let ticket = {};
-        await eventController.printTicket(user._id, eventId, ticket, user._id);
-      }
-      res.send(charge);
-    } catch (e) {
-      console.error(e);
-      res.sendStatus(500);
-    }
-  });
+  // server.post('/payment', async(req, res) => {
+  //   if (!req.user) return res.sendStatus(401);
+  //   // let { token, fees, qty, eventAddress } = req.body;
+  //   let { token: stripeToken, eventId } = req.body;
+  //   let parsedToken = stripeToken.token;
+  //
+  //   let user = req.user;
+  //   let total = 5000;
+  //   try {
+  //     let charge = await paymentController.createCharge(user, parsedToken, total);
+  //     if (charge === 'success') {
+  //       // set tickets to buyer
+  //       // printTicket(callerId, eventId, ticket, ownerId)
+  //       let ticket = {};
+  //       await eventController.printTicket(user._id, eventId, ticket, user._id);
+  //     }
+  //     res.send(charge);
+  //   } catch (e) {
+  //     console.error(e);
+  //     res.sendStatus(500);
+  //   }
+  // });
 
   server.post('/payment/:ticketId', async(req, res) => {
     let { ticketId } = req.params;
@@ -40,6 +40,7 @@ module.exports = (server) => {
     let passwordChangeUrl;
 
     let user = req.user;
+
     if (!user) {
       user = await userController.getUserByEmail(stripeToken.email);
       if (user) return res.send({ error: 'Email already in use' });
@@ -52,7 +53,10 @@ module.exports = (server) => {
       if (!ticket || !ticket.isForSale) {
         return res.send({ error: 'No ticket found' });
       }
-      let charge = await paymentController.createCharge(user, stripeToken, ticket.price);
+      console.log('Service Fee: $1.00');
+      console.log('Card Fee: $1.00');
+      let total = ticket.price + 100 + 100;
+      let charge = await paymentController.createCharge(user, stripeToken, total);
       // TODO: I think this is wrong...charge returns a charge
       // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
       if (!charge) return res.send({ error: 'Failed to charge card' });

@@ -5,6 +5,9 @@ import config from 'config';
 let env = config.env;
 
 const UserModel = require('../models/user');
+const EventModel = require('../models/event');
+
+
 const uuidv1 = require('uuid/v4');
 
 import { emailRecievedTicket, emailPasswordChange, emailSoldTicket, emailTransferTicket } from '../utils/requireEmail';
@@ -19,25 +22,23 @@ function saltPassword(password) {
 class UserApi {
   async signup(email, password) {
     return await UserModel.create({
-      email,
+      email: email.toLowerCase(),
       password: saltPassword(password)
     });
   }
 
   async getUserByEmail(email) {
-    let user = UserModel.findOne({ email });
+    let user = await UserModel.findOne({ email: email.toLowerCase() });
     return user;
   }
 
-  async getUser(email, password) {
-    return await new Promise((resolve, reject) => {
-      UserModel.findOne({email}).exec((err, user) => {
-        if (!user) return reject(new Error('This user doesn\'t exist.'));
-        bcrypt.compare(password, user.password, (err, success) => {
-          if (err) return reject(err);
-          if (!success) return reject(new Error('Wrong Password'));
-          return resolve(user);
-        });
+  async loginUser(email, password) {
+    return await new Promise(async(resolve, reject) => {
+      let user = await this.getUserByEmail(email);
+      bcrypt.compare(password, user.password, (err, success) => {
+        if (err) return reject(err);
+        if (!success) return reject(new Error('Wrong Password'));
+        return resolve(user);
       });
     });
   }
@@ -84,7 +85,7 @@ class UserApi {
     let user = await new Promise((resolve, reject) => {
       client.hget('set-password', token, async(err, email) => {
         if (err) return reject(err);
-        let user = await UserModel.findOneAndUpdate({ email }, {
+        let user = await UserModel.findOneAndUpdate({ email: email.toLowerCase() }, {
           $set: {
             password: saltPassword(password)
           }
@@ -147,6 +148,10 @@ class UserApi {
       }
     }, { new: true });
     return user;
+  }
+
+  async emailTransferTicket(email, fromUser, eventName) {
+    await emailTransferTicket(email, fromUser, eventName);
   }
 
   async sendRecievedTicketEmail(user, ticket) {

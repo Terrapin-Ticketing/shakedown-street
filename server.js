@@ -11,6 +11,13 @@ const config = require('config');
 let app = express();
 
 app.use(helmet());
+// const session = require('cookie-session');
+// let secure = config.env !== 'development';
+// app.use(session({
+//   name: config.session.name,
+//   keys: [ 'key1', 'key2' ]
+// }));
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({limit: '3mb'}));
 app.use(cookieParser());
@@ -20,7 +27,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', config.clientDomain);
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT');
-  res.header('Access-Control-Allow-Headers', 'Authorization, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
+  res.header('Access-Control-Allow-Headers', 'Authorization, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
   next();
 });
 
