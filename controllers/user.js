@@ -22,25 +22,23 @@ function saltPassword(password) {
 class UserApi {
   async signup(email, password) {
     return await UserModel.create({
-      email,
+      email: email.toLowerCase(),
       password: saltPassword(password)
     });
   }
 
   async getUserByEmail(email) {
-    let user = UserModel.findOne({ email });
+    let user = UserModel.findOne({ email: email.toLowerCase() });
     return user;
   }
 
-  async getUser(email, password) {
-    return await new Promise((resolve, reject) => {
-      UserModel.findOne({email}).exec((err, user) => {
-        if (!user) return reject(new Error('This user doesn\'t exist.'));
-        bcrypt.compare(password, user.password, (err, success) => {
-          if (err) return reject(err);
-          if (!success) return reject(new Error('Wrong Password'));
-          return resolve(user);
-        });
+  async loginUser(email, password) {
+    return await new Promise(async(resolve, reject) => {
+      let user = await this.getUserByEmail(email);
+      bcrypt.compare(password, user.password, (err, success) => {
+        if (err) return reject(err);
+        if (!success) return reject(new Error('Wrong Password'));
+        return resolve(user);
       });
     });
   }

@@ -63,7 +63,7 @@ class TicketApi {
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
-    let transferToUser = await UserModel.findOne({ email: transferToEmail });
+    let transferToUser = await userController.getUserByEmail(transferToEmail);
     // if user doesn't exist create one
     if (!transferToUser) {
       let event = await EventModel.findOne({ _id: ticket.eventId });
