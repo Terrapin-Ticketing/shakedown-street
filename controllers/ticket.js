@@ -67,9 +67,10 @@ class TicketApi {
     // if user doesn't exist create one
     if (!transferToUser) {
       let event = await EventModel.findOne({ _id: ticket.eventId });
-      transferToUser = await userController.createTransferPlaceholderUser(transferToEmail, user.email, event.name);
+      transferToUser = await userController.createTransferPlaceholderUser(transferToEmail);
+      await userController.emailTransferTicket(transferToEmail, user.email, event.name);
     } else {
-      await userController.sendTransferEmail(transferToUser, user.email, ticket);
+      await userController.sendRecievedTicketEmail(transferToUser, ticket);
     }
 
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {

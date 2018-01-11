@@ -49,8 +49,7 @@ class UserApi {
     return await UserModel.findOne({ _id: id }).populate('eventId');
   }
 
-  async createTransferPlaceholderUser(email, fromUser, eventName) {
-    await emailTransferTicket(email, fromUser, eventName);
+  async createTransferPlaceholderUser(email) {
     let user = await this.signup(email, uuidv1());
     return user;
   }
@@ -152,9 +151,8 @@ class UserApi {
     return user;
   }
 
-  async sendTransferEmail(toUser, fromEmail, ticket) {
-    let event = await EventModel.findOne({ _id: ticket.eventId });
-    await emailTransferTicket(toUser.email, fromEmail, event.name);
+  async emailTransferTicket(email, fromUser, eventName) {
+    await emailTransferTicket(email, fromUser, eventName);
   }
 
   async sendRecievedTicketEmail(user, ticket) {
