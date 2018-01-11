@@ -76,7 +76,8 @@ class TicketApi {
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
         ownerId: transferToUser._id,
-        barcode: newBarcode
+        barcode: newBarcode,
+        isForSale: false
       }
     }, { new: true });
 
