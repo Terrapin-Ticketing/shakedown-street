@@ -80,8 +80,6 @@ class TicketApi {
       }
     }, { new: true });
 
-
-
     // whoever called this doesn't own the ticket anymore
     transferedTicket.barcode = null;
     return transferedTicket;

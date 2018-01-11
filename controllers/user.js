@@ -28,7 +28,7 @@ class UserApi {
   }
 
   async getUserByEmail(email) {
-    let user = UserModel.findOne({ email: email.toLowerCase() });
+    let user = await UserModel.findOne({ email: email.toLowerCase() });
     return user;
   }
 
@@ -84,7 +84,7 @@ class UserApi {
     let user = await new Promise((resolve, reject) => {
       client.hget('set-password', token, async(err, email) => {
         if (err) return reject(err);
-        let user = await UserModel.findOneAndUpdate({ email }, {
+        let user = await UserModel.findOneAndUpdate({ email: email.toLowerCase() }, {
           $set: {
             password: saltPassword(password)
           }
