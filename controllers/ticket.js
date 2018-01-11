@@ -63,7 +63,7 @@ class TicketApi {
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
-    let transferToUser = await userController.getUserByEmail(transferToEmail);
+    transferToUser = await userController.getUserByEmail(transferToEmail);
     // if user doesn't exist create one
     if (!transferToUser) {
       transferToUser = await userController.createTransferPlaceholderUser(transferToEmail);
@@ -75,7 +75,8 @@ class TicketApi {
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
         ownerId: transferToUser._id,
-        barcode: newBarcode
+        barcode: newBarcode,
+        isForSale: false
       }
     }, { new: true });
 
