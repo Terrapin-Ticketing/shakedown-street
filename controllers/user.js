@@ -5,6 +5,9 @@ import config from 'config';
 let env = config.env;
 
 const UserModel = require('../models/user');
+const EventModel = require('../models/event');
+
+
 const uuidv1 = require('uuid/v4');
 
 import { emailRecievedTicket, emailPasswordChange, emailSoldTicket, emailTransferTicket } from '../utils/requireEmail';
@@ -147,6 +150,11 @@ class UserApi {
       }
     }, { new: true });
     return user;
+  }
+
+  async sendTransferEmail(toUser, fromEmail, ticket) {
+    let event = await EventModel.findOne({ _id: ticket.eventId });
+    await emailTransferTicket(toUser.email, fromEmail, event.name);
   }
 
   async sendRecievedTicketEmail(user, ticket) {
