@@ -68,8 +68,23 @@ module.exports = (server) => {
       let originalOwner = await userController.getUserById(ticket.ownerId);
       let newTicket = await ticketController.transferTicket(ticket._id, user.email, originalOwner);
 
-      // don't use 'await' here because we want to return immediatly
+      // don't use 'await' here because we want to return immediately
       userController.sendSoldTicketEmail(originalOwner, newTicket);
+
+      /*
+      // send notification to kevin or I that someone bought a ticket
+      this.sendNotification(to, ticket.price, serviceFee, cardFee);
+      hey kev,
+
+      ${user.email} has bought ticket ${ticket._id} from ${ticket.originalOwner}
+
+      Ticket Price: ${ticket.price}
+
+      ${ticket.originalOwner} would like to be paid using:
+
+      ${ticket.originalOwner.payment.default} with ${ticket.originalOwner.payment[default]}
+      // i.e: venmo with 513-623-8888
+      */
 
       return res.send({
         charge,
