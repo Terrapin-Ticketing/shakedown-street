@@ -154,7 +154,7 @@ class CincyTicket {
     //   filename: 'export.csv',
     //   cmd: 'export'
     // }, sessionId);
-    return false;
+    return 1000;
   }
 
   // expensive
@@ -179,7 +179,8 @@ class CincyTicket {
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
             if (fields[i] === 'Order Number') {
-              ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
+              // ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
+              ticketEntry.price = await this._getOrderDetails(fields[i]);
             }
           }
         })

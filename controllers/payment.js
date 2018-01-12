@@ -23,7 +23,7 @@ class Payment {
     let source = await stripe.customers.createSource(user.stripe.id, {
       source: token.id
     });
-    if (config.env === 'development') {
+    if (config.env === 'development' || config.env === 'demo') {
       source = 'tok_visa';
     }
     let charge = await stripe.charges.create({
