@@ -1,7 +1,10 @@
 // let stripeSecretKey = 'sk_test_uKIHGA1q5UfwysISFvt6nHto';
 let stripeSecretKey = process.env.STRIPE_SK;
+if (!stripeSecretKey) throw new Error('Missing STRIPE_SK');
 // let jwtSecret = 'nershi4prez';
 let jwtSecret = process.env.JWT_SECRET;
+if (!stripeSecretKey) throw new Error('Missing JWT_SECRET');
+
 
 let infopass = process.env.INFO_PASS;
 let PORT = 8080;
