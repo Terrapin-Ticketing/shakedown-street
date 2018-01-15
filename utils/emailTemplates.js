@@ -275,6 +275,28 @@ export default (emailHTML) => {
 				max-width:560px;
 			}
 
+      .btn {
+        cursor: pointer;
+        display: inline-block;
+        overflow: hidden;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        vertical-align: middle;
+        z-index: 1;
+        transition: .3s ease-out;
+        text-decoration: none;
+        color: #fff;
+        background-color: #093;
+        border: none;
+        border-radius: 2px;
+        padding: 15px;
+        font-size: 2rem;
+        box-shadow: 0 3px 3px 0 rgba(0,0,0,.14), 0 1px 7px 0 rgba(0,0,0,.12), 0 3px 1px -1px rgba(0,0,0,.2);
+      }
+
 			/* ========== Column Styles ========== */
 
 			.templateColumnContainer{display:inline; width:260px;}

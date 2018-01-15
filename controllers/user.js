@@ -154,8 +154,7 @@ class UserApi {
   }
 
   async sendRecievedTicketEmail(user, ticket) {
-    let event = ticket.eventId;
-    await emailRecievedTicket(user.email, event);
+    await emailRecievedTicket(user.email, ticket);
   }
 
   async sendSoldTicketEmail(user, ticket) {

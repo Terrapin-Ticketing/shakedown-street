@@ -79,13 +79,27 @@ function getTicketCard(ticket, config) {
 
 
 export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
-  let emailHTML = (`<p>
-    go to this link to change your password: ${passwordChangeUrl}
-  </p>`);
+  let emailHTML = (`
+    <tr>
+      <td valign="top" class="bodyContent" mc:edit="body_content00">
+          <h1>Reset Password</h1>
+          <h3>You're a lost sailor. You've been too long at sea!</h3>
+          Someone requested to change your password. Follow the instructions below to reset it.
+          <br /><br />
+          Click this link to reset your password: ${passwordChangeUrl}
+          <br /><br />
+          <div style="text-align: center;">
+            <button class="btn">Reset Password</button>
+          </div>
+
+          - Terrapin Ticketing Team
+    </td>
+    </tr>
+  `);
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
     to: toEmail, // list of receivers
-    subject: 'forget your password?', // Subject line
+    subject: 'Forgot Password', // Subject line
     html: formatEmail(emailHTML)
   };
 
@@ -104,7 +118,7 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
                 <h1>You received a ticket</h1>
                 <h3>Creating a good-looking email is simple</h3>
                 You received a ticket to ${ticket.eventId.name} from ${fromUser}. <br /><br />
-                <span style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</span>
+                <div style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</div>
             </td>
         </tr>
         ${getTicketCard(ticket, config)}
@@ -133,16 +147,34 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
   return await sendMail(mailOptions);
 };
 
-export const emailRecievedTicket = async(email, event) => {
+export const emailRecievedTicket = async(email, ticket) => {
   let emailHTML = (`
-    <p>
-      go to this link view your tickets: ${config.clientDomain}/my-profile
-    </p>
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>You received a ticket</h1>
+                <br />
+                You received a ticket to ${ticket.eventId.name}. <br /><br />
+                <div style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</div>
+            </td>
+        </tr>
+        ${getTicketCard(ticket, config)}
+      <!-- <tr>
+          <td class="bodyContent" style="padding-top:0; padding-bottom:0;">
+              <img src="http://gallery.mailchimp.com/27aac8a65e64c994c4416d6b8/images/body_placeholder_650px.png" style="max-width:560px;" id="bodyImage" mc:label="body_image" mc:edit="body_image" mc:allowtext />
+            </td>
+        </tr> -->
+        <!-- <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content01">
+                <h2>Styling Your Content</h2>
+                <h4>Make your email easy to read</h4>
+                After you enter your content, highlight the text you want to style and select the options you set in the style editor in the "<em>styles</em>" drop down box. Want to <a href="http://www.mailchimp.com/kb/article/im-using-the-style-designer-and-i-cant-get-my-formatting-to-change" target="_blank">get rid of styling on a bit of text</a>, but having trouble doing it? Just use the "<em>remove formatting</em>" button to strip the text of any formatting and reset your style.
+            </td>
+        </tr> -->
   `);
   const mailOptions = {
     from: 'info@terrapinticketing.com', // sender address
     to: email, // list of receivers
-    subject: `You're going to ${event.name}!`, // Subject line
+    subject: `You're going to ${ticket.eventId.name}!`, // Subject line
     html: formatEmail(emailHTML)
   };
 
@@ -150,9 +182,16 @@ export const emailRecievedTicket = async(email, event) => {
 };
 
 export const emailSoldTicket = async(email, ticket) => {
-  let event = ticket.eventId;
   let emailHTML = (`
-    <p>You sold your ticket for ${event.name}</p>
+    <tr>
+        <td valign="top" class="bodyContent" mc:edit="body_content00">
+            <h1>Your ticket sold!</h1>
+            <br />
+            Your ticket for ${ticket.eventId.name} sold for ${ticket.price} on Terrapin Ticketing.
+            <br /><br />
+            We will send the funds to your account in the next 24 hours. We apologize for the wait but sending funds is a manual process at the moment. If you have any questions, please email info@terrapinticketing.com
+        </td>
+    </tr>
   `);
   const mailOptions = {
     from: 'info@terrapinticketing.com', // sender address

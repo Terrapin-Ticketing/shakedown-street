@@ -119,8 +119,8 @@ async function issueTicket() {
     city: 'tet',
     state: 'OH',
     zip_code: 45209,
-    email_address: 'testing@terrapinticketing.com',
-    _email_address: 'testing@terrapinticketing.com',
+    email_address: 'kevin@terrapinticketing.com',
+    _email_address: 'kevin@terrapinticketing.com',
     'cmd=forward': 'SUBMIT ORDER'
   }, sessionId);
 
@@ -237,7 +237,7 @@ describe('User & Auth', function() {
     });
 
     it('should allow user to transfer succesfully uploaded ticket', async function() {
-      this.timeout(6000);
+      this.timeout(16000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
         email: 'kevin@terrapinticketing.com'
