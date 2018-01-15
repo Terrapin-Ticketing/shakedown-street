@@ -85,6 +85,39 @@ class TicketApi {
     return transferedTicket;
   }
 
+  async transferPurchasedTicket(ticketId, transferToEmail, user) {
+    let ticket = await this.getTicketById(ticketId, user);
+    if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
+
+    let event = await EventModel.findOne({ _id: ticket.eventId });
+    let newBarcode = uuidv1(); // used for non third party events
+    if (event.isThirdParty) {
+      let thirdPartyEvent = thirdPartyControllers[event.eventManager];
+      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
+      if (!success) return { error: 'Deactivation Failed' };
+
+      newBarcode = await thirdPartyEvent.issueTicket();
+      if (!newBarcode) return { error: 'Ticket Creation Failed' };
+    }
+
+    let transferToUser = await userController.getUserByEmail(transferToEmail);
+    // if user doesn't exist create one
+
+    await userController.sendPurchaseEmail(transferToUser, ticket);
+
+    let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
+      $set: {
+        ownerId: transferToUser._id,
+        barcode: newBarcode,
+        isForSale: false
+      }
+    }, { new: true });
+
+    // whoever called this doesn't own the ticket anymore
+    transferedTicket.barcode = null;
+    return transferedTicket;
+  }
+
   async setTicketOwner(ticketId, user) {
     let ticket = TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
@@ -147,7 +180,6 @@ class TicketApi {
 
     // at this
     if (!ticketInfo.price) throw new Error('Original price of ticket not set');
-    console.log('price:', ticketInfo.price);
     let price = ticketInfo.price;
     let ticket = await eventController.createTicket(_id, user._id, barcode, price);
     return ticket;

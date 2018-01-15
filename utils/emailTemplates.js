@@ -543,6 +543,30 @@ export default (emailHTML) => {
 					/*@editable*/ line-height:125% !important;
 				}
 
+        /* ===== Table Styles ===== */
+        table {
+          width: 100%;
+          display: table;
+          border-collapse: collapse;
+          border-spacing: 0;
+        }
+
+        td, th {
+          padding: 15px 5px;
+          display: table-cell;
+          text-align: left;
+          vertical-align: middle;
+          border-radius: 2px;
+        }
+
+        .order-details-header {
+          background: #e1e2e1;
+        }
+
+        .service-fee, .order-details-rows, card-fee, total {
+          border-bottom: 1px solid rgba(0,0,0,.12);
+        }
+
 				/* ======== Column Styles ======== */
 
 				.templateColumnContainer{display:block !important; width:100% !important;}
@@ -646,25 +670,8 @@ export default (emailHTML) => {
                                 	<!-- BEGIN FOOTER // -->
                                     <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateFooter">
                                         <tr>
-                                            <td valign="top" class="footerContent" mc:edit="footer_content00">
-                                                <a href="*|TWITTER:PROFILEURL|*">Follow on Twitter</a>&nbsp;&nbsp;&nbsp;<a href="*|FACEBOOK:PROFILEURL|*">Friend on Facebook</a>&nbsp;&nbsp;&nbsp;<a href="*|FORWARD|*">Forward to Friend</a>&nbsp;
-                                            </td>
-                                        </tr>
-                                        <tr>
                                             <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content01">
-                                                <em>Copyright &copy; *|CURRENT_YEAR|* *|LIST:COMPANY|*, All rights reserved.</em>
-                                                <br />
-                                                *|IFNOT:ARCHIVE_PAGE|* *|LIST:DESCRIPTION|*
-                                                <br />
-                                                <br />
-                                                <strong>Our mailing address is:</strong>
-                                                <br />
-                                                *|HTML:LIST_ADDRESS_HTML|* *|END:IF|*
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content02">
-                                            	<a href="*|UNSUB|*">unsubscribe from this list</a>&nbsp;&nbsp;&nbsp;<a href="*|UPDATE_PROFILE|*">update subscription preferences</a>&nbsp;
+                                                Thanks for using Terrapin Ticketing. If you have any issues with your order, please email at info@terrapinticketing.com. For urgent matters, call (708) 805-9743.
                                             </td>
                                         </tr>
                                     </table>

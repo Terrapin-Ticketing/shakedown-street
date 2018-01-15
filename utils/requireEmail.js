@@ -30,6 +30,14 @@ function formatEmail(emailHTML) {
   return emailTemplates.default(emailHTML);
 }
 
+function calculateTotal(ticketPrice, serviceFee, cardFee) {
+  return ticketPrice + serviceFee + cardFee;
+}
+
+function displayPrice(price) {
+  return (`$${parseFloat(price / 100.0).toFixed(2)}`);
+}
+
 function getTicketCard(ticket, config) {
   return (`
     <tr>
@@ -40,7 +48,7 @@ function getTicketCard(ticket, config) {
                     <td align="left" valign="top" style="padding-bottom:0;">
                         <table align="left" border="0" cellpadding="0" cellspacing="0" class="templateColumnContainer">
                             <tr>
-                              <h1>Ticket Information</h1>
+                              <h2>Ticket Information</h2>
                                 <td class="leftColumnContent">
                                     <img src="${ticket.eventId.imageUrl}" style="max-width:260px;" class="columnImage" mc:label="left_column_image" mc:edit="left_column_image" />
                                   </td>
@@ -77,6 +85,38 @@ function getTicketCard(ticket, config) {
   `);
 }
 
+function getOrderCard(ticket, config) {
+  let serviceFee = 100;
+  let cardFee = 100;
+  return (`
+    <div class="order-details card-content col s12 l6">
+          <h2>Order Details</h2>
+          <div class="order-box">
+            <table class="order-table bordered">
+              <thead>
+                <tr class="order-details-header">
+                  <th class="name-column">Event</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="order-details-rows">
+                  <td class="name-column">
+                    ${ ticket.eventId.name } <br />
+                    ${ ticket.type }
+                  </td>
+                  <td class="price">${displayPrice(ticket.price)}</td>
+                </tr>
+                <tr class="service-fee"><td class="name-column">Service Fee</td><td>${displayPrice(serviceFee)}</td></tr>
+                <tr class="card-fee"><td class="name-column">Credit Card Processing</td><td>${displayPrice(cardFee)}</td></tr>
+                <tr class="total"><td class="name-column">Total:</td><td>${displayPrice(calculateTotal(ticket.price, serviceFee, cardFee))}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+  `);
+}
+
 
 export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
   let emailHTML = (`
@@ -91,8 +131,6 @@ export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
           <div style="text-align: center;">
             <button class="btn">Reset Password</button>
           </div>
-
-          - Terrapin Ticketing Team
     </td>
     </tr>
   `);
@@ -116,9 +154,9 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
         <tr>
             <td valign="top" class="bodyContent" mc:edit="body_content00">
                 <h1>You received a ticket</h1>
-                <h3>Creating a good-looking email is simple</h3>
                 You received a ticket to ${ticket.eventId.name} from ${fromUser}. <br /><br />
-                <div style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</div>
+
+                We created an account for you on Terrapin Ticketing to manage your ticket. Please set your account password using this link: ${config.clientDomain}/set-password/${token}
             </td>
         </tr>
         ${getTicketCard(ticket, config)}
@@ -137,7 +175,7 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
   `);
 
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
     to: toEmail, // list of receivers
     subject: `You're going to ${ticket.eventId.name}!`, // Subject line
     html: formatEmail(emailHTML)
@@ -172,7 +210,7 @@ export const emailRecievedTicket = async(email, ticket) => {
         </tr> -->
   `);
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
     to: email, // list of receivers
     subject: `You're going to ${ticket.eventId.name}!`, // Subject line
     html: formatEmail(emailHTML)
@@ -187,16 +225,43 @@ export const emailSoldTicket = async(email, ticket) => {
         <td valign="top" class="bodyContent" mc:edit="body_content00">
             <h1>Your ticket sold!</h1>
             <br />
-            Your ticket for ${ticket.eventId.name} sold for ${ticket.price} on Terrapin Ticketing.
+            Your ticket for ${ticket.eventId.name} sold for ${displayPrice(ticket.price)} on Terrapin Ticketing.
             <br /><br />
             We will send the funds to your account in the next 24 hours. We apologize for the wait but sending funds is a manual process at the moment. If you have any questions, please email info@terrapinticketing.com
         </td>
     </tr>
   `);
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
     to: email, // list of receivers
     subject: 'You sold your ticket!', // Subject line
+    html: formatEmail(emailHTML)
+  };
+
+  return await sendMail(mailOptions);
+};
+
+export const emailPurchaseTicket = async(email, ticket) => {
+  let emailHTML = (`
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>You purchased a ticket</h1>
+                <br />
+                You purchased a ticket to ${ticket.eventId.name}. <br /><br />
+                <div style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</div>
+            </td>
+        </tr>
+        ${getTicketCard(ticket, config)}
+        <tr>
+          <td valign="top" class="bodyContent">
+          ${getOrderCard(ticket, config)}
+        </td>
+      </tr>
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: email, // list of receivers
+    subject: `Purchase Receipt: ${ticket.eventId.name}!`, // Subject line
     html: formatEmail(emailHTML)
   };
 
