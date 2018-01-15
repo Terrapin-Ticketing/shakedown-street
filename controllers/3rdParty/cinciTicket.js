@@ -82,7 +82,7 @@ class CincyTicket {
   async deactivateTicket(barcode) {
     let sessionId = await this._login();
     let ticketInfo = await this.getTicketInfo(barcode);
-    if (!ticketInfo) return false;
+    if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
     // all properties are required
     await reqPOST('/merchant/products/2/manage/tickets', {
@@ -154,7 +154,7 @@ class CincyTicket {
     //   filename: 'export.csv',
     //   cmd: 'export'
     // }, sessionId);
-    return false;
+    return 1000;
   }
 
   // expensive
@@ -162,7 +162,7 @@ class CincyTicket {
     let sessionId = await this._login();
     let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
       from: 'January 10, 2018 2:35 PM',
-      to: 'January 13, 2018 2:35 PM',
+      to: 'January 13, 2019 2:35 PM',
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
@@ -179,7 +179,8 @@ class CincyTicket {
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
             if (fields[i] === 'Order Number') {
-              ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
+              // ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
+              ticketEntry.price = await this._getOrderDetails(fields[i]);
             }
           }
         })

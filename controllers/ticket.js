@@ -75,7 +75,8 @@ class TicketApi {
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
         ownerId: transferToUser._id,
-        barcode: newBarcode
+        barcode: newBarcode,
+        isForSale: false
       }
     }, { new: true });
 
@@ -145,7 +146,9 @@ class TicketApi {
     if (!ticketInfo || ticketInfo.Status === 'void') return { error: 'Invalid Ticket ID' };
 
     // at this
-    let price = 1000;
+    if (!ticketInfo.price) throw new Error('Original price of ticket not set');
+    console.log('price:', ticketInfo.price);
+    let price = ticketInfo.price;
     let ticket = await eventController.createTicket(_id, user._id, barcode, price);
     return ticket;
   }

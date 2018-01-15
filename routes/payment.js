@@ -43,7 +43,7 @@ module.exports = (server) => {
 
     if (!user) {
       user = await userController.getUserByEmail(stripeToken.email);
-      if (user) return res.send({ error: 'Email already in use' });
+      if (user) return res.send({ error: 'Email already in use. Please log in' });
       user = await userController.createPlaceholderUser(stripeToken.email);
       passwordChangeUrl = await userController.requestPasswordChange(stripeToken.email);
     }
@@ -53,28 +53,42 @@ module.exports = (server) => {
       if (!ticket || !ticket.isForSale) {
         return res.send({ error: 'No ticket found' });
       }
-      console.log('Service Fee: $1.00');
-      console.log('Card Fee: $1.00');
-      let total = ticket.price + 100 + 100;
+      let serviceFee = 100;
+      let cardFee = 100;
+      let total = ticket.price + serviceFee + cardFee;
+      console.log('Service Fee:', serviceFee);
+      console.log('Card Fee:', cardFee);
+      console.log('Total: ', total);
       let charge = await paymentController.createCharge(user, stripeToken, total);
       // TODO: I think this is wrong...charge returns a charge
       // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
-      if (!charge) return res.send({ error: 'Failed to charge card' });
+      if (!charge.status === 'succeeded') return res.send({ error: 'Failed to charge card' });
 
       // notify us that we need to venmo
-      // deactivate jamie ticket
-      // issue new jamie ticket
-      // save new barcode in our system ticketController.setBarcode()
       let originalOwner = await userController.getUserById(ticket.ownerId);
-      let purchasedTicket = await ticketController.setTicketOwner(ticketId, user);
+      let newTicket = await ticketController.transferTicket(ticket._id, user.email, originalOwner);
 
-      // send "you recieved a ticket" email
-      userController.sendRecievedTicketEmail(user, purchasedTicket);
-      userController.sendSoldTicketEmail(originalOwner, purchasedTicket);
+      // don't use 'await' here because we want to return immediately
+      userController.sendSoldTicketEmail(originalOwner, newTicket);
+
+      /*
+      // send notification to kevin or I that someone bought a ticket
+      this.sendNotification(to, ticket.price, serviceFee, cardFee);
+      hey kev,
+
+      ${user.email} has bought ticket ${ticket._id} from ${ticket.originalOwner}
+
+      Ticket Price: ${ticket.price}
+
+      ${ticket.originalOwner} would like to be paid using:
+
+      ${ticket.originalOwner.payment.default} with ${ticket.originalOwner.payment[default]}
+      // i.e: venmo with 513-623-8888
+      */
 
       return res.send({
         charge,
-        ticket: purchasedTicket,
+        ticket: newTicket,
         passwordChangeUrl
       });
     } catch (e) {
