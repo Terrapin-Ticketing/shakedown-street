@@ -129,7 +129,7 @@ export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
           Click this link to reset your password: ${passwordChangeUrl}
           <br /><br />
           <div style="text-align: center;">
-            <button class="btn">Reset Password</button>
+            <a href="${passwordChangeUrl} class="btn">Reset Password</a>
           </div>
     </td>
     </tr>
