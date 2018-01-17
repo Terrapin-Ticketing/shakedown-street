@@ -154,15 +154,15 @@ class UserApi {
   }
 
   async sendRecievedTicketEmail(user, ticket) {
-    await emailRecievedTicket(user.email, ticket);
+    await emailRecievedTicket(user, ticket);
   }
 
   async sendSoldTicketEmail(user, ticket) {
-    await emailSoldTicket(user.email, ticket);
+    await emailSoldTicket(user, ticket);
   }
 
   async sendPurchaseEmail(user, ticket) {
-    await emailPurchaseTicket(user.email, ticket);
+    await emailPurchaseTicket(user, ticket);
   }
 
 }

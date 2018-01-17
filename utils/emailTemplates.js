@@ -1,4 +1,4 @@
-export default (emailHTML) => {
+export default (emailHTML, previewText) => {
   return (`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -110,7 +110,6 @@ export default (emailHTML) => {
 				display:block;
 				/*@editable*/ font-family:Helvetica;
 				/*@editable*/ font-size:16px;
-				/*@editable*/ font-style:italic;
 				/*@editable*/ font-weight:normal;
 				/*@editable*/ line-height:100%;
 				/*@editable*/ letter-spacing:normal;
@@ -142,6 +141,34 @@ export default (emailHTML) => {
 				margin-left:0;
 				/*@editable*/ text-align:left;
 			}
+
+      /* Table Styles */
+
+      table.order-table {
+        width: 100%;
+        display: table;
+        border-collapse: collapse;
+        border-spacing: 0;
+        padding: 15px;
+      }
+
+
+
+      td.name-column, th.order {
+        padding: 15px 5px;
+        display: table-cell;
+        text-align: left;
+        vertical-align: middle;
+        border-radius: 2px;
+      }
+
+      .order-details-header {
+        background: #e1e2e1;
+      }
+
+      .service-fee, .order-details-rows, .card-fee, {
+        border-bottom: 1px solid rgba(0,0,0,.12);
+      }
 
 			/* ========== Header Styles ========== */
 
@@ -275,6 +302,10 @@ export default (emailHTML) => {
 				max-width:560px;
 			}
 
+      .subtext {
+        font-size: 12px;
+      }
+
       .btn {
         cursor: pointer;
         display: inline-block;
@@ -287,13 +318,14 @@ export default (emailHTML) => {
         vertical-align: middle;
         z-index: 1;
         transition: .3s ease-out;
-        text-decoration: none;
-        color: #fff;
+        text-decoration: none !important;
+        color: #fff !important;
         background-color: #093;
         border: none;
         border-radius: 2px;
         padding: 15px;
-        font-size: 2rem;
+        font-size: 2rem !important;
+        margin: 0 auto !important;
         box-shadow: 0 3px 3px 0 rgba(0,0,0,.14), 0 1px 7px 0 rgba(0,0,0,.12), 0 3px 1px -1px rgba(0,0,0,.2);
       }
 
@@ -308,8 +340,8 @@ export default (emailHTML) => {
 			*/
 			#templateColumns{
 				/*@editable*/ background-color:#F4F4F4;
-				/*@editable*/ border-top:1px solid #FFFFFF;
-				/*@editable*/ border-bottom:1px solid #CCCCCC;
+				/*@editable*/ border-top: 1px solid hsla(0,0%,63%,.2);
+				/*@editable border-bottom:1px solid #CCCCCC; */
 			}
 
 			/**
@@ -399,7 +431,7 @@ export default (emailHTML) => {
 			*/
 			#templateFooter{
 				/*@editable*/ background-color:#F4F4F4;
-				/*@editable*/ border-top:1px solid #FFFFFF;
+				/*@editable*/ border-top: 1px solid hsla(0,0%,63%,.2);
 			}
 
 			/**
@@ -543,30 +575,6 @@ export default (emailHTML) => {
 					/*@editable*/ line-height:125% !important;
 				}
 
-        /* ===== Table Styles ===== */
-        table {
-          width: 100%;
-          display: table;
-          border-collapse: collapse;
-          border-spacing: 0;
-        }
-
-        td, th {
-          padding: 15px 5px;
-          display: table-cell;
-          text-align: left;
-          vertical-align: middle;
-          border-radius: 2px;
-        }
-
-        .order-details-header {
-          background: #e1e2e1;
-        }
-
-        .service-fee, .order-details-rows, card-fee, total {
-          border-bottom: 1px solid rgba(0,0,0,.12);
-        }
-
 				/* ======== Column Styles ======== */
 
 				.templateColumnContainer{display:block !important; width:100% !important;}
@@ -630,14 +638,9 @@ export default (emailHTML) => {
                                 	<!-- BEGIN PREHEADER // -->
                                     <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templatePreheader">
                                         <tr>
-                                            <td valign="top" class="preheaderContent" style="padding-top:10px; padding-right:20px; padding-bottom:10px; padding-left:20px;" mc:edit="preheader_content00">
-                                                Use this area to offer a short teaser of your email's content. Text here will show in the preview area of some email clients.
+                                            <td valign="top" class="preheaderContent" style="padding-top:10px; padding-right:20px; padding-bottom:10px; padding-left:20px;">
+                                                ${previewText}
                                             </td>
-                                            <!-- *|IFNOT:ARCHIVE_PAGE|* -->
-                                            <td valign="top" width="180" class="preheaderContent" style="padding-top:10px; padding-right:20px; padding-bottom:10px; padding-left:0;" mc:edit="preheader_content01">
-                                                Email not displaying correctly?<br /><a href="*|ARCHIVE|*" target="_blank">View it in your browser</a>.
-                                            </td>
-                                            <!-- *|END:IF|* -->
                                         </tr>
                                     </table>
                                     <!-- // END PREHEADER -->
@@ -670,8 +673,15 @@ export default (emailHTML) => {
                                 	<!-- BEGIN FOOTER // -->
                                     <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateFooter">
                                         <tr>
-                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content01">
-                                                Thanks for using Terrapin Ticketing. If you have any issues with your order, please email at info@terrapinticketing.com. For urgent matters, call (708) 805-9743.
+                                            <td valign="top" class="footerContent" style="padding-top:0; text-align: center;" mc:edit="footer_content01">
+                                              <br />
+                                              If you experience any issues or have questions about an order, please email at info@terrapinticketing.com. <br />
+                                              For urgent matters, call (708) 805-9743. <br /><br />
+
+                                              Terrapin Ticketing <br />
+                                              1122 Delta Ave. <br />
+                                              Cincinnati, OH 45208 <br /><br />
+                                              © 2018 Terrapin Ticketing. All rights reserved.
                                             </td>
                                         </tr>
                                     </table>

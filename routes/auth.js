@@ -49,7 +49,7 @@ module.exports = (server) => {
     try {
       let user = await userCol.updatePayoutMethod(id, payoutMethod, payoutValue);
       if (!user) return res.sendStatus(403);
-      res.send({ user });
+      sendToken(res, user);
     } catch (e) {
       console.error(e);
       res.sendStatus(500);

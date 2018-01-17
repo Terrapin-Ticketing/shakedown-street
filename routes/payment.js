@@ -43,7 +43,7 @@ module.exports = (server) => {
 
     if (!user) {
       user = await userController.getUserByEmail(stripeToken.email);
-      if (user) return res.send({ error: 'Email already in use. Please log in' });
+      if (user) return res.send({ error: 'There is already an account with this email addres. Please log in to purchase this ticket.' });
       user = await userController.createPlaceholderUser(stripeToken.email);
       passwordChangeUrl = await userController.requestPasswordChange(stripeToken.email, false);
     }

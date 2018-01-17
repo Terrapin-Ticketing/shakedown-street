@@ -111,8 +111,7 @@ class TicketApi {
         barcode: newBarcode,
         isForSale: false
       }
-    }, { new: true });
-
+    }, { new: true }).populate('eventId');
     // whoever called this doesn't own the ticket anymore
     transferedTicket.barcode = null;
     return transferedTicket;
