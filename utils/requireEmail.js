@@ -260,3 +260,26 @@ export const emailPurchaseTicket = async(user, ticket) => {
 
   return await sendMail(mailOptions);
 };
+
+export const emailInternalPaymentNotification = async(oldOwner, newOwner, ticket) => {
+  let topText = `Internal: You need to send ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}`;
+  let emailHTML = (`
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>We need to pay ${oldOwner.payout[oldOwner.payout.default]}</h1>
+                <br />
+                ${newOwner.email} bought ${oldOwner.email}'s ticket to ${ticket.eventId.name}. <br /><br />
+                <b>We need to send ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}</b>
+            </td>
+        </tr>
+        ${getOrderCard(ticket, config)}
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: 'info@terrapinticketing.com', // list of receivers
+    subject: `Send Payment: ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}`,
+    html: formatEmail(emailHTML, topText)
+  };
+  console.log('hits sendInternalPaymentNotificationEmail');
+  return await sendMail(mailOptions);
+};

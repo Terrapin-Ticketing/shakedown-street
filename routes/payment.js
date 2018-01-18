@@ -66,7 +66,7 @@ module.exports = (server) => {
       let newTicket = await ticketController.transferPurchasedTicket(ticket._id, user.email, originalOwner);
       // don't use 'await' here because we want to return immediately
       userController.sendSoldTicketEmail(originalOwner, newTicket);
-
+      userController.sendInternalPaymentNotificationEmail(originalOwner, user, newTicket);
       /*
       // send notification to kevin or I that someone bought a ticket
       this.sendNotification(to, ticket.price, serviceFee, cardFee);
