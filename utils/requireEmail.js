@@ -5,6 +5,7 @@ import moment from 'moment';
 
 const emailTemplates = require('./emailTemplates');
 
+const notificationEmail = 'info@terrapinticketing.com';
 
 const uuidv1 = require('uuid/v4');
 
@@ -169,7 +170,8 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
 
                 <div style="text-align: center">
                   <a href="${config.clientDomain}/set-password/${token}" class="btn">View it Here</a>
-                </div>
+                </div><br />
+                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
             </td>
         </tr>
         ${getTicketCard(ticket, config)}
@@ -182,8 +184,15 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
     html: formatEmail(emailHTML, topText)
   };
 
-  // return await sendMail(mailOptions);
-  return await sendMail(mailOptions);
+  const notificationOptions = {
+    from: notificationEmail, // sender address
+    to: notificationEmail, // list of receivers
+    subject: `Transfer Notification: ${ticket.eventId.name}`, // Subject line
+    html: `${fromUser} transfered <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> to ${toEmail} (Event: ${ticket.eventId.name})`
+  };
+
+  await sendMail(mailOptions);
+  return await sendMail(notificationOptions);
 };
 
 export const emailRecievedTicket = async(user, ticket) => {
@@ -194,7 +203,10 @@ export const emailRecievedTicket = async(user, ticket) => {
                 <h1>You received a ticket</h1>
                 <br />
                 You received a ticket to ${ticket.eventId.name}. <br /><br />
-                <div style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</div>
+                <div style="text-align: center">
+                  <a href="${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}" class="btn">View it Here</a>
+                </div><br />
+                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
             </td>
         </tr>
         ${getOrderCard(ticket, config)}
@@ -207,7 +219,15 @@ export const emailRecievedTicket = async(user, ticket) => {
     html: formatEmail(emailHTML, topText)
   };
 
-  return await sendMail(mailOptions);
+  const notificationOptions = {
+    from: notificationEmail, // sender address
+    to: notificationEmail, // list of receivers
+    subject: `Transfer Notification: ${ticket.eventId.name}`, // Subject line
+    html: `${user.email} receieved <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> (Event: ${ticket.eventId.name})`
+  };
+
+  await sendMail(mailOptions);
+  return await sendMail(notificationOptions);
 };
 
 export const emailSoldTicket = async(user, ticket) => {
@@ -280,6 +300,5 @@ export const emailInternalPaymentNotification = async(oldOwner, newOwner, ticket
     subject: `Send Payment: ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}`,
     html: formatEmail(emailHTML, topText)
   };
-  console.log('hits sendInternalPaymentNotificationEmail');
   return await sendMail(mailOptions);
 };

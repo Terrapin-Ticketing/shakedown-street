@@ -215,8 +215,8 @@ export default (emailHTML, previewText) => {
 			*/
 			#templateHeader{
 				/*@editable*/ background-color:#149739;
-				/*@editable*/ border-top:1px solid #FFFFFF;
-				/*@editable*/ border-bottom:1px solid #CCCCCC;
+				/*@editable border-top:1px solid #FFFFFF; */
+				/*@editable border-bottom:1px solid #CCCCCC; */
 			}
 
 			/**
@@ -431,7 +431,7 @@ export default (emailHTML, previewText) => {
 			*/
 			#templateFooter{
 				/*@editable*/ background-color:#F4F4F4;
-				/*@editable*/ border-top: 1px solid hsla(0,0%,63%,.2);
+				/*@editable border-top: 1px solid hsla(0,0%,63%,.2); */
 			}
 
 			/**
