@@ -1,4 +1,3 @@
-import uuidv1 from 'uuid/v4';
 import request from 'request';
 import url from 'url';
 import csv from 'csvtojson';
@@ -8,7 +7,8 @@ if (!process.env.CINCI_UN) throw new Error('process.env.CINCI_UN is not set (pas
 let cincyTicketPassword = process.env.CINCI_PW;
 if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (username)');
 
-let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
+// let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
+// let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
 let domain = 'https://terrapin.cincyregister.com';
 
 let fields = [
@@ -71,7 +71,7 @@ async function reqGET(route) {
   });
 }
 
-async function getSValue() {
+async function getSValue(ticketPortal) {
   let ticketPage = (await reqGET(ticketPortal)).body;
   let lineMatch = ticketPage.match(/.*\bname[ \t]*="s".*\b/)[0];
   let sVal = lineMatch.match(/value=(["'])(?:(?=(\\?))\2.)*?\1/)[0].substring(7, 39);
@@ -79,9 +79,9 @@ async function getSValue() {
 }
 
 class CincyTicket {
-  async deactivateTicket(barcode) {
+  async deactivateTicket(barcode, event) {
     let sessionId = await this._login();
-    let ticketInfo = await this.getTicketInfo(barcode);
+    let ticketInfo = await this.getTicketInfo(barcode, event);
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
     // all properties are required
@@ -93,29 +93,23 @@ class CincyTicket {
       id: ticketInfo.lookupId
     }, sessionId);
 
+
     let isValidTicket = await this.isValidTicket(
-      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length));
+      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
     // success if ticket became invalid
     let success = !isValidTicket;
     return success;
   }
 
-  async issueTicket() {
+  async issueTicket(event, oldTicket) {
     let sessionId = await this._login();
-    let sVal = await getSValue();
+    let ticketPortal = `${event.domain}${event.issueTicketRoute}`;
+    let sVal = await getSValue(ticketPortal);
 
-
-    // SUBMIT this sVal ORDER
-    await reqPOST('/testfest', {
+    let issueTicketRequestBody = {
       s: sVal,
       step: 0,
       r: 0,
-      vip_2day: 1,
-      vip_single_day_121: 0,
-      vip_single_day_122: 0,
-      general_admission: 0,
-      gen_121: 0,
-      gen_122: 0,
       first_name: 'test',
       last_name: 'test',
       address: 'test',
@@ -125,7 +119,15 @@ class CincyTicket {
       email_address: 'reeder@terrapinticketing.com',
       _email_address: 'reeder@terrapinticketing.com',
       'cmd=forward': 'SUBMIT ORDER'
-    }, sessionId);
+    };
+
+    let ticketType = oldTicket['Ticket Level'];
+
+    let reqParam = event.ticketTypes[ticketType].paramName;
+    issueTicketRequestBody[reqParam] = 1;
+
+    // SUBMIT this sVal ORDER
+    await reqPOST(event.issueTicketRoute, issueTicketRequestBody, sessionId);
 
     // USER sVal ORDER to print ticket
     let printableTicket = (await reqPOST('/testfest', {
@@ -139,8 +141,8 @@ class CincyTicket {
     return ticketNum;
   }
 
-  async isValidTicket(ticketId) {
-    let tickets = await this._getTickets();
+  async isValidTicket(ticketId, event) {
+    let tickets = await this._getTickets(event);
     return tickets[ticketId] && tickets[ticketId].Status === 'active';
   }
 
@@ -158,11 +160,12 @@ class CincyTicket {
   }
 
   // expensive
-  async _getTickets() {
+  async _getTickets(event) {
     let sessionId = await this._login();
     let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
-      from: 'January 10, 2018 2:35 PM',
-      to: 'January 13, 2019 2:35 PM',
+      form_id: event.externalEventId,
+      from: 'January 1, 2018 2:35 PM',
+      to: 'January 1, 2019 2:35 PM',
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
@@ -190,8 +193,8 @@ class CincyTicket {
     return ticketLookupTable;
   }
 
-  async getTicketInfo(ticketId) {
-    let tickets = await this._getTickets();
+  async getTicketInfo(ticketId, event) {
+    let tickets = await this._getTickets(event);
     return tickets[ticketId];
   }
 

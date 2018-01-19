@@ -28,6 +28,13 @@ let EventSchema = new mongoose.Schema({
   isThirdParty: { type: Boolean, required: true, default: false },
   eventManager: { type: String },
 
+  domain: { type: String },
+  issueTicketRoute: { type: String },
+
+  ticketTypes: {},
+
+  externalEventId: { type: String },
+
   queryDateStart: { type: Date },
   queryDateEnd: { type: Date }
 

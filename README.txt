@@ -12,8 +12,6 @@ db.getCollection('events').insert({
   },
   imageUrl: 'https://terrapinticketing.com/img/phish1.png',
   isThirdParty: true,
-  eventManager: 'CINCI_TICKET'
+  eventManager: 'CINCI_TICKET',
+  externalEventId: 102179
 });
-
-
-5a5657c133564c0969c732da

@@ -13,7 +13,6 @@ if (!process.env.CINCI_UN) throw new Error('process.env.CINCI_UN is not set (pas
 let cincyTicketPassword = process.env.CINCI_PW;
 if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (username)');
 
-let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
 let domain = 'https://terrapin.cincyregister.com';
 
 let baseUrl = config.domain;
@@ -64,7 +63,7 @@ async function printTicket(eventId, ownerId, token) {
   }, token);
 }
 
-async function getSValue() {
+async function getSValue(ticketPortal) {
   let ticketPage = await reqGET(ticketPortal);
   let lineMatch = ticketPage.match(/.*\bname[ \t]*="s".*\b/)[0];
   let sVal = lineMatch.match(/value=(["'])(?:(?=(\\?))\2.)*?\1/)[0].substring(7, 39);
@@ -99,19 +98,19 @@ async function reqPOST(route, formData, cookieValue) {
 //   return ticketNum;
 // }
 
-async function issueTicket() {
+async function issueTicket(ticketPortal, issueTicketRoute) {
   let sessionId = await login();
-  let sVal = await getSValue();
+  let sVal = await getSValue(ticketPortal);
 
-  await reqPOST('/testfest', {
+  await reqPOST(issueTicketRoute, {
     s: sVal,
     step: 0,
     r: 0,
-    vip_2day: 1,
+    vip_2day: 0,
     vip_single_day_121: 0,
     vip_single_day_122: 0,
     general_admission: 0,
-    gen_121: 0,
+    gen_121: 1,
     gen_122: 0,
     first_name: 'test',
     last_name: 'test',
@@ -125,7 +124,7 @@ async function issueTicket() {
   }, sessionId);
 
   // USER sVal ORDER to print ticket
-  let printableTicket = (await reqPOST('/testfest', {
+  let printableTicket = (await reqPOST(issueTicketRoute, {
     s: sVal,
     step: 1,
     r: 0,
@@ -183,6 +182,8 @@ describe('User & Auth', function() {
     let { login } = this.users[0];
     let { body: { token } } = await req('login', login);
     let uniqueId = shortid.generate();
+    let domain = 'https://terrapin.cincyregister.com';
+    this.freeTicketPortal = 'https://terrapin.cincyregister.com/testfest';
     this.event = {
       date: '3/4/2018',
       name: `TF Columbus Brewgrass Festival at The Bluestone (${uniqueId})`,
@@ -197,13 +198,17 @@ describe('User & Auth', function() {
       },
       imageUrl: 'https://terrapinticketing.com/img/phish1.png',
       isThirdParty: true,
-      eventManager: 'CINCI_TICKET'
+      eventManager: 'CINCI_TICKET',
+      domain,
+      externalEventId: 102179,
+      issueTicketRoute: '/testfest'
     };
     console.log('Event urlSafe:', `TFBrewgrass${uniqueId}`);
     let { body } = await req('events', { event: this.event }, token);
     this.event._id = body._id;
   });
 
+  // issue tickets to user
   before(async function() {
     let { token } = this.users[0];
     this.tickets = [];
@@ -216,18 +221,80 @@ describe('User & Auth', function() {
     });
   });
 
-  describe('Cinci Ticket (Test Fest)', async function() {
+  describe.only('Cinci Ticket (Test Fest)', async function() {
+    // create a test event
+    before(async function() {
+      let { login } = this.users[0];
+      let { body: { token } } = await req('login', login);
+      let uniqueId = shortid.generate();
+      let urlSafe = `PaidCinci${uniqueId}`;
+      let domain = 'https://terrapin.cincyregister.com';
+      this.issueTicketRoute = '/testfest';
+      this.paidTicketPortal = domain + this.issueTicketRoute;
+      this.paidEvent = {
+        date: '3/4/2018',
+        name: `Paid Cinci Ticket Event (${uniqueId})`,
+        urlSafe,
+        description: 'paid cinci ticket event',
+        venue: {
+          name: 'Legend Valley',
+          address: '999 Fun Time',
+          city: 'Theland',
+          state: 'OH',
+          zip: 43215
+        },
+        imageUrl: 'https://terrapinticketing.com/img/phish1.png',
+        isThirdParty: true,
+        eventManager: 'CINCI_TICKET',
+        domain,
+        externalEventId: 102179,
+        // externalEventId: 102384,
+        issueTicketRoute: this.issueTicketRoute,
+        ticketTypes: {
+          'VIP 2-Day Pass': {
+            paramName: 'vip_2day',
+            price: 1000
+          },
+          'VIP Single Day 12/1': {
+            paramName: 'vip_single_day_121',
+            price: 0
+          },
+          'VIP Single Day 12/2': {
+            paramName: 'vip_single_day_122',
+            price: 0
+          },
+          'General Admission Two-Day Pass': {
+            paramName: 'general_admission',
+            price: 0
+          },
+          'General Admission Single Day 12/1': {
+            paramName: 'gen_121',
+            price: 0
+          },
+          'General Admission Single Day 12/2': {
+            paramName: 'gen_122',
+            price: 0
+          }
+        }
+      };
+      console.log('PAID Event:', urlSafe);
+      let { body } = await req('events', { event: this.paidEvent }, token);
+      this.paidEvent._id = body._id;
+    });
+
+    // issue ticket
     before(async function() {
       this.timeout(10000);
-      this.barcode = await issueTicket();
-      this.barcode2 = await issueTicket();
+      this.barcode = await issueTicket(this.paidTicketPortal, this.issueTicketRoute);
+      this.barcode2 = await issueTicket(this.paidTicketPortal, this.issueTicketRoute);
       this.voidedBarcode = '7854772863441586';
     });
 
+    // activate ticket
     before(async function() {
-      this.timeout(5000);
+      this.timeout(10000);
       let { login } = this.users[3];
-      let { urlSafe } = this.event;
+      let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/activate`, {
         barcode: this.barcode,
         email: login.email
@@ -236,8 +303,8 @@ describe('User & Auth', function() {
       if (body.error) console.error('before hook error:', body);
     });
 
-    it('should allow user to transfer succesfully uploaded ticket', async function() {
-      this.timeout(6000);
+    it.only('should allow user to transfer succesfully uploaded ticket', async function() {
+      this.timeout(10000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
         email: 'kevin@terrapinticketing.com'
