@@ -245,7 +245,7 @@ describe('User & Auth', function() {
           state: 'OH',
           zip: 43215
         },
-        imageUrl: 'https://terrapinticketing.com/img/phish1.png',
+        imageUrl: '/img/phish1.png',
         isThirdParty: true,
         eventManager: 'CINCI_TICKET',
         domain,
