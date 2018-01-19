@@ -43,9 +43,9 @@ module.exports = (server) => {
 
     if (!user) {
       user = await userController.getUserByEmail(stripeToken.email);
-      if (user) return res.send({ error: 'Email already in use. Please log in' });
+      if (user) return res.send({ error: 'There is already an account with this email addres. Please log in to purchase this ticket.' });
       user = await userController.createPlaceholderUser(stripeToken.email);
-      passwordChangeUrl = await userController.requestPasswordChange(stripeToken.email);
+      passwordChangeUrl = await userController.requestPasswordChange(stripeToken.email, false);
     }
 
     try {
@@ -56,9 +56,6 @@ module.exports = (server) => {
       let serviceFee = 100;
       let cardFee = 100;
       let total = ticket.price + serviceFee + cardFee;
-      console.log('Service Fee:', serviceFee);
-      console.log('Card Fee:', cardFee);
-      console.log('Total: ', total);
       let charge = await paymentController.createCharge(user, stripeToken, total);
       // TODO: I think this is wrong...charge returns a charge
       // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
@@ -66,11 +63,10 @@ module.exports = (server) => {
 
       // notify us that we need to venmo
       let originalOwner = await userController.getUserById(ticket.ownerId);
-      let newTicket = await ticketController.transferTicket(ticket._id, user.email, originalOwner);
-
+      let newTicket = await ticketController.transferPurchasedTicket(ticket._id, user.email, originalOwner);
       // don't use 'await' here because we want to return immediately
       userController.sendSoldTicketEmail(originalOwner, newTicket);
-
+      userController.sendInternalPaymentNotificationEmail(originalOwner, user, newTicket);
       /*
       // send notification to kevin or I that someone bought a ticket
       this.sendNotification(to, ticket.price, serviceFee, cardFee);

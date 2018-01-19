@@ -93,7 +93,6 @@ class CincyTicket {
       id: ticketInfo.lookupId
     }, sessionId);
 
-
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
     // success if ticket became invalid
@@ -103,7 +102,8 @@ class CincyTicket {
 
   async issueTicket(event, oldTicket) {
     let sessionId = await this._login();
-    let ticketPortal = `${event.domain}${event.issueTicketRoute}`;
+    let ticketIssueRoute = event.issueTicketRoute;
+    let ticketPortal = `${event.domain}${ticketIssueRoute}`;
     let sVal = await getSValue(ticketPortal);
 
     let issueTicketRequestBody = {
@@ -121,16 +121,19 @@ class CincyTicket {
       'cmd=forward': 'SUBMIT ORDER'
     };
 
+    // add ticket level to request body
     let ticketType = oldTicket['Ticket Level'];
-
     let reqParam = event.ticketTypes[ticketType].paramName;
     issueTicketRequestBody[reqParam] = 1;
 
+    // add promocode to request body
+    issueTicketRequestBody['coupon_code'] = event.promoCode;
+
     // SUBMIT this sVal ORDER
-    await reqPOST(event.issueTicketRoute, issueTicketRequestBody, sessionId);
+    await reqPOST(ticketIssueRoute, issueTicketRequestBody, sessionId);
 
     // USER sVal ORDER to print ticket
-    let printableTicket = (await reqPOST('/testfest', {
+    let printableTicket = (await reqPOST(ticketIssueRoute, {
       s: sVal,
       step: 1,
       r: 0,
@@ -138,12 +141,19 @@ class CincyTicket {
     }, sessionId)).body;
     let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
 
+    // success if ticket became invalid
     return ticketNum;
   }
 
   async isValidTicket(ticketId, event) {
     let tickets = await this._getTickets(event);
-    return tickets[ticketId] && tickets[ticketId].Status === 'active';
+    let ticket = tickets[ticketId];
+    if (!ticket) return false;
+
+    let scanned = tickets[ticketId]['Scanned'];
+    let isScanned = scanned !== '0';
+
+    return ticket.Status === 'active' && !isScanned;
   }
 
   async _getOrderDetails(orderNumber) {
@@ -181,9 +191,10 @@ class CincyTicket {
           };
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
-            if (fields[i] === 'Order Number') {
-              // ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
-              ticketEntry.price = await this._getOrderDetails(fields[i]);
+            // set the ticket price based on the ticket level (ticket type)
+            if (fields[i] === 'Ticket Level') {
+              let ticketLevel = ticketEntry[fields[i]];
+              ticketEntry.price = event.ticketTypes[ticketLevel].price;
             }
           }
         })

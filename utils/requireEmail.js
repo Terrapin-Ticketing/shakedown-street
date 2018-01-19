@@ -1,9 +1,11 @@
 import nodemailer from 'nodemailer';
 import redis from 'redis';
 import config from 'config';
+import moment from 'moment';
 
 const emailTemplates = require('./emailTemplates');
 
+const notificationEmail = 'info@terrapinticketing.com';
 
 const uuidv1 = require('uuid/v4');
 
@@ -26,8 +28,16 @@ async function sendMail(mailOptions) {
   });
 }
 
-function formatEmail(emailHTML) {
-  return emailTemplates.default(emailHTML);
+function formatEmail(emailHTML, topText) {
+  return emailTemplates.default(emailHTML, topText);
+}
+
+function calculateTotal(ticketPrice, serviceFee, cardFee) {
+  return ticketPrice + serviceFee + cardFee;
+}
+
+function displayPrice(price) {
+  return (`$${parseFloat(price / 100.0).toFixed(2)}`);
 }
 
 function getTicketCard(ticket, config) {
@@ -40,7 +50,7 @@ function getTicketCard(ticket, config) {
                     <td align="left" valign="top" style="padding-bottom:0;">
                         <table align="left" border="0" cellpadding="0" cellspacing="0" class="templateColumnContainer">
                             <tr>
-                              <h1>Ticket Information</h1>
+                              <h2>Ticket Information</h2>
                                 <td class="leftColumnContent">
                                     <img src="${ticket.eventId.imageUrl}" style="max-width:260px;" class="columnImage" mc:label="left_column_image" mc:edit="left_column_image" />
                                   </td>
@@ -50,7 +60,7 @@ function getTicketCard(ticket, config) {
                               <tr>
                                 <td valign="top" class="rightColumnContent" mc:edit="right_column_content">
                                       <h3>${ticket.eventId.name}</h3>
-                                      <i>${ticket.type}</i> <br /><br />
+                                      ${ticket.type} <br /><br />
                                       <span>${ticket.eventId.date}</span> <br /><br />
                                       ${ticket.eventId.venue.name} <br />
                                       ${ticket.eventId.venue.address} <br />
@@ -77,16 +87,70 @@ function getTicketCard(ticket, config) {
   `);
 }
 
+function getOrderCard(ticket, config) {
+  let serviceFee = 100;
+  let cardFee = 100;
+  return (`
+    <tr>
+      <td valign="top" class="bodyContent">
+          <h2>Order Details</h2>
+          <div class="order-box">
+            <table class="order-table bordered">
+              <thead>
+                <tr class="order-details-header">
+                  <th class="name-column order">Event</th>
+                  <th class="order">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="order-details-rows">
+                  <td class="name-column">
+                    ${ ticket.eventId.name } <br />
+                    ${ ticket.type }
+                  </td>
+                  <td class="price">${displayPrice(ticket.price)}</td>
+                </tr>
+                <tr class="service-fee"><td class="name-column">Service Fee</td><td>${displayPrice(serviceFee)}</td></tr>
+                <tr class="card-fee"><td class="name-column">Credit Card Processing</td><td>${displayPrice(cardFee)}</td></tr>
+                <tr class="total"><td class="name-column">Total:</td><td>${displayPrice(calculateTotal(ticket.price, serviceFee, cardFee))}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `);
+}
+
 
 export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
-  let emailHTML = (`<p>
-    go to this link to change your password: ${passwordChangeUrl}
-  </p>`);
+  let topText = 'Use this link to reset your password.';
+  let emailHTML = (`
+    <tr>
+      <td valign="top" class="bodyContent" mc:edit="body_content00">
+          <h1>Reset Password</h1>
+          <p>You recently requested to reset your password for your Terrapin Ticketing account. Use the button below to reset it.</p>
+          <div style="text-align: center">
+            <a href="${passwordChangeUrl}" class="btn">Reset Password</a>
+          </div>
+
+          <p>If you did not request a password reset, please ignore this email or <a href="mailto:info@terrapinticketing.com">contact support</a> if you have questions.</p>
+
+          <p>Cheers,<br />
+          The Terrapin Ticketing Team</p>
+
+          <hr />
+
+          <p class="subtext">If you’re having trouble with the button above, copy and paste the URL below into your web browser. <br />
+          ${passwordChangeUrl}</p>
+    </td>
+    </tr>
+  `);
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
     to: toEmail, // list of receivers
-    subject: 'forget your password?', // Subject line
-    html: formatEmail(emailHTML)
+    subject: 'Forgot Password', // Subject line
+    html: formatEmail(emailHTML, topText)
   };
 
   return await sendMail(mailOptions);
@@ -97,69 +161,144 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
   await new Promise((resolve) => {
     client.hset('set-password', token, toEmail, resolve);
   });
-
+  let topText = 'You were transfered a ticket on Terrapin Ticketing.';
   let emailHTML = (`
         <tr>
             <td valign="top" class="bodyContent" mc:edit="body_content00">
                 <h1>You received a ticket</h1>
-                <h3>Creating a good-looking email is simple</h3>
-                You received a ticket to ${ticket.eventId.name} from ${fromUser}. <br /><br />
-                <span style="word-wrap: break-word">View it here: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</span>
+                ${fromUser} transfered a ${ticket.eventId.name} to your Terrapin Ticketing account. <br /><br />
+
+                <div style="text-align: center">
+                  <a href="${config.clientDomain}/set-password/${token}" class="btn">View it Here</a>
+                </div><br />
+                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
             </td>
         </tr>
         ${getTicketCard(ticket, config)}
-      <!-- <tr>
-          <td class="bodyContent" style="padding-top:0; padding-bottom:0;">
-              <img src="http://gallery.mailchimp.com/27aac8a65e64c994c4416d6b8/images/body_placeholder_650px.png" style="max-width:560px;" id="bodyImage" mc:label="body_image" mc:edit="body_image" mc:allowtext />
-            </td>
-        </tr> -->
-        <!-- <tr>
-            <td valign="top" class="bodyContent" mc:edit="body_content01">
-                <h2>Styling Your Content</h2>
-                <h4>Make your email easy to read</h4>
-                After you enter your content, highlight the text you want to style and select the options you set in the style editor in the "<em>styles</em>" drop down box. Want to <a href="http://www.mailchimp.com/kb/article/im-using-the-style-designer-and-i-cant-get-my-formatting-to-change" target="_blank">get rid of styling on a bit of text</a>, but having trouble doing it? Just use the "<em>remove formatting</em>" button to strip the text of any formatting and reset your style.
-            </td>
-        </tr> -->
   `);
 
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
     to: toEmail, // list of receivers
     subject: `You're going to ${ticket.eventId.name}!`, // Subject line
-    html: formatEmail(emailHTML)
+    html: formatEmail(emailHTML, topText)
   };
 
-  // return await sendMail(mailOptions);
-  return await sendMail(mailOptions);
-};
-
-export const emailRecievedTicket = async(email, event) => {
-  let emailHTML = (`
-    <p>
-      go to this link view your tickets: ${config.clientDomain}/my-profile
-    </p>
-  `);
-  const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
-    to: email, // list of receivers
-    subject: `You're going to ${event.name}!`, // Subject line
-    html: formatEmail(emailHTML)
+  const notificationOptions = {
+    from: notificationEmail, // sender address
+    to: notificationEmail, // list of receivers
+    subject: `Transfer Notification: ${ticket.eventId.name}`, // Subject line
+    html: `${fromUser} transfered <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> to ${toEmail} (Event: ${ticket.eventId.name})`
   };
 
-  return await sendMail(mailOptions);
+  await sendMail(mailOptions);
+  return await sendMail(notificationOptions);
 };
 
-export const emailSoldTicket = async(email, ticket) => {
-  let event = ticket.eventId;
+export const emailRecievedTicket = async(user, ticket) => {
+  let topText = 'Someone transfered you a ticket on Terrapin Ticketing.';
   let emailHTML = (`
-    <p>You sold your ticket for ${event.name}</p>
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>You received a ticket</h1>
+                <br />
+                You received a ticket to ${ticket.eventId.name}. <br /><br />
+                <div style="text-align: center">
+                  <a href="${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}" class="btn">View it Here</a>
+                </div><br />
+                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
+            </td>
+        </tr>
+        ${getOrderCard(ticket, config)}
+        ${getTicketCard(ticket, config)}
   `);
   const mailOptions = {
-    from: 'info@terrapinticketing.com', // sender address
-    to: email, // list of receivers
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: user.email, // list of receivers
+    subject: `You're going to ${ticket.eventId.name}!`, // Subject line
+    html: formatEmail(emailHTML, topText)
+  };
+
+  const notificationOptions = {
+    from: notificationEmail, // sender address
+    to: notificationEmail, // list of receivers
+    subject: `Transfer Notification: ${ticket.eventId.name}`, // Subject line
+    html: `${user.email} receieved <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> (Event: ${ticket.eventId.name})`
+  };
+
+  await sendMail(mailOptions);
+  return await sendMail(notificationOptions);
+};
+
+export const emailSoldTicket = async(user, ticket) => {
+  let topText = `Someone bought your ticket to ${ticket.eventId.name}!`;
+  let emailHTML = (`
+    <tr>
+        <td valign="top" class="bodyContent" mc:edit="body_content00">
+            <h1>Your ticket sold!</h1>
+            <br />
+            Your ticket for ${ticket.eventId.name} sold on Terrapin Ticketing.
+            <br /><br />
+            We will send ${displayPrice(ticket.price)} to ${user.payout[user.payout.default]} via ${user.payout.default.charAt(0).toUpperCase() + user.payout.default.slice(1)} in the next 24 hours. <br /><br />
+            We apologize for the wait but sending funds is a manual process at the moment.
+            If you have any questions, please email info@terrapinticketing.com
+            <br /><br />
+            <p>Cheers,<br />
+            The Terrapin Ticketing Team</p>
+        </td>
+    </tr>
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: user.email, // list of receivers
     subject: 'You sold your ticket!', // Subject line
-    html: formatEmail(emailHTML)
+    html: formatEmail(emailHTML, topText)
   };
 
+  return await sendMail(mailOptions);
+};
+
+export const emailPurchaseTicket = async(user, ticket) => {
+  let topText = `This is a receipt for your recent purchase on ${moment().format('MMMM Do YYYY')}. No payment is due with this receipt.`
+  let emailHTML = (`
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>You purchased a ticket</h1>
+                <br />
+                Thanks for using Terrapin Ticketing. This email is the receipt for your purchase. No payment is due.
+            </td>
+        </tr>
+        ${getOrderCard(ticket, config)}
+        ${getTicketCard(ticket, config)}
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: user.email, // list of receivers
+    subject: `Purchase Receipt: ${ticket.eventId.name}!`, // Subject line
+    html: formatEmail(emailHTML, topText)
+  };
+
+  return await sendMail(mailOptions);
+};
+
+export const emailInternalPaymentNotification = async(oldOwner, newOwner, ticket) => {
+  let topText = `Internal: You need to send ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}`;
+  let emailHTML = (`
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>We need to pay ${oldOwner.payout[oldOwner.payout.default]}</h1>
+                <br />
+                ${newOwner.email} bought ${oldOwner.email}'s ticket to ${ticket.eventId.name}. <br /><br />
+                <b>We need to send ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}</b>
+            </td>
+        </tr>
+        ${getOrderCard(ticket, config)}
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: 'info@terrapinticketing.com', // list of receivers
+    subject: `Send Payment: ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}`,
+    html: formatEmail(emailHTML, topText)
+  };
   return await sendMail(mailOptions);
 };

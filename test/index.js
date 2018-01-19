@@ -102,7 +102,7 @@ async function issueTicket(ticketPortal, issueTicketRoute) {
   let sessionId = await login();
   let sVal = await getSValue(ticketPortal);
 
-  await reqPOST(issueTicketRoute, {
+  let res = await reqPOST(issueTicketRoute, {
     s: sVal,
     step: 0,
     r: 0,
@@ -118,9 +118,10 @@ async function issueTicket(ticketPortal, issueTicketRoute) {
     city: 'tet',
     state: 'OH',
     zip_code: 45209,
-    email_address: 'testing@terrapinticketing.com',
-    _email_address: 'testing@terrapinticketing.com',
-    'cmd=forward': 'SUBMIT ORDER'
+    email_address: 'kevin@terrapinticketing.com',
+    _email_address: 'kevin@terrapinticketing.com',
+    'cmd=forward': 'SUBMIT ORDER',
+    'coupon_code': 'TERRAPIN'
   }, sessionId);
 
   // USER sVal ORDER to print ticket
@@ -130,6 +131,7 @@ async function issueTicket(ticketPortal, issueTicketRoute) {
     r: 0,
     'cmd=tprint': 'Print Tickets'
   }, sessionId)).body;
+  // console.log(printableTicket);
   let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
 
   return ticketNum;
@@ -229,7 +231,7 @@ describe('User & Auth', function() {
       let uniqueId = shortid.generate();
       let urlSafe = `PaidCinci${uniqueId}`;
       let domain = 'https://terrapin.cincyregister.com';
-      this.issueTicketRoute = '/testfest';
+      this.issueTicketRoute = '/moofest';
       this.paidTicketPortal = domain + this.issueTicketRoute;
       this.paidEvent = {
         date: '3/4/2018',
@@ -247,9 +249,10 @@ describe('User & Auth', function() {
         isThirdParty: true,
         eventManager: 'CINCI_TICKET',
         domain,
-        externalEventId: 102179,
-        // externalEventId: 102384,
+        // externalEventId: 102179,
+        externalEventId: 102384,
         issueTicketRoute: this.issueTicketRoute,
+        promoCode: 'TERRAPIN',
         ticketTypes: {
           'VIP 2-Day Pass': {
             paramName: 'vip_2day',
@@ -300,11 +303,11 @@ describe('User & Auth', function() {
         email: login.email
       });
       this.activatedTicket = body.ticket;
-      if (body.error) console.error('before hook error:', body);
+      if (body.error) throw new Error(body);
     });
 
-    it.only('should allow user to transfer succesfully uploaded ticket', async function() {
-      this.timeout(10000);
+    it('should allow user to transfer succesfully uploaded ticket', async function() {
+      this.timeout(16000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
         email: 'kevin@terrapinticketing.com'
@@ -315,7 +318,7 @@ describe('User & Auth', function() {
 
     it('should check validity of ticket', async function() {
       let { login } = this.users[3];
-      let { urlSafe } = this.event;
+      let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/validate`, {
         barcode: this.barcode2,
         email: login.email
@@ -325,7 +328,7 @@ describe('User & Auth', function() {
 
     it('should reject voided ticket', async function() {
       let { login } = this.users[3];
-      let { urlSafe } = this.event;
+      let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/validate`, {
         barcode: this.voidedBarcode,
         email: login.email
@@ -335,7 +338,7 @@ describe('User & Auth', function() {
 
     it('should reject invalid ticket id', async function() {
       let { login } = this.users[3];
-      let { urlSafe } = this.event;
+      let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/activate`, {
         barcode: uuidv1(),
         email: login.email

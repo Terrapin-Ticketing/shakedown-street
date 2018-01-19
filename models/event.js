@@ -34,6 +34,7 @@ let EventSchema = new mongoose.Schema({
   ticketTypes: {},
 
   externalEventId: { type: String },
+  promoCode: { type: String },
 
   queryDateStart: { type: Date },
   queryDateEnd: { type: Date }

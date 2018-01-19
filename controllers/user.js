@@ -10,7 +10,7 @@ const EventModel = require('../models/event');
 
 const uuidv1 = require('uuid/v4');
 
-import { emailRecievedTicket, emailPasswordChange, emailSoldTicket, emailTransferTicket } from '../utils/requireEmail';
+import { emailRecievedTicket, emailPasswordChange, emailSoldTicket, emailTransferTicket, emailPurchaseTicket, emailInternalPaymentNotification } from '../utils/requireEmail';
 
 let client = redis.createClient();
 
@@ -154,13 +154,21 @@ class UserApi {
   }
 
   async sendRecievedTicketEmail(user, ticket) {
-    let event = ticket.eventId;
-    await emailRecievedTicket(user.email, event);
+    await emailRecievedTicket(user, ticket);
   }
 
   async sendSoldTicketEmail(user, ticket) {
-    await emailSoldTicket(user.email, ticket);
+    await emailSoldTicket(user, ticket);
   }
+
+  async sendPurchaseEmail(user, ticket) {
+    await emailPurchaseTicket(user, ticket);
+  }
+
+  async sendInternalPaymentNotificationEmail(originalOwner, newOwner, ticket) {
+    await emailInternalPaymentNotification(originalOwner, newOwner, ticket);
+  }
+
 }
 
 module.exports = UserApi;
