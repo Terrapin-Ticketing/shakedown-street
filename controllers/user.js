@@ -35,6 +35,7 @@ class UserApi {
   async loginUser(email, password) {
     return await new Promise(async(resolve, reject) => {
       let user = await this.getUserByEmail(email);
+      if (!user) return reject(new Error('User not found'));
       bcrypt.compare(password, user.password, (err, success) => {
         if (err) return reject(err);
         if (!success) return reject(new Error('Wrong Password'));

@@ -195,6 +195,7 @@ class CincyTicket {
             if (fields[i] === 'Ticket Level') {
               let ticketLevel = ticketEntry[fields[i]];
               ticketEntry.price = event.ticketTypes[ticketLevel].price;
+              ticketEntry.type = ticketLevel;
             }
           }
         })

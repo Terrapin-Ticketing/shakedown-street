@@ -43,16 +43,6 @@ async function reqGET(route, token = {}) {
   return (await req(route, {}, token, 'GET')).body;
 }
 
-// async function reqGET(route) {
-//   return await new Promise((resolve, reject) => {
-//     return request(route, (err, res) => {
-//       if (err) return reject(err);
-//       resolve(res);
-//     });
-//   });
-// }
-
-
 async function printTicket(eventId, ownerId, token) {
   return await req(`events/${eventId}/tickets`, {
     ticket: {
@@ -198,7 +188,7 @@ describe('User & Auth', function() {
         state: 'OH',
         zip: 43215
       },
-      imageUrl: 'https://terrapinticketing.com/img/phish1.png',
+      imageUrl: 'http://liveatthebluestone.com/wp-content/uploads/2017/12/24068068_528690924147257_2284411860158418511_n.png',
       isThirdParty: true,
       eventManager: 'CINCI_TICKET',
       domain,
@@ -245,7 +235,8 @@ describe('User & Auth', function() {
           state: 'OH',
           zip: 43215
         },
-        imageUrl: '/img/phish1.png',
+        // imageUrl: 'https://images.parents.mdpcdn.com/sites/parents.com/files/styles/scale_1500_1500/public/images/wordpress/661/shutterstock_130073408-300x300.jpg',
+        imageUrl: 'http://liveatthebluestone.com/wp-content/uploads/2017/12/24068068_528690924147257_2284411860158418511_n.png', //brewgrass
         isThirdParty: true,
         eventManager: 'CINCI_TICKET',
         domain,
@@ -337,6 +328,7 @@ describe('User & Auth', function() {
     });
 
     it('should reject invalid ticket id', async function() {
+      this.timeout(6000);
       let { login } = this.users[3];
       let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/activate`, {

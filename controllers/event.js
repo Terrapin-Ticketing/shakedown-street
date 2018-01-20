@@ -19,7 +19,7 @@ class EventApi {
     return `${event.createrId}` === `${userId}`;
   }
 
-  async createTicket(eventId, ownerId, barcode, price) {
+  async createTicket(eventId, ownerId, barcode, price, type) {
     let user = await UserModel.findOne({ _id: ownerId });
     if (!user) return { error: `Invalid ticket owner ${ownerId}` };
 
@@ -27,7 +27,8 @@ class EventApi {
       barcode,
       ownerId: mongoose.mongo.ObjectId(ownerId),
       dateIssued: new Date(),
-      price
+      price,
+      type
     });
 
     let event = await EventModel.findOneAndUpdate(

@@ -10,7 +10,7 @@ db.getCollection('events').insert({
     state: 'OH',
     zip: 43215
   },
-  imageUrl: 'https://terrapinticketing.com/img/brewgrass.png',
+  imageUrl: 'http://liveatthebluestone.com/wp-content/uploads/2017/12/24068068_528690924147257_2284411860158418511_n.png',
   isThirdParty: true,
   eventManager: 'CINCI_TICKET',
   domain: 'https://terrapin.cincyregister.com',

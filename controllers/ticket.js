@@ -178,10 +178,13 @@ class TicketApi {
     let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode, event);
     if (!ticketInfo || ticketInfo.Status === 'void') return { error: 'Invalid Ticket ID' };
 
-    // at this
     if (!ticketInfo.price && ticketInfo.price !== 0) throw new Error('Original price of ticket not set');
     let price = ticketInfo.price;
-    let ticket = await eventController.createTicket(_id, user._id, barcode, price);
+
+    if (!ticketInfo.type) throw new Error('Original ticket type not set');
+    let type = ticketInfo.type;
+
+    let ticket = await eventController.createTicket(_id, user._id, barcode, price, type);
     return ticket;
   }
 
