@@ -94,10 +94,11 @@ class TicketApi {
     let newBarcode = uuidv1(); // used for non third party events
     if (event.isThirdParty) {
       let thirdPartyEvent = thirdPartyControllers[event.eventManager];
-      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
+      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode, event);
       if (!success) return { error: 'Deactivation Failed' };
 
-      newBarcode = await thirdPartyEvent.issueTicket();
+      let oldTicket = await thirdPartyEvent.getTicketInfo(ticket.barcode, event);
+      newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
