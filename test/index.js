@@ -299,7 +299,7 @@ describe('User & Auth', function() {
       if (body.error) throw new Error(body);
     });
 
-    it.only('should allow user to transfer succesfully uploaded ticket', async function() {
+    it('should allow user to transfer succesfully uploaded ticket', async function() {
       this.timeout(16000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {

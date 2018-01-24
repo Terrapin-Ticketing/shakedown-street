@@ -14,8 +14,8 @@ db.getCollection('events').insert({
   isThirdParty: true,
   eventManager: 'CINCI_TICKET',
   domain: 'https://terrapin.cincyregister.com',
-  externalEventId: 102384,
-  issueTicketRoute: '/moofest',
+  externalEventId: 102179,
+  issueTicketRoute: '/testfest',
   promoCode: 'TERRAPIN',
   ticketTypes: {
     'VIP 2-Day Pass': {
