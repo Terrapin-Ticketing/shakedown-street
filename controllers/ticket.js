@@ -56,10 +56,11 @@ class TicketApi {
     let newBarcode = uuidv1(); // used for non third party events
     if (event.isThirdParty) {
       let thirdPartyEvent = thirdPartyControllers[event.eventManager];
-      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
+      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode, event);
       if (!success) return { error: 'Deactivation Failed' };
 
-      newBarcode = await thirdPartyEvent.issueTicket(inputtedTransferToUser);
+      let oldTicket = await thirdPartyEvent.getTicketInfo(ticket.barcode, event);
+      newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket, inputtedTransferToUser);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
@@ -93,10 +94,11 @@ class TicketApi {
     let newBarcode = uuidv1(); // used for non third party events
     if (event.isThirdParty) {
       let thirdPartyEvent = thirdPartyControllers[event.eventManager];
-      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
+      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode, event);
       if (!success) return { error: 'Deactivation Failed' };
 
-      newBarcode = await thirdPartyEvent.issueTicket(inputtedTransferToUser.firstName, inputtedTransferToUser.lastName);
+      let oldTicket = await thirdPartyEvent.getTicketInfo(ticket.barcode, event);
+      newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket, inputtedTransferToUser);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
@@ -167,20 +169,23 @@ class TicketApi {
     let { eventManager } = event;
 
     let thirdPartyEvent = thirdPartyControllers[eventManager];
-    return await thirdPartyEvent.isValidTicket(barcode);
+    return await thirdPartyEvent.isValidTicket(barcode, event);
   }
 
   async activateThirdPartyTicket(event, barcode, user) {
     if (!event.isThirdParty) return { error: 'Invalid Event' };
     let { _id, eventManager } = event;
     let thirdPartyEvent = thirdPartyControllers[eventManager];
-    let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode);
+    let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode, event);
     if (!ticketInfo || ticketInfo.Status === 'void') return { error: 'Invalid Ticket ID' };
 
-    // at this
-    if (!ticketInfo.price) throw new Error('Original price of ticket not set');
+    if (!ticketInfo.price && ticketInfo.price !== 0) throw new Error('Original price of ticket not set');
     let price = ticketInfo.price;
-    let ticket = await eventController.createTicket(_id, user._id, barcode, price);
+
+    if (!ticketInfo.type) throw new Error('Original ticket type not set');
+    let type = ticketInfo.type;
+
+    let ticket = await eventController.createTicket(_id, user._id, barcode, price, type);
     return ticket;
   }
 

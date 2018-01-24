@@ -1,4 +1,3 @@
-import uuidv1 from 'uuid/v4';
 import request from 'request';
 import url from 'url';
 import csv from 'csvtojson';
@@ -8,7 +7,8 @@ if (!process.env.CINCI_UN) throw new Error('process.env.CINCI_UN is not set (pas
 let cincyTicketPassword = process.env.CINCI_PW;
 if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (username)');
 
-let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
+// let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
+// let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
 let domain = 'https://terrapin.cincyregister.com';
 
 let fields = [
@@ -71,7 +71,7 @@ async function reqGET(route) {
   });
 }
 
-async function getSValue() {
+async function getSValue(ticketPortal) {
   let ticketPage = (await reqGET(ticketPortal)).body;
   let lineMatch = ticketPage.match(/.*\bname[ \t]*="s".*\b/)[0];
   let sVal = lineMatch.match(/value=(["'])(?:(?=(\\?))\2.)*?\1/)[0].substring(7, 39);
@@ -79,9 +79,9 @@ async function getSValue() {
 }
 
 class CincyTicket {
-  async deactivateTicket(barcode) {
+  async deactivateTicket(barcode, event) {
     let sessionId = await this._login();
-    let ticketInfo = await this.getTicketInfo(barcode);
+    let ticketInfo = await this.getTicketInfo(barcode, event);
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
     // all properties are required
@@ -94,28 +94,22 @@ class CincyTicket {
     }, sessionId);
 
     let isValidTicket = await this.isValidTicket(
-      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length));
+      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
     // success if ticket became invalid
     let success = !isValidTicket;
     return success;
   }
 
-  async issueTicket(user) {
+  async issueTicket(event, oldTicket, user) {
     let sessionId = await this._login();
-    let sVal = await getSValue();
+    let ticketIssueRoute = event.issueTicketRoute;
+    let ticketPortal = `${event.domain}${ticketIssueRoute}`;
+    let sVal = await getSValue(ticketPortal);
 
-
-    // SUBMIT this sVal ORDER
-    await reqPOST('/testfest', {
+    let issueTicketRequestBody = {
       s: sVal,
       step: 0,
       r: 0,
-      vip_2day: 1,
-      vip_single_day_121: 0,
-      vip_single_day_122: 0,
-      general_admission: 0,
-      gen_121: 0,
-      gen_122: 0,
       first_name: user.firstName || 'Terrapin',
       last_name: user.lastName || 'Ticketing',
       address: 'test',
@@ -125,9 +119,21 @@ class CincyTicket {
       email_address: 'reeder@terrapinticketing.com',
       _email_address: 'reeder@terrapinticketing.com',
       'cmd=forward': 'SUBMIT ORDER'
-    }, sessionId);
+    };
+
+    // add ticket level to request body
+    let ticketType = oldTicket['Ticket Level'];
+    let reqParam = event.ticketTypes[ticketType].paramName;
+    issueTicketRequestBody[reqParam] = 1;
+
+    // add promocode to request body
+    issueTicketRequestBody['coupon_code'] = event.promoCode;
+
+    // SUBMIT this sVal ORDER
+    await reqPOST(ticketIssueRoute, issueTicketRequestBody, sessionId);
+
     // USER sVal ORDER to print ticket
-    let printableTicket = (await reqPOST('/testfest', {
+    let printableTicket = (await reqPOST(ticketIssueRoute, {
       s: sVal,
       step: 1,
       r: 0,
@@ -135,12 +141,19 @@ class CincyTicket {
     }, sessionId)).body;
     let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
 
+    // success if ticket became invalid
     return ticketNum;
   }
 
-  async isValidTicket(ticketId) {
-    let tickets = await this._getTickets();
-    return tickets[ticketId] && tickets[ticketId].Status === 'active';
+  async isValidTicket(ticketId, event) {
+    let tickets = await this._getTickets(event);
+    let ticket = tickets[ticketId];
+    if (!ticket) return false;
+
+    let scanned = tickets[ticketId]['Scanned'];
+    let isScanned = scanned !== '0';
+
+    return ticket.Status === 'active' && !isScanned;
   }
 
   async _getOrderDetails(orderNumber) {
@@ -157,11 +170,12 @@ class CincyTicket {
   }
 
   // expensive
-  async _getTickets() {
+  async _getTickets(event) {
     let sessionId = await this._login();
     let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
-      from: 'January 10, 2018 2:35 PM',
-      to: 'January 13, 2019 2:35 PM',
+      form_id: event.externalEventId,
+      from: 'January 1, 2018 2:35 PM',
+      to: 'January 1, 2019 2:35 PM',
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
@@ -177,9 +191,11 @@ class CincyTicket {
           };
           for (let i = 0; i < row.length; i++) {
             ticketEntry[fields[i]] = row[i];
-            if (fields[i] === 'Order Number') {
-              // ticketEntry['Order Details'] = await this._getOrderDetails(fields[i]);
-              ticketEntry.price = await this._getOrderDetails(fields[i]);
+            // set the ticket price based on the ticket level (ticket type)
+            if (fields[i] === 'Ticket Level') {
+              let ticketLevel = ticketEntry[fields[i]];
+              ticketEntry.price = event.ticketTypes[ticketLevel].price;
+              ticketEntry.type = ticketLevel;
             }
           }
         })
@@ -189,8 +205,8 @@ class CincyTicket {
     return ticketLookupTable;
   }
 
-  async getTicketInfo(ticketId) {
-    let tickets = await this._getTickets();
+  async getTicketInfo(ticketId, event) {
+    let tickets = await this._getTickets(event);
     return tickets[ticketId];
   }
 
