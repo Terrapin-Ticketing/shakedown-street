@@ -99,7 +99,7 @@ async function reqPOST(route, formData, cookieValue) {
 //   return ticketNum;
 // }
 
-async function issueTicket() {
+async function issueTicket(user) {
   let sessionId = await login();
   let sVal = await getSValue();
 
@@ -113,8 +113,8 @@ async function issueTicket() {
     general_admission: 0,
     gen_121: 0,
     gen_122: 0,
-    first_name: 'test',
-    last_name: 'test',
+    first_name: user.firstName || 'Terrapin',
+    last_name: user.lastName || 'Ticketing',
     address: 'test',
     city: 'tet',
     state: 'OH',
@@ -219,8 +219,8 @@ describe('User & Auth', function() {
   describe('Cinci Ticket (Test Fest)', async function() {
     before(async function() {
       this.timeout(10000);
-      this.barcode = await issueTicket();
-      this.barcode2 = await issueTicket();
+      this.barcode = await issueTicket({email: 'tedDanson@gmial.com', firstName: 'Ted', lastName: 'Danson'});
+      this.barcode2 = await issueTicket({email: 'tedDanson@gmial.com', firstName: 'Ted', lastName: 'Danson'});
       this.voidedBarcode = '7854772863441586';
     });
 

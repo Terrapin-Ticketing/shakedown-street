@@ -48,7 +48,7 @@ class TicketApi {
     return !!redeemedTicket;
   }
 
-  async transferTicket(ticketId, transferToEmail, user) {
+  async transferTicket(ticketId, inputtedTransferToUser, user) {
     let ticket = await this.getTicketById(ticketId, user);
     if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
 
@@ -59,15 +59,15 @@ class TicketApi {
       let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
       if (!success) return { error: 'Deactivation Failed' };
 
-      newBarcode = await thirdPartyEvent.issueTicket();
+      newBarcode = await thirdPartyEvent.issueTicket(inputtedTransferToUser);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
-    let transferToUser = await userController.getUserByEmail(transferToEmail);
+    let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
     if (!transferToUser) {
-      transferToUser = await userController.createTransferPlaceholderUser(transferToEmail);
-      await userController.emailTransferTicket(transferToEmail, user.email, ticket);
+      transferToUser = await userController.createTransferPlaceholderUser(inputtedTransferToUser.email);
+      await userController.emailTransferTicket(inputtedTransferToUser.email, user.email, ticket);
     } else {
       await userController.sendRecievedTicketEmail(transferToUser, ticket);
     }
@@ -85,7 +85,7 @@ class TicketApi {
     return transferedTicket;
   }
 
-  async transferPurchasedTicket(ticketId, transferToEmail, user) {
+  async transferPurchasedTicket(ticketId, inputtedTransferToUser, user) {
     let ticket = await this.getTicketById(ticketId, user);
     if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
 
@@ -96,11 +96,11 @@ class TicketApi {
       let success = await thirdPartyEvent.deactivateTicket(ticket.barcode);
       if (!success) return { error: 'Deactivation Failed' };
 
-      newBarcode = await thirdPartyEvent.issueTicket();
+      newBarcode = await thirdPartyEvent.issueTicket(inputtedTransferToUser.firstName, inputtedTransferToUser.lastName);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
 
-    let transferToUser = await userController.getUserByEmail(transferToEmail);
+    let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
 
     await userController.sendPurchaseEmail(transferToUser, ticket);

@@ -76,9 +76,9 @@ module.exports = (server) => {
   server.post('/tickets/:id/transfer', async(req, res) => {
     if (!req.user) return res.sendStatus(401);
     let { id } = req.params;
-    let { email } = req.body;
+    let { transferToUser } = req.body;
     try {
-      let transferedTicket = await ticketController.transferTicket(id, email, req.user);
+      let transferedTicket = await ticketController.transferTicket(id, transferToUser, req.user);
       if (transferedTicket.error) return res.send({ error: transferedTicket.error });
       res.send({ ticket: transferedTicket });
     } catch (e) {

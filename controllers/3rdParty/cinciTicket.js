@@ -100,7 +100,7 @@ class CincyTicket {
     return success;
   }
 
-  async issueTicket() {
+  async issueTicket(user) {
     let sessionId = await this._login();
     let sVal = await getSValue();
 
@@ -116,8 +116,8 @@ class CincyTicket {
       general_admission: 0,
       gen_121: 0,
       gen_122: 0,
-      first_name: 'test',
-      last_name: 'test',
+      first_name: user.firstName || 'Terrapin',
+      last_name: user.lastName || 'Ticketing',
       address: 'test',
       city: 'tet',
       state: 'OH',
@@ -126,7 +126,6 @@ class CincyTicket {
       _email_address: 'reeder@terrapinticketing.com',
       'cmd=forward': 'SUBMIT ORDER'
     }, sessionId);
-
     // USER sVal ORDER to print ticket
     let printableTicket = (await reqPOST('/testfest', {
       s: sVal,

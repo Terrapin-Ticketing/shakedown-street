@@ -11,41 +11,18 @@ const TicketApi = require('../controllers/ticket');
 let ticketController = new TicketApi();
 
 module.exports = (server) => {
-  // server.post('/payment', async(req, res) => {
-  //   if (!req.user) return res.sendStatus(401);
-  //   // let { token, fees, qty, eventAddress } = req.body;
-  //   let { token: stripeToken, eventId } = req.body;
-  //   let parsedToken = stripeToken.token;
-  //
-  //   let user = req.user;
-  //   let total = 5000;
-  //   try {
-  //     let charge = await paymentController.createCharge(user, parsedToken, total);
-  //     if (charge === 'success') {
-  //       // set tickets to buyer
-  //       // printTicket(callerId, eventId, ticket, ownerId)
-  //       let ticket = {};
-  //       await eventController.printTicket(user._id, eventId, ticket, user._id);
-  //     }
-  //     res.send(charge);
-  //   } catch (e) {
-  //     console.error(e);
-  //     res.sendStatus(500);
-  //   }
-  // });
-
   server.post('/payment/:ticketId', async(req, res) => {
     let { ticketId } = req.params;
-    let { token: stripeToken } = req.body;
+    let { token: stripeToken, transferToUser } = req.body;
     let passwordChangeUrl;
 
     let user = req.user;
 
     if (!user) {
-      user = await userController.getUserByEmail(stripeToken.email);
+      user = await userController.getUserByEmail(transferToUser.email);
       if (user) return res.send({ error: 'There is already an account with this email addres. Please log in to purchase this ticket.' });
-      user = await userController.createPlaceholderUser(stripeToken.email);
-      passwordChangeUrl = await userController.requestPasswordChange(stripeToken.email, false);
+      user = await userController.createPlaceholderUser(transferToUser.email);
+      passwordChangeUrl = await userController.requestPasswordChange(transferToUser.email, false);
     }
 
     try {
@@ -63,7 +40,7 @@ module.exports = (server) => {
 
       // notify us that we need to venmo
       let originalOwner = await userController.getUserById(ticket.ownerId);
-      let newTicket = await ticketController.transferPurchasedTicket(ticket._id, user.email, originalOwner);
+      let newTicket = await ticketController.transferPurchasedTicket(ticket._id, transferToUser, originalOwner);
       // don't use 'await' here because we want to return immediately
       userController.sendSoldTicketEmail(originalOwner, newTicket);
       userController.sendInternalPaymentNotificationEmail(originalOwner, user, newTicket);
