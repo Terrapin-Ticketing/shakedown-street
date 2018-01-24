@@ -221,7 +221,8 @@ describe('User & Auth', function() {
       let uniqueId = shortid.generate();
       let urlSafe = `PaidCinci${uniqueId}`;
       let domain = 'https://terrapin.cincyregister.com';
-      this.issueTicketRoute = '/moofest';
+      // this.issueTicketRoute = '/moofest';
+      this.issueTicketRoute = '/testfest';
       this.paidTicketPortal = domain + this.issueTicketRoute;
       this.paidEvent = {
         date: '3/4/2018',
@@ -240,8 +241,8 @@ describe('User & Auth', function() {
         isThirdParty: true,
         eventManager: 'CINCI_TICKET',
         domain,
-        // externalEventId: 102179,
-        externalEventId: 102384,
+        // externalEventId: 102384,
+        externalEventId: 102179,
         issueTicketRoute: this.issueTicketRoute,
         promoCode: 'TERRAPIN',
         ticketTypes: {
@@ -298,11 +299,13 @@ describe('User & Auth', function() {
       if (body.error) throw new Error(body);
     });
 
-    it('should allow user to transfer succesfully uploaded ticket', async function() {
+    it.only('should allow user to transfer succesfully uploaded ticket', async function() {
       this.timeout(16000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
-        email: 'kevin@terrapinticketing.com'
+        transferToUser: {
+          email: 'kevin@terrapinticketing.com'
+        }
       }, customer.token);
 
       assert(body.ticket);
