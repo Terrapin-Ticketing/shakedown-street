@@ -245,6 +245,7 @@ describe('User & Auth', function() {
         externalEventId: 102179,
         issueTicketRoute: this.issueTicketRoute,
         promoCode: 'TERRAPIN',
+        totalMarkupPercent: 0.20,
         ticketTypes: {
           'VIP 2-Day Pass': {
             paramName: 'vip_2day',
@@ -318,6 +319,7 @@ describe('User & Auth', function() {
         barcode: this.barcode2,
         email: login.email
       });
+      console.log('body:', body);
       assert(body.isValidTicket);
     });
 

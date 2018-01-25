@@ -36,6 +36,8 @@ let EventSchema = new mongoose.Schema({
   externalEventId: { type: String },
   promoCode: { type: String },
 
+  totalMarkupPercent: { type: Number },
+
   queryDateStart: { type: Date },
   queryDateEnd: { type: Date }
 
