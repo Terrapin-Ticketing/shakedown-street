@@ -22,6 +22,8 @@ let EventSchema = new mongoose.Schema({
   primaryColor: { type: String },
   textColor: { type: String },
   imageUrl: { type: String },
+  thumbnail_image_url: { type: String },
+
   website: { type: String },
   backgroundColor: { type: String },
 
@@ -35,6 +37,8 @@ let EventSchema = new mongoose.Schema({
 
   externalEventId: { type: String },
   promoCode: { type: String },
+
+  totalMarkupPercent: { type: Number },
 
   queryDateStart: { type: Date },
   queryDateEnd: { type: Date }

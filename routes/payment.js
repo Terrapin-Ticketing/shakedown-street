@@ -30,9 +30,16 @@ module.exports = (server) => {
       if (!ticket || !ticket.isForSale) {
         return res.send({ error: 'No ticket found' });
       }
-      let serviceFee = 100;
-      let cardFee = 100;
-      let total = ticket.price + serviceFee + cardFee;
+
+      let event = await eventController.getEventById(ticket.eventId);
+
+      let serviceFee = ticket.price * event.totalMarkupPercent;
+      let baseTotal = serviceFee + ticket.price;
+
+      let stripeTotal = (baseTotal * 0.029) + 30;
+
+      let total = baseTotal + stripeTotal;
+      console.log('TOTAL:', total);
       let charge = await paymentController.createCharge(user, stripeToken, total);
       // TODO: I think this is wrong...charge returns a charge
       // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });

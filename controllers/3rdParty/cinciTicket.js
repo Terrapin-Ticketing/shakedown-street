@@ -201,7 +201,6 @@ class CincyTicket {
         })
         .on('done', resolve);
     });
-
     return ticketLookupTable;
   }
 

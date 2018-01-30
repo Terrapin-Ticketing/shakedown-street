@@ -20,6 +20,7 @@ Object.keys(ThirdPartyControllers).forEach((key) => {
 class TicketApi {
   async getTicketById(ticketId, user) {
     let ticket = await TicketModel.findOne({ _id: ticketId }).populate('eventId');
+    console.log('ticket:', ticket);
     // only return the ticket barcode if the it is owned by the caller
     if (!ticket) return ticket;
     if (!user || `${ticket.ownerId}` !== `${user._id}`) {
