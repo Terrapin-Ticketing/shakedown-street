@@ -4,7 +4,7 @@ let paymentController = new Payment();
 import User from '../controllers/user';
 let userController = new User();
 
-import EventApi from '../controllers/user';
+import EventApi from '../controllers/event';
 let eventController = new EventApi();
 
 const TicketApi = require('../controllers/ticket');
@@ -30,7 +30,6 @@ module.exports = (server) => {
       if (!ticket || !ticket.isForSale) {
         return res.send({ error: 'No ticket found' });
       }
-
       let event = await eventController.getEventById(ticket.eventId);
 
       let serviceFee = ticket.price * event.totalMarkupPercent;
@@ -38,7 +37,7 @@ module.exports = (server) => {
 
       let stripeTotal = (baseTotal * 0.029) + 30;
 
-      let total = baseTotal + stripeTotal;
+      let total = Math.ceil(baseTotal + stripeTotal);
       console.log('TOTAL:', total);
       let charge = await paymentController.createCharge(user, stripeToken, total);
       // TODO: I think this is wrong...charge returns a charge
