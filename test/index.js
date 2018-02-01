@@ -108,8 +108,8 @@ async function issueTicket(ticketPortal, issueTicketRoute, user) {
     city: 'tet',
     state: 'OH',
     zip_code: 45209,
-    email_address: 'kevin@terrapinticketing.com',
-    _email_address: 'kevin@terrapinticketing.com',
+    email_address: 'reeder@terrapinticketing.com',
+    _email_address: 'reeder@terrapinticketing.com',
     'cmd=forward': 'SUBMIT ORDER',
     'coupon_code': 'TERRAPIN'
   }, sessionId);

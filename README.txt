@@ -18,7 +18,7 @@ db.getCollection('events').insert({
   externalEventId: 102179,
   issueTicketRoute: '/testfest',
   promoCode: 'TERRAPIN',
-  totalMarkupPercent: 0.20,
+  totalMarkupPercent: 0.10,
   ticketTypes: {
     'VIP 2-Day Pass': {
       paramName: 'vip_2day',

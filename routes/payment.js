@@ -17,7 +17,6 @@ module.exports = (server) => {
     let passwordChangeUrl;
 
     let user = req.user;
-
     if (!user) {
       user = await userController.getUserByEmail(transferToUser.email);
       if (user) return res.send({ error: 'There is already an account with this email addres. Please log in to purchase this ticket.' });
@@ -40,7 +39,7 @@ module.exports = (server) => {
       let total = Math.ceil(baseTotal + stripeTotal);
       console.log('TOTAL:', total);
       let charge = await paymentController.createCharge(user, stripeToken, total);
-      // TODO: I think this is wrong...charge returns a charge
+
       // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
       if (!charge.status === 'succeeded') return res.send({ error: 'Failed to charge card' });
 
@@ -50,6 +49,7 @@ module.exports = (server) => {
       // don't use 'await' here because we want to return immediately
       userController.sendSoldTicketEmail(originalOwner, newTicket);
       userController.sendInternalPaymentNotificationEmail(originalOwner, user, newTicket);
+
       /*
       // send notification to kevin or I that someone bought a ticket
       this.sendNotification(to, ticket.price, serviceFee, cardFee);

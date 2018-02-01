@@ -46,6 +46,7 @@ module.exports = (server) => {
     let { id } = req.params;
     if (!req.user || req.user._id !== id) return res.sendStatus(401);
     let { payoutMethod, payoutValue } = req.body;
+    console.log(req.body);
     try {
       let user = await userCol.updatePayoutMethod(id, payoutMethod, payoutValue);
       if (!user) return res.sendStatus(403);

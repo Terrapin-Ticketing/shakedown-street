@@ -48,7 +48,7 @@ class TicketApi {
     return !!redeemedTicket;
   }
 
-  async transferTicket(ticketId, inputtedTransferToUser, user) {
+  async _transferTicket(ticketId, inputtedTransferToUser, user) {
     let ticket = await this.getTicketById(ticketId, user);
     if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
 
@@ -63,14 +63,29 @@ class TicketApi {
       newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket, inputtedTransferToUser);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
+    return newBarcode;
+  }
+
+  async transferTicket(ticketId, inputtedTransferToUser, user) {
+    let newBarcode = await this._transferTicket(ticketId, inputtedTransferToUser, user);
+    let ticket = await this.getTicketById(ticketId, user);
 
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
     if (!transferToUser) {
       transferToUser = await userController.createTransferPlaceholderUser(inputtedTransferToUser.email);
-      await userController.emailTransferTicket(inputtedTransferToUser.email, user.email, ticket);
+      try {
+        await userController.emailTransferTicket(inputtedTransferToUser.email, user.email, ticket);
+      } catch (e) {
+        console.error('emailTransferTicket Email Failed');
+      }
     } else {
-      await userController.sendRecievedTicketEmail(transferToUser, ticket);
+      try {
+        await userController.sendRecievedTicketEmail(transferToUser, ticket);
+      } catch (e) {
+        console.error('sendRecievedTicketEmail Email Failed');
+        console.log('transferToUser', transferToUser);
+      }
     }
 
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
@@ -83,29 +98,23 @@ class TicketApi {
 
     // whoever called this doesn't own the ticket anymore
     transferedTicket.barcode = null;
+
+
     return transferedTicket;
   }
 
   async transferPurchasedTicket(ticketId, inputtedTransferToUser, user) {
+    let newBarcode = await this._transferTicket(ticketId, inputtedTransferToUser, user);
     let ticket = await this.getTicketById(ticketId, user);
-    if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
-
-    let event = await EventModel.findOne({ _id: ticket.eventId });
-    let newBarcode = uuidv1(); // used for non third party events
-    if (event.isThirdParty) {
-      let thirdPartyEvent = thirdPartyControllers[event.eventManager];
-      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode, event);
-      if (!success) return { error: 'Deactivation Failed' };
-
-      let oldTicket = await thirdPartyEvent.getTicketInfo(ticket.barcode, event);
-      newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket, inputtedTransferToUser);
-      if (!newBarcode) return { error: 'Ticket Creation Failed' };
-    }
 
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
 
-    await userController.sendPurchaseEmail(transferToUser, ticket);
+    try {
+      await userController.sendPurchaseEmail(transferToUser, ticket);
+    } catch (e) {
+      console.error(e);
+    }
 
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
@@ -148,20 +157,18 @@ class TicketApi {
 
   async find(query, user) {
     let tickets = await TicketModel.find(query).populate('eventId');
-    return tickets.map((ticket) => {
-      console.log('ticket: ', typeof ticket.ownerId.toString());
-      console.log('user: ', typeof user._id, user._id);
+    let userTickets = tickets.map((ticket) => {
       if (ticket.ownerId.toString() !== user._id) {
-        console.log('not owner!', ticket.ownerId !== user._id);
         ticket.barcode = null;
       }
       return ticket;
     });
+    return userTickets;
   }
 
   async findOne(id, user) {
     let ticket = await TicketModel.findOne({ _id: id }).populate('eventId');
-    if (ticket.ownerId !== user._id) {
+    if (ticket.ownerId.toString() !== user._id) {
       ticket.barcode = null;
     }
     return ticket;
