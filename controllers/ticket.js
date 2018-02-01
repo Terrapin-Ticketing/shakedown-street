@@ -48,7 +48,7 @@ class TicketApi {
     return !!redeemedTicket;
   }
 
-  async transferTicket(ticketId, inputtedTransferToUser, user) {
+  async _transferTicket(ticketId, inputtedTransferToUser, user) {
     let ticket = await this.getTicketById(ticketId, user);
     if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
 
@@ -63,6 +63,12 @@ class TicketApi {
       newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket, inputtedTransferToUser);
       if (!newBarcode) return { error: 'Ticket Creation Failed' };
     }
+    return newBarcode;
+  }
+
+  async transferTicket(ticketId, inputtedTransferToUser, user) {
+    let newBarcode = await this._transferTicket(ticketId, inputtedTransferToUser, user);
+    let ticket = await this.getTicketById(ticketId, user);
 
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
@@ -87,20 +93,8 @@ class TicketApi {
   }
 
   async transferPurchasedTicket(ticketId, inputtedTransferToUser, user) {
+    let newBarcode = await this._transferTicket(ticketId, inputtedTransferToUser, user);
     let ticket = await this.getTicketById(ticketId, user);
-    if (`${ticket.ownerId}` !== `${user._id}`) return { error: 'User doesn\'t own this ticket' };
-
-    let event = await EventModel.findOne({ _id: ticket.eventId });
-    let newBarcode = uuidv1(); // used for non third party events
-    if (event.isThirdParty) {
-      let thirdPartyEvent = thirdPartyControllers[event.eventManager];
-      let success = await thirdPartyEvent.deactivateTicket(ticket.barcode, event);
-      if (!success) return { error: 'Deactivation Failed' };
-
-      let oldTicket = await thirdPartyEvent.getTicketInfo(ticket.barcode, event);
-      newBarcode = await thirdPartyEvent.issueTicket(event, oldTicket, inputtedTransferToUser);
-      if (!newBarcode) return { error: 'Ticket Creation Failed' };
-    }
 
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
@@ -148,12 +142,13 @@ class TicketApi {
 
   async find(query, user) {
     let tickets = await TicketModel.find(query).populate('eventId');
-    return tickets.map((ticket) => {
+    let userTickets = tickets.map((ticket) => {
       if (ticket.ownerId !== user._id) {
         ticket.barcode = null;
       }
       return ticket;
     });
+    return userTickets;
   }
 
   async findOne(id, user) {
