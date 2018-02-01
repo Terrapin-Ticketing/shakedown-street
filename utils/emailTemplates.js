@@ -679,8 +679,8 @@ export default (emailHTML, previewText) => {
                                               For urgent matters, call (708) 805-9743. <br /><br />
 
                                               Terrapin Ticketing <br />
-                                              1122 Delta Ave. <br />
-                                              Cincinnati, OH 45208 <br /><br />
+                                              1311 Vine Street <br />
+                                              Cincinnati, OH 45202 <br /><br />
                                               © 2018 Terrapin Ticketing. All rights reserved.
                                             </td>
                                         </tr>

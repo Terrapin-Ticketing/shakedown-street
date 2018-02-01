@@ -87,9 +87,13 @@ function getTicketCard(ticket, config) {
   `);
 }
 
-function getOrderCard(ticket, config) {
-  let serviceFee = 100;
-  let cardFee = 100;
+function getOrderCard(ticket) {
+  let serviceFee = ticket.price * ticket.eventId.totalMarkupPercent;
+  let baseTotal = serviceFee + ticket.price;
+
+  let stripeTotal = (baseTotal * 0.029) + 30;
+
+  let total = Math.ceil(baseTotal + stripeTotal);
   return (`
     <tr>
       <td valign="top" class="bodyContent">
@@ -111,8 +115,8 @@ function getOrderCard(ticket, config) {
                   <td class="price">${displayPrice(ticket.price)}</td>
                 </tr>
                 <tr class="service-fee"><td class="name-column">Service Fee</td><td>${displayPrice(serviceFee)}</td></tr>
-                <tr class="card-fee"><td class="name-column">Credit Card Processing</td><td>${displayPrice(cardFee)}</td></tr>
-                <tr class="total"><td class="name-column">Total:</td><td>${displayPrice(calculateTotal(ticket.price, serviceFee, cardFee))}</td></tr>
+                <tr class="card-fee"><td class="name-column">Credit Card Processing</td><td>${displayPrice(stripeTotal)}</td></tr>
+                <tr class="total"><td class="name-column">Total:</td><td>${displayPrice(total)}</td></tr>
               </tbody>
             </table>
           </div>
@@ -209,7 +213,6 @@ export const emailRecievedTicket = async(user, ticket) => {
                 <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
             </td>
         </tr>
-        ${getOrderCard(ticket, config)}
         ${getTicketCard(ticket, config)}
   `);
   const mailOptions = {
@@ -268,7 +271,7 @@ export const emailPurchaseTicket = async(user, ticket) => {
                 Thanks for using Terrapin Ticketing. This email is the receipt for your purchase. No payment is due.
             </td>
         </tr>
-        ${getOrderCard(ticket, config)}
+        ${getOrderCard(ticket)}
         ${getTicketCard(ticket, config)}
   `);
   const mailOptions = {
@@ -292,7 +295,7 @@ export const emailInternalPaymentNotification = async(oldOwner, newOwner, ticket
                 <b>We need to send ${displayPrice(ticket.price)} to ${oldOwner.payout[oldOwner.payout.default]} via ${oldOwner.payout.default}</b>
             </td>
         </tr>
-        ${getOrderCard(ticket, config)}
+        ${getOrderCard(ticket)}
   `);
   const mailOptions = {
     from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address

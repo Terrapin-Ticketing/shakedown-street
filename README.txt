@@ -1,12 +1,12 @@
 db.getCollection('events').insert({
-  date: '3/4/2018',
-  name: 'Test Fest',
-  urlSafe: 'TestFest',
-  description: 'Since 1997982 B.C. Moograss has been the number one grass destination for cattle around the world. Calfs are welcome but must be at least 10 weeks old. Moograss hosts several chicken promotion workshops.',
+  date: '3/2/2018',
+  name: 'Columbus Brewgrass Festival',
+  urlSafe: 'Brewgrass',
+  description: 'Our goal is to bring you the best in Beer and Bluegrass to Columbus OH. Winter will be over and we will be ready to come out and play. See you at the Bluestone!',
   venue: {
-    name: 'Legend Valley',
-    address: '999 Fun Time',
-    city: 'Theland',
+    name: 'The Bluestone',
+    address: '583 E Broad St',
+    city: 'Columbus',
     state: 'OH',
     zip: 43215
   },
