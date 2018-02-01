@@ -74,9 +74,18 @@ class TicketApi {
     // if user doesn't exist create one
     if (!transferToUser) {
       transferToUser = await userController.createTransferPlaceholderUser(inputtedTransferToUser.email);
-      await userController.emailTransferTicket(inputtedTransferToUser.email, user.email, ticket);
+      try {
+        await userController.emailTransferTicket(inputtedTransferToUser.email, user.email, ticket);
+      } catch (e) {
+        console.error('emailTransferTicket Email Failed');
+      }
     } else {
-      await userController.sendRecievedTicketEmail(transferToUser, ticket);
+      try {
+        await userController.sendRecievedTicketEmail(transferToUser, ticket);
+      } catch (e) {
+        console.error('sendRecievedTicketEmail Email Failed');
+        console.log('transferToUser', transferToUser);
+      }
     }
 
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
@@ -89,6 +98,8 @@ class TicketApi {
 
     // whoever called this doesn't own the ticket anymore
     transferedTicket.barcode = null;
+
+
     return transferedTicket;
   }
 
@@ -99,7 +110,11 @@ class TicketApi {
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
     // if user doesn't exist create one
 
-    await userController.sendPurchaseEmail(transferToUser, ticket);
+    try {
+      await userController.sendPurchaseEmail(transferToUser, ticket);
+    } catch (e) {
+      console.error(e);
+    }
 
     let transferedTicket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
@@ -143,7 +158,7 @@ class TicketApi {
   async find(query, user) {
     let tickets = await TicketModel.find(query).populate('eventId');
     let userTickets = tickets.map((ticket) => {
-      if (ticket.ownerId !== user._id) {
+      if (ticket.ownerId.toString() !== user._id) {
         ticket.barcode = null;
       }
       return ticket;
@@ -153,7 +168,7 @@ class TicketApi {
 
   async findOne(id, user) {
     let ticket = await TicketModel.findOne({ _id: id }).populate('eventId');
-    if (ticket.ownerId !== user._id) {
+    if (ticket.ownerId.toString() !== user._id) {
       ticket.barcode = null;
     }
     return ticket;
