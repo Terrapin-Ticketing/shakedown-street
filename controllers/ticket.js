@@ -83,8 +83,7 @@ class TicketApi {
       try {
         await userController.sendRecievedTicketEmail(transferToUser, ticket);
       } catch (e) {
-        console.error('sendRecievedTicketEmail Email Failed');
-        console.log('transferToUser', transferToUser);
+        console.error('sendRecievedTicketEmail Email Failed', transferToUser);
       }
     }
 

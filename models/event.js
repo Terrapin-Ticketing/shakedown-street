@@ -9,8 +9,8 @@ let EventSchema = new mongoose.Schema({
   createrId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
   date: { type: String, required: true },
-  name: { type: String, unique: true, required: true },
-  urlSafe: { type: String, unique: true, required: true },
+  name: { type: String, index: { unique: true }, required: true },
+  urlSafe: { type: String, index: { unique: true }, required: true },
   description: { type: String },
   venue: {
     name: { type: String },

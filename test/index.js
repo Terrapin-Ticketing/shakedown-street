@@ -245,7 +245,7 @@ describe('User & Auth', function() {
         externalEventId: 102179,
         issueTicketRoute: this.issueTicketRoute,
         promoCode: 'TERRAPIN',
-        totalMarkupPercent: 0.20,
+        totalMarkupPercent: 0.10,
         ticketTypes: {
           'VIP 2-Day Pass': {
             paramName: 'vip_2day',
@@ -301,7 +301,7 @@ describe('User & Auth', function() {
     });
 
     it('should allow user to transfer succesfully uploaded ticket', async function() {
-      this.timeout(16000);
+      this.timeout(30000);
       let customer = this.users[3];
       let { body } = await req(`tickets/${this.activatedTicket._id}/transfer`, {
         transferToUser: {

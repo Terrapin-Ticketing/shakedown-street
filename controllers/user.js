@@ -21,10 +21,11 @@ function saltPassword(password) {
 
 class UserApi {
   async signup(email, password) {
-    return await UserModel.create({
+    let user = await UserModel.create({
       email: email.toLowerCase(),
       password: saltPassword(password)
     });
+    return user;
   }
 
   async getUserByEmail(email) {

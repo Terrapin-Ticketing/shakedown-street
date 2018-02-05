@@ -22,7 +22,7 @@ db.getCollection('events').insert({
   ticketTypes: {
     'VIP 2-Day Pass': {
       paramName: 'vip_2day',
-      price: 50
+      price: 1000
     },
     'VIP Single Day 12/1': {
       paramName: 'vip_single_day_121',
