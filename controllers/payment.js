@@ -20,16 +20,18 @@ class Payment {
   async createCharge(user, token, total, metadata) {
     user = await this.setStripe(user);
 
-    let source = await stripe.customers.createSource(user.stripe.id, {
-      source: token.id
-    });
+    // let source = await stripe.customers.createSource(user.stripe.id, {
+    //   source: token.id
+    // });
+
+    let source = token.card;
     if (config.env === 'development') {
       source = 'tok_visa';
     }
     let charge = await stripe.charges.create({
       amount: total,
       currency: 'usd',
-      source, // token.card
+      source,
       description: `Deposite made from ${user.email}`,
       metadata
     });
