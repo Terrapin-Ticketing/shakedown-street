@@ -73,7 +73,20 @@ module.exports = (server) => {
     let { password } = req.body;
     try {
       let user = await userCol.changePassword(token, password);
+      console.log('set-password user:', user);
+      if (user.error) return res.send({ error: user.error });
       return sendToken(res, user);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
+  });
+
+  server.post('/check-token', async(req, res) => {
+    let { token } = req.body;
+    try {
+      let email = await userCol.getEmailFromToken(token);
+      return res.send({ isValidToken: !!email });
     } catch (e) {
       console.error(e);
       res.sendStatus(500);

@@ -81,19 +81,27 @@ class UserApi {
     return passwordChangeUrl;
   }
 
-  async changePassword(token, password) {
-    // update password of given token
-    let user = await new Promise((resolve, reject) => {
+  async getEmailFromToken(token) {
+    return await new Promise((resolve) => {
       client.hget('set-password', token, async(err, email) => {
-        if (err) return reject(err);
-        let user = await UserModel.findOneAndUpdate({ email: email.toLowerCase() }, {
-          $set: {
-            password: saltPassword(password)
-          }
-        }, { new: true });
-        resolve(user);
+        if (err || email === 'false') return resolve(false);
+        return resolve(email);
       });
     });
+  }
+
+  async changePassword(token, password) {
+    // update password of given token
+    let email = await this.getEmailFromToken(token);
+    if (!email) return { error: 'Invalid Token' };
+
+    let user = await UserModel.findOneAndUpdate({ email: email.toLowerCase() }, {
+      $set: {
+        password: saltPassword(password)
+      }
+    }, { new: true });
+
+    if (!user) return { error: 'User not found' };
 
     // unset client token
     await new Promise((resolve) => {

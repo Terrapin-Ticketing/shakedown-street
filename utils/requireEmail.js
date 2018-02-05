@@ -175,7 +175,7 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
                 <div style="text-align: center;">
                   <a href="${config.clientDomain}/set-password/${token}" class="btn">View it Here</a>
                 </div><br />
-                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
+                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/set-password/${token}`}</small>
             </td>
         </tr>
         ${getTicketCard(ticket, config)}
