@@ -77,7 +77,7 @@ class TicketApi {
       try {
         await userController.emailTransferTicket(inputtedTransferToUser.email, user.email, ticket);
       } catch (e) {
-        console.error('emailTransferTicket Email Failed');
+        console.error('emailTransferTicket Email Failed', e);
       }
     } else {
       try {
