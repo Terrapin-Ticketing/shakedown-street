@@ -96,7 +96,6 @@ class CincyTicket {
 
     console.log('set void resp:', x);
 
-
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
 
@@ -120,6 +119,8 @@ class CincyTicket {
       r: 0,
       first_name: user.firstName || 'Terrapin',
       last_name: user.lastName || 'Ticketing',
+      _billing_first_name: user.firstName || 'Terrapin',
+      _billing_last_name: user.lastName || 'Ticketing',
       address: 'test',
       city: 'tet',
       state: 'OH',
