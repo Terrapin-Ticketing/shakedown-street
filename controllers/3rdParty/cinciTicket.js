@@ -86,13 +86,15 @@ class CincyTicket {
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
     // all properties are required
-    await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
+    let x = await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
       name: ticketInfo['Ticket Holder'],
       status: 'void',
       scanned: ticketInfo['Scanned'],
       cmd: 'edit',
       id: ticketInfo.lookupId
     }, sessionId);
+
+    console.log('set void resp:', x);
 
 
     let isValidTicket = await this.isValidTicket(
