@@ -9,7 +9,7 @@ if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (use
 
 // let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
 // let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
-let domain = 'https://terrapin.cincyregister.com';
+// let domain = 'https://terrapin.cincyregister.com';
 
 let fields = [
   'Ticket Holder',
@@ -40,7 +40,7 @@ let fields = [
 
 let requestFields = 'tick.name,layout.name,tick.id,tick.status,tick.scanned,tick.created,trx.first_name,trx.last_name,trx.address,trx.city,trx.country,trx.state,trx.zip_code,trx.phone,trx.payment_date,trx.account,trx.order_number,reg.email,trx.ip_address,form.name,reg.id,trx.id,gateway.label,gateway.name';
 
-async function reqPOST(route, formData, cookieValue) {
+async function reqPOST(domain, route, formData, cookieValue) {
   let jar = request.jar();
   let cookie = request.cookie(`session_id=${cookieValue}`);
   jar.setCookie(cookie, domain);
@@ -85,7 +85,7 @@ class CincyTicket {
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
     // all properties are required
-    await reqPOST('/merchant/products/2/manage/tickets', {
+    await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
       name: ticketInfo['Ticket Holder'],
       status: 'void',
       scanned: ticketInfo['Scanned'],
@@ -130,10 +130,10 @@ class CincyTicket {
     issueTicketRequestBody['coupon_code'] = event.promoCode;
 
     // SUBMIT this sVal ORDER
-    await reqPOST(ticketIssueRoute, issueTicketRequestBody, sessionId);
+    await reqPOST(event.domain, ticketIssueRoute, issueTicketRequestBody, sessionId);
 
     // USER sVal ORDER to print ticket
-    let printableTicket = (await reqPOST(ticketIssueRoute, {
+    let printableTicket = (await reqPOST(event.domain, ticketIssueRoute, {
       s: sVal,
       step: 1,
       r: 0,
@@ -172,7 +172,7 @@ class CincyTicket {
   // expensive
   async _getTickets(event) {
     let sessionId = await this._login();
-    let csvExport = (await reqPOST('/merchant/products/2/manage/tickets', {
+    let csvExport = (await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
       form_id: event.externalEventId,
       from: 'January 1, 2018 2:35 PM',
       to: 'January 1, 2019 2:35 PM',
