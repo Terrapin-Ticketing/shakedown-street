@@ -314,6 +314,7 @@ describe('User & Auth', function() {
     });
 
     it('should check validity of ticket', async function() {
+      this.timeout(10000);
       let { login } = this.users[3];
       let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/validate`, {
@@ -325,6 +326,7 @@ describe('User & Auth', function() {
     });
 
     it('should reject voided ticket', async function() {
+      this.timeout(10000);
       let { login } = this.users[3];
       let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/validate`, {
@@ -335,7 +337,7 @@ describe('User & Auth', function() {
     });
 
     it('should reject invalid ticket id', async function() {
-      this.timeout(6000);
+      this.timeout(10000);
       let { login } = this.users[3];
       let { urlSafe } = this.paidEvent;
       let { body } = await req(`${urlSafe}/activate`, {

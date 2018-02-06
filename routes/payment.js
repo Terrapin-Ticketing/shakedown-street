@@ -26,9 +26,11 @@ module.exports = (server) => {
 
     try {
       let ticket = await ticketController.getTicketById(ticketId);
-      if (!ticket || !ticket.isForSale) {
-        return res.send({ error: 'No ticket found' });
-      }
+      if (!ticket || !ticket.isForSale) return res.send({ error: 'No ticket found' });
+      // check if ticket is valid before charging them
+      let isValidTicket = await ticketController.isValidTicket(ticket.eventId, ticket.barcode);
+      if (!isValidTicket) return res.send({ error: 'Unable to buy Invalid Ticket' });
+
       let event = await eventController.getEventById(ticket.eventId);
 
       let serviceFee = ticket.price * event.totalMarkupPercent;
