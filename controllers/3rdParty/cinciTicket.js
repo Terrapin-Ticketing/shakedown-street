@@ -116,8 +116,8 @@ class CincyTicket {
       city: 'tet',
       state: 'OH',
       zip_code: 45209,
-      email_address: 'reeder@terrapinticketing.com',
-      _email_address: 'reeder@terrapinticketing.com',
+      email_address: 'info@terrapinticketing.com',
+      _email_address: 'info@terrapinticketing.com',
       'cmd=forward': 'SUBMIT ORDER'
     };
 
@@ -174,8 +174,8 @@ class CincyTicket {
     let sessionId = await this._login();
     let csvExport = (await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
       form_id: event.externalEventId,
-      from: 'January 1, 2018 2:35 PM',
-      to: 'January 1, 2019 2:35 PM',
+      from: 'January 1, 2000 2:35 PM',
+      to: 'January 1, 2030 2:35 PM',
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
