@@ -42,7 +42,7 @@ module.exports = (server) => {
       try {
         charge = await paymentController.createCharge(user, stripeToken, total);
       } catch (e) {
-        console.log('charge failed:');
+        console.log('charge failed:', e);
         return res.send({ error: 'Failed to charge card' });
       }
 

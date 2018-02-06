@@ -80,24 +80,25 @@ async function getSValue(ticketPortal) {
 
 class CincyTicket {
   async deactivateTicket(barcode, event) {
-    let sessionId = await this._login();
-    let ticketInfo = await this.getTicketInfo(barcode, event);
-    if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
-
-    // all properties are required
-    await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
-      name: ticketInfo['Ticket Holder'],
-      status: 'void',
-      scanned: ticketInfo['Scanned'],
-      cmd: 'edit',
-      id: ticketInfo.lookupId
-    }, sessionId);
-
-    let isValidTicket = await this.isValidTicket(
-      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
-    // success if ticket became invalid
-    let success = !isValidTicket;
-    return success;
+    // let sessionId = await this._login();
+    // let ticketInfo = await this.getTicketInfo(barcode, event);
+    // if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
+    //
+    // // all properties are required
+    // await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
+    //   name: ticketInfo['Ticket Holder'],
+    //   status: 'void',
+    //   scanned: ticketInfo['Scanned'],
+    //   cmd: 'edit',
+    //   id: ticketInfo.lookupId
+    // }, sessionId);
+    //
+    // let isValidTicket = await this.isValidTicket(
+    //   ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
+    // // success if ticket became invalid
+    // let success = !isValidTicket;
+    // return success;
+    return true;
   }
 
   async issueTicket(event, oldTicket, user) {
@@ -116,9 +117,17 @@ class CincyTicket {
       city: 'tet',
       state: 'OH',
       zip_code: 45209,
+      _billing_zip_code: 45209,
+      'phone_number': [ 900, 623, 6235 ],
+      _billing_method: 10292,
+      _hide_coupon: 0,
+      _billing_3653461: 0,
+      _billing_country: 'US',
+      _billing_state: 'OH',
       email_address: 'info@terrapinticketing.com',
       _email_address: 'info@terrapinticketing.com',
-      'cmd=forward': 'SUBMIT ORDER'
+      'cmd=forward': 'SUBMIT ORDER',
+      r3653466: 1
     };
 
     // add ticket level to request body
