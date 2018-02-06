@@ -82,24 +82,20 @@ class CincyTicket {
   async deactivateTicket(barcode, event) {
     let sessionId = await this._login();
     let ticketInfo = await this.getTicketInfo(barcode, event);
-    console.log('ticketInfo', ticketInfo);
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
     // all properties are required
-    let x = await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
-      name: ticketInfo['Ticket Holder'],
+    await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
+      name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
       status: 'void',
       scanned: ticketInfo['Scanned'],
       cmd: 'edit',
       id: ticketInfo.lookupId
     }, sessionId);
 
-    console.log('set void resp:', x);
-
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
 
-    console.log('isValidTicket', isValidTicket);
     // success if ticket became invalid
     let success = !isValidTicket;
     return success;
@@ -110,8 +106,6 @@ class CincyTicket {
     let ticketIssueRoute = event.issueTicketRoute;
     let ticketPortal = `${event.domain}${ticketIssueRoute}`;
     let sVal = await getSValue(ticketPortal);
-
-    console.log('name:', user.firstName, user.lastName);
 
     let issueTicketRequestBody = {
       s: sVal,
