@@ -91,7 +91,7 @@ function getOrderCard(ticket) {
   let serviceFee = ticket.price * ticket.eventId.totalMarkupPercent;
   let baseTotal = serviceFee + ticket.price;
 
-  let stripeTotal = (baseTotal * 0.029) + 30;
+  let stripeTotal = (baseTotal * 0.029) + 50;
 
   let total = Math.ceil(baseTotal + stripeTotal);
   return (`

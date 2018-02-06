@@ -34,7 +34,7 @@ module.exports = (server) => {
       let serviceFee = ticket.price * event.totalMarkupPercent;
       let baseTotal = serviceFee + ticket.price;
 
-      let stripeTotal = (baseTotal * 0.029) + 30;
+      let stripeTotal = (baseTotal * 0.029) + 50;
 
       let total = Math.ceil(baseTotal + stripeTotal);
       console.log('TOTAL:', total);
@@ -42,8 +42,7 @@ module.exports = (server) => {
       try {
         charge = await paymentController.createCharge(user, stripeToken, total);
       } catch (e) {
-        console.log('charge failed:', e);
-        return res.send({ error: 'Failed to charge card' });
+        return res.send({ error: e.message });
       }
 
       // console.log('charge:', charge);
