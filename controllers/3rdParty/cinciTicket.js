@@ -130,7 +130,8 @@ class CincyTicket {
     issueTicketRequestBody['coupon_code'] = event.promoCode;
 
     // SUBMIT this sVal ORDER
-    await reqPOST(event.domain, ticketIssueRoute, issueTicketRequestBody, sessionId);
+    let x = await reqPOST(event.domain, ticketIssueRoute, issueTicketRequestBody, sessionId);
+    console.log('ORDER: ', x.body);
 
     // USER sVal ORDER to print ticket
     let printableTicket = (await reqPOST(event.domain, ticketIssueRoute, {
@@ -139,6 +140,8 @@ class CincyTicket {
       r: 0,
       'cmd=tprint': 'Print Tickets'
     }, sessionId)).body;
+    console.log('SVAL:', sVal);
+    console.log('printableTicket', printableTicket);
     let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
 
     // success if ticket became invalid

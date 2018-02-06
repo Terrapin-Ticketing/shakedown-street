@@ -40,6 +40,7 @@ module.exports = (server) => {
       console.log('TOTAL:', total);
       let charge = await paymentController.createCharge(user, stripeToken, total);
 
+      console.log('charge:', charge);
       // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
       if (!charge.status === 'succeeded') return res.send({ error: 'Failed to charge card' });
 
