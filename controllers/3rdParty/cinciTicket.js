@@ -80,25 +80,24 @@ async function getSValue(ticketPortal) {
 
 class CincyTicket {
   async deactivateTicket(barcode, event) {
-    // let sessionId = await this._login();
-    // let ticketInfo = await this.getTicketInfo(barcode, event);
-    // if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
-    //
-    // // all properties are required
-    // await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
-    //   name: ticketInfo['Ticket Holder'],
-    //   status: 'void',
-    //   scanned: ticketInfo['Scanned'],
-    //   cmd: 'edit',
-    //   id: ticketInfo.lookupId
-    // }, sessionId);
-    //
-    // let isValidTicket = await this.isValidTicket(
-    //   ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
-    // // success if ticket became invalid
-    // let success = !isValidTicket;
-    // return success;
-    return true;
+    let sessionId = await this._login();
+    let ticketInfo = await this.getTicketInfo(barcode, event);
+    if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
+
+    // all properties are required
+    await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
+      name: ticketInfo['Ticket Holder'],
+      status: 'void',
+      scanned: ticketInfo['Scanned'],
+      cmd: 'edit',
+      id: ticketInfo.lookupId
+    }, sessionId);
+
+    let isValidTicket = await this.isValidTicket(
+      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event);
+    // success if ticket became invalid
+    let success = !isValidTicket;
+    return success;
   }
 
   async issueTicket(event, oldTicket, user) {
@@ -140,7 +139,6 @@ class CincyTicket {
 
     // SUBMIT this sVal ORDER
     let x = await reqPOST(event.domain, ticketIssueRoute, issueTicketRequestBody, sessionId);
-    console.log('ORDER: ', x.body);
 
     // USER sVal ORDER to print ticket
     let printableTicket = (await reqPOST(event.domain, ticketIssueRoute, {
@@ -149,8 +147,6 @@ class CincyTicket {
       r: 0,
       'cmd=tprint': 'Print Tickets'
     }, sessionId)).body;
-    console.log('SVAL:', sVal);
-    console.log('printableTicket', printableTicket);
     let ticketNum = printableTicket.match(/[0-9]{16}/)[0];
 
     // success if ticket became invalid
