@@ -38,11 +38,17 @@ module.exports = (server) => {
 
       let total = Math.ceil(baseTotal + stripeTotal);
       console.log('TOTAL:', total);
-      let charge = await paymentController.createCharge(user, stripeToken, total);
+      let charge;
+      try {
+        charge = await paymentController.createCharge(user, stripeToken, total);
+      } catch (e) {
+        console.log('charge faile:');
+        return res.send({ error: 'Failed to charge card' });
+      }
 
-      console.log('charge:', charge);
-      // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
-      if (!charge.status === 'succeeded') return res.send({ error: 'Failed to charge card' });
+      // console.log('charge:', charge);
+      // // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
+      // if (!charge.status === 'succeeded') return res.send({ error: 'Failed to charge card' });
 
       // notify us that we need to venmo
       let originalOwner = await userController.getUserById(ticket.ownerId);
