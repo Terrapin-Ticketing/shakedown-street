@@ -22,7 +22,8 @@ class Payment {
 
     let source = token.id;
     if (config.env === 'development') {
-      source = 'tok_chargeDeclined';
+      // source = 'tok_chargeDeclined';
+      source = 'tok_visa';
     }
     let charge = await stripe.charges.create({
       amount: total,
