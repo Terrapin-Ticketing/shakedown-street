@@ -90,7 +90,7 @@ module.exports = (server) => {
   server.post('/tickets/:id/sell', async(req, res) => {
     if (!req.user) return res.sendStatus(401);
     let { id } = req.params;
-    let { isForSale, price, payoutMethod, payoutValue } = req.body;
+    let { isForSale, price } = req.body;
     try {
       let ticket = await ticketController.setIsForSale(id, isForSale, price, req.user);
       if (!ticket) return res.sendStatus(403);

@@ -44,7 +44,7 @@ class EventApi {
       $set: {
         eventId: event._id
       }
-    }, { new: true });
+    }, { new: true }).populate('eventId');
 
     return newTicket;
   }

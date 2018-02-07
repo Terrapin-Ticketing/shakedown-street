@@ -144,13 +144,13 @@ class TicketApi {
     // if no price is given, use default price
     if (!price) price = ticket.price;
 
-    ticket = TicketModel.findOneAndUpdate({ _id: ticketId }, {
+    ticket = await TicketModel.findOneAndUpdate({ _id: ticketId }, {
       $set: {
         isForSale,
         price
       }
     }, { new: true }).populate('eventId');
-
+    userController.sendTicketIsForSaleEmail(user, ticket);
     return ticket;
   }
 
@@ -195,6 +195,7 @@ class TicketApi {
     let type = ticketInfo.type;
 
     let ticket = await eventController.createTicket(_id, user._id, barcode, price, type);
+    userController.sendTicketActivateEmail(user, ticket);
     return ticket;
   }
 

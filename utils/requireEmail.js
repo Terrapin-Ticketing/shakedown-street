@@ -5,7 +5,7 @@ import moment from 'moment';
 
 const emailTemplates = require('./emailTemplates');
 
-const notificationEmail = 'info@terrapinticketing.com';
+const notificationEmail = 'brewgrass@terrapinticketing.com';
 
 const uuidv1 = require('uuid/v4');
 
@@ -160,6 +160,45 @@ export const emailPasswordChange = async(toEmail, passwordChangeUrl) => {
   return await sendMail(mailOptions);
 };
 
+export const emailTicketActivate = async(user, ticket) => {
+  let topText = `You activated your ${ticket.eventId.name} ticket`;
+  let emailHTML = (`
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                <h1>You activated a ticket</h1>
+                <br />
+                You activated a ticket to ${ticket.eventId.name}. <br /><br />
+                <div style="text-align: center">
+                  <a href="${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}" class="btn">View it Here</a>
+                </div><br />
+                <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}`}</small>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top" class="bodyContent" mc:edit="body_content00">
+                Now that your ticket is activated on Terrapin, you can mark it as for sale, transfer it to other fans, or store it in your Terrapin wallet to pull up whle in line to get into the show.
+            </td>
+        </tr>
+        ${getTicketCard(ticket, config)}
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: user.email, // list of receivers
+    subject: `You activated a ticket to ${ticket.eventId.name}!`, // Subject line
+    html: await formatEmail(emailHTML, topText)
+  };
+
+  const notificationOptions = {
+    from: notificationEmail, // sender address
+    to: notificationEmail, // list of receivers
+    subject: `Ticket Activation: ${ticket._id}`, // Subject line
+    html: `${user.email} activated <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> (Event: ${ticket.eventId.name})`
+  };
+
+  await sendMail(mailOptions);
+  return await sendMail(notificationOptions);
+};
+
 export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
   let token = uuidv1();
   await new Promise((resolve) => {
@@ -191,7 +230,7 @@ export const emailTransferTicket = async(toEmail, fromUser, ticket) => {
   const notificationOptions = {
     from: notificationEmail, // sender address
     to: notificationEmail, // list of receivers
-    subject: `Transfer Notification: ${ticket.eventId.name}`, // Subject line
+    subject: `Ticket Transfer: ${ticket._id}`, // Subject line
     html: `${fromUser} transfered <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> to ${toEmail} (Event: ${ticket.eventId.name})`
   };
 
@@ -225,7 +264,7 @@ export const emailRecievedTicket = async(user, ticket) => {
   const notificationOptions = {
     from: notificationEmail, // sender address
     to: notificationEmail, // list of receivers
-    subject: `Transfer Notification: ${ticket.eventId.name}`, // Subject line
+    subject: `Ticket Transfer: ${ticket._id}`, // Subject line
     html: `${user.email} receieved <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> (Event: ${ticket.eventId.name})`
   };
 
@@ -243,7 +282,6 @@ export const emailSoldTicket = async(user, ticket) => {
             Your ticket for ${ticket.eventId.name} sold on Terrapin Ticketing.
             <br /><br />
             We will send ${displayPrice(ticket.price)} to ${user.payout[user.payout.default]} via ${user.payout.default.charAt(0).toUpperCase() + user.payout.default.slice(1)} in the next 24 hours. <br /><br />
-            We apologize for the wait but sending funds is a manual process at the moment.
             If you have any questions, please email info@terrapinticketing.com
             <br /><br />
             <p>Cheers,<br />
@@ -259,6 +297,43 @@ export const emailSoldTicket = async(user, ticket) => {
   };
 
   return await sendMail(mailOptions);
+};
+
+export const emailTicketIsForSale = async(user, ticket) => {
+  let topText = `Your ticket to ${ticket.eventId.name} is ${(ticket.isForSale) ? 'for sale' : 'no longer for sale'}!`;
+  let emailHTML = (`
+    <tr>
+        <td valign="top" class="bodyContent" mc:edit="body_content00">
+            <h1>${(ticket.isForSale) ? 'Congrats, your ticket is now for sale!' : 'Second thoughts?'}</h1>
+            <br />
+            Your ticket to ${ticket.eventId.name} is <b>${(ticket.isForSale) ? 'marked for sale' : 'no longer for sale'}</b> on Terrapin Ticketing.
+            <br /><br />
+            ${(ticket.isForSale) ? `Share this link around so other people can buy it: <span style="break-word: normal">${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}</span> <br /><br />
+            We will send ${displayPrice(ticket.price)} to ${user.payout[user.payout.default]} via ${user.payout.default.charAt(0).toUpperCase() + user.payout.default.slice(1)} once someone else buys it. <br /><br />` : ''}
+
+            If you have any questions, please email info@terrapinticketing.com
+            <br /><br />
+            <p>Cheers,<br />
+            The Terrapin Ticketing Team</p>
+        </td>
+    </tr>
+  `);
+  const mailOptions = {
+    from: 'Terrapin Ticketing <info@terrapinticketing.com>', // sender address
+    to: user.email, // list of receivers
+    subject: `${(ticket.isForSale) ? 'Your ticket is for sale!' : 'Your ticket is no longer for sale!'}`, // Subject line
+    html: await formatEmail(emailHTML, topText)
+  };
+
+  const notificationOptions = {
+    from: notificationEmail, // sender address
+    to: notificationEmail, // list of receivers
+    subject: `Ticket Marked ${(ticket.isForSale) ? 'For Sale' : 'Not For Sale'}: ${ticket._id}`, // Subject line
+    html: `${user.email} marked <a href="${config.clientDomain}/event/${ticket.eventId._id}/ticket/${ticket._id}">${ticket._id}</a> <b>${(ticket.isForSale) ? 'For Sale' : 'Not For Sale'}</b> at ${displayPrice(ticket.price)} (Event: ${ticket.eventId.name})`
+  };
+
+  await sendMail(mailOptions);
+  return await sendMail(notificationOptions);
 };
 
 export const emailPurchaseTicket = async(user, ticket) => {
