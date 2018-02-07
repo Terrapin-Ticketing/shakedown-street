@@ -46,7 +46,6 @@ module.exports = (server) => {
     let { id } = req.params;
     if (!req.user || req.user._id !== id) return res.sendStatus(401);
     let { payoutMethod, payoutValue } = req.body;
-    console.log(req.body);
     try {
       let user = await userCol.updatePayoutMethod(id, payoutMethod, payoutValue);
       if (!user) return res.sendStatus(403);
@@ -73,7 +72,6 @@ module.exports = (server) => {
     let { password } = req.body;
     try {
       let user = await userCol.changePassword(token, password);
-      console.log('set-password user:', user);
       if (user.error) return res.send({ error: user.error });
       return sendToken(res, user);
     } catch (e) {

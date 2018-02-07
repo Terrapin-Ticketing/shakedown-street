@@ -25,7 +25,11 @@ module.exports = (server) => {
     }
 
     try {
-      let ticket = await ticketController.getTicketById(ticketId);
+      let ticketNoBarcode = await ticketController.getTicketById(ticketId);
+
+      let originalOwner = await userController.getUserById(ticketNoBarcode.ownerId);
+      let ticket = await ticketController.getTicketById(ticketId, originalOwner);
+
       if (!ticket || !ticket.isForSale) return res.send({ error: 'No ticket found' });
       // check if ticket is valid before charging them
       let isValidTicket = await ticketController.isValidTicket(ticket.eventId, ticket.barcode);
@@ -47,12 +51,7 @@ module.exports = (server) => {
         return res.send({ error: e.message });
       }
 
-      // console.log('charge:', charge);
-      // // if (charge !== 'success') return res.send({ error: 'Failed to charge card' });
-      // if (!charge.status === 'succeeded') return res.send({ error: 'Failed to charge card' });
-
       // notify us that we need to venmo
-      let originalOwner = await userController.getUserById(ticket.ownerId);
       let newTicket = await ticketController.transferPurchasedTicket(ticket._id, transferToUser, originalOwner);
       // don't use 'await' here because we want to return immediately
       userController.sendSoldTicketEmail(originalOwner, newTicket);

@@ -167,19 +167,6 @@ class CincyTicket {
     return ticket.Status === 'active' && !isScanned;
   }
 
-  async _getOrderDetails(orderNumber) {
-    // let sessionId = await this._login();
-
-    // let res = await reqPOST('/merchant/products/2/manage/transactions', {
-    //   from: 'January 3, 2018 2:35 PM',
-    //   to: 'January 4, 2018 2:35 PM',
-    //   fields: requestFields,
-    //   filename: 'export.csv',
-    //   cmd: 'export'
-    // }, sessionId);
-    return 1000;
-  }
-
   // expensive
   async _getTickets(event) {
     let sessionId = await this._login();
