@@ -126,8 +126,8 @@ class CincyTicket {
       _billing_3653461: 0,
       _billing_country: 'US',
       _billing_state: 'OH',
-      email_address: 'info@terrapinticketing.com',
-      _email_address: 'info@terrapinticketing.com',
+      email_address: 'brewgrass@terrapinticketing.com',
+      _email_address: 'brewgrass@terrapinticketing.com',
       'cmd=forward': 'SUBMIT ORDER',
       r3653466: 1
     };

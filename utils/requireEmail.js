@@ -281,7 +281,7 @@ export const emailSoldTicket = async(user, ticket) => {
             <br />
             Your ticket for ${ticket.eventId.name} sold on Terrapin Ticketing.
             <br /><br />
-            We will send ${displayPrice(ticket.price)} to ${user.payout[user.payout.default]} via ${user.payout.default.charAt(0).toUpperCase() + user.payout.default.slice(1)} in the next 24 hours. <br /><br />
+            You will receive ${displayPrice(ticket.price)} in your ${user.payout[user.payout.default]} account on ${user.payout.default.charAt(0).toUpperCase() + user.payout.default.slice(1)} in the next 24 hours. <br /><br />
             If you have any questions, please email info@terrapinticketing.com
             <br /><br />
             <p>Cheers,<br />
