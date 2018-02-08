@@ -185,9 +185,10 @@ class TicketApi {
     if (!event.isThirdParty) return { error: 'Invalid Event' };
     let { _id, eventManager } = event;
     let thirdPartyEvent = thirdPartyControllers[eventManager];
-    let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode, event);
-    if (!ticketInfo || ticketInfo.Status === 'void') return { error: 'Invalid Ticket ID' };
+    let isValidTicket = await thirdPartyEvent.isValidTicket(barcode, event);
+    if (!isValidTicket) return { error: 'Invalid Ticket ID' };
 
+    let ticketInfo = await thirdPartyEvent.getTicketInfo(barcode, event);
     if (!ticketInfo.price && ticketInfo.price !== 0) throw new Error('Original price of ticket not set');
     let price = ticketInfo.price;
 
