@@ -157,7 +157,7 @@ class TicketApi {
   async find(query, user) {
     let tickets = await TicketModel.find(query).populate('eventId');
     let userTickets = tickets.map((ticket) => {
-      if (ticket.ownerId.toString() !== user._id) {
+      if (!user || ticket.ownerId.toString() !== user._id) {
         ticket.barcode = null;
       }
       return ticket;

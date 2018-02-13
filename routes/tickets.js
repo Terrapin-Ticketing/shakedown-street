@@ -49,7 +49,7 @@ module.exports = (server) => {
   });
 
   server.post('/tickets/find', async(req, res) => {
-    if (!req.user) return res.sendStatus(401);
+    // if (!req.user) return res.sendStatus(401);
     let { query } = req.body;
     try {
       let tickets = await ticketController.find(query, req.user);
