@@ -60,6 +60,19 @@ module.exports = (server) => {
     }
   });
 
+  server.post('/tickets/findAll', async(req, res) => {
+    let { query } = req.body;
+    try {
+      let tickets = await ticketController.findAll(query, req.user);
+      if (!tickets) return res.sendStatus(403);
+      res.send({ tickets });
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(500);
+    }
+  });
+
+
   server.get('/tickets/:id', async(req, res) => {
     let { id } = req.params;
     try {
