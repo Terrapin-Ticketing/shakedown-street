@@ -68,6 +68,8 @@ class TicketApi {
 
   async transferTicket(ticketId, inputtedTransferToUser, user) {
     let newBarcode = await this._transferTicket(ticketId, inputtedTransferToUser, user);
+    if (newBarcode.error) return newBarcode.error;
+
     let ticket = await this.getTicketById(ticketId, user);
 
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
@@ -104,6 +106,7 @@ class TicketApi {
 
   async transferPurchasedTicket(ticketId, inputtedTransferToUser, user) {
     let newBarcode = await this._transferTicket(ticketId, inputtedTransferToUser, user);
+    if (newBarcode.error) return newBarcode.error;
     let ticket = await this.getTicketById(ticketId, user);
 
     let transferToUser = await userController.getUserByEmail(inputtedTransferToUser.email);
