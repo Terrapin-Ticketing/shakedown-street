@@ -2,10 +2,6 @@ import request from 'request';
 import url from 'url';
 import csv from 'csvtojson';
 
-let cincyTicketUsername = process.env.CINCI_UN;
-if (!process.env.CINCI_UN) throw new Error('process.env.CINCI_UN is not set (password)');
-let cincyTicketPassword = process.env.CINCI_PW;
-if (!process.env.CINCI_PW) throw new Error('process.env.CINCI_PW is not set (username)');
 
 // let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
 // let ticketPortal = 'https://terrapin.cincyregister.com/testfest';
@@ -80,7 +76,7 @@ async function getSValue(ticketPortal) {
 
 class CincyTicket {
   async deactivateTicket(barcode, event) {
-    let sessionId = await this._login();
+    let sessionId = await this._login(event);
     let ticketInfo = await this.getTicketInfo(barcode, event);
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false;
 
@@ -102,7 +98,7 @@ class CincyTicket {
   }
 
   async issueTicket(event, oldTicket, user) {
-    let sessionId = await this._login();
+    let sessionId = await this._login(event);
     let ticketIssueRoute = event.issueTicketRoute;
     let ticketPortal = `${event.domain}${ticketIssueRoute}`;
     let sVal = await getSValue(ticketPortal);
@@ -169,7 +165,7 @@ class CincyTicket {
 
   // expensive
   async _getTickets(event) {
-    let sessionId = await this._login();
+    let sessionId = await this._login(event);
     let csvExport = (await reqPOST(event.domain, '/merchant/products/2/manage/tickets', {
       form_id: event.externalEventId,
       from: 'January 1, 2000 2:35 PM',
@@ -207,14 +203,14 @@ class CincyTicket {
     return tickets[ticketId];
   }
 
-  async _login() {
+  async _login(event) {
     let fullUrl = 'https://cp.cincyregister.com/';
     let options = {
       method: 'POST',
       url: fullUrl,
       formData: {
-        username: cincyTicketUsername,
-        password: cincyTicketPassword
+        username: event.username,
+        password: event.password
       },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'

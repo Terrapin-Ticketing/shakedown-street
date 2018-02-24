@@ -27,6 +27,11 @@ let EventSchema = new mongoose.Schema({
   website: { type: String },
   backgroundColor: { type: String },
 
+  // * Third Party *
+
+  username: { type: String },
+  password: { type: String },
+
   isThirdParty: { type: Boolean, required: true, default: false },
   eventManager: { type: String },
 
