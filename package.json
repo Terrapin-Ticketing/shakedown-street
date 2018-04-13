@@ -47,8 +47,10 @@
     "moment": "^2.22.0",
     "mongoose": "^5.0.13",
     "nodemailer": "^4.6.4",
+    "query-string": "^6.0.0",
     "redis": "^2.8.0",
     "request": "^2.85.0",
+    "set-cookie-parser": "^2.1.1",
     "stripe": "^5.8.0",
     "uuid": "^3.2.1"
   }

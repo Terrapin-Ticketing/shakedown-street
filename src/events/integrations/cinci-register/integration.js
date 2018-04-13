@@ -19,9 +19,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       password
     }
     const res = await post(loginUrl, formData)
-    const cookies = res.headers['set-cookie'][0].split(';')
-    const sessionCookie = cookies[0]
-    const newSessionId = sessionCookie.split('=')[1]
+    const newSessionId = res.cookies['session_id']
     await redis.set('cinci-register', 'sessionId', newSessionId, 60*60)
     return newSessionId
   }
@@ -41,7 +39,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       scanned: ticketInfo['Scanned'],
       cmd: 'edit',
       id: ticketInfo.lookupId
-    }, sessionId)
+    }, { session_id: sessionId})
 
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event)
@@ -90,7 +88,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     issueTicketRequestBody['coupon_code'] = event.promoCode
 
     // SUBMIT this sVal ORDER
-    await post(ticketPortal, issueTicketRequestBody, sessionId)
+    await post(ticketPortal, issueTicketRequestBody, { session_id: sessionId })
 
     // USER sVal ORDER to print ticket
     let printTicketRes = await post(ticketPortal, {
@@ -98,7 +96,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       step: 1,
       r: 0,
       'cmd=tprint': 'Print Tickets'
-    }, sessionId)
+    }, { session_id: sessionId })
     // console.log('printTicketRes', printTicketRes);
     let printableTicket = printTicketRes.body
     // console.log('printableTicket', printableTicket);
@@ -129,7 +127,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       fields: requestFields,
       filename: 'export.csv',
       cmd: 'export'
-    }, sessionId)).body
+    }, { session_id: sessionId })).body
 
     let ticketLookupTable = {}
     await new Promise((resolve) => {

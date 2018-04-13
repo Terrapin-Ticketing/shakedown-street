@@ -1,12 +1,13 @@
 import IntegrationInterface from '../IntegrationInterface'
-import { post, get } from '../../../_utils/http'
+import { post } from '../../../_utils/http'
 import redis from '../../../_utils/redis'
 
 class CinciTicketIntegration extends IntegrationInterface {
 
   async login(username, password) {
-    const sessionId = await redis.get('cinci-ticket', 'sessionId')
-    if (sessionId) return sessionId
+    const serializedSessionCookies = await redis.get('cinci-ticket', 'sessionCookies')
+    const sessionCookies = JSON.parse(serializedSessionCookies)
+    if (sessionCookies) return sessionCookies
 
     const loginUrl = 'https://cincyticket.showare.com/admin/login.asp'
     const formData = {
@@ -15,13 +16,9 @@ class CinciTicketIntegration extends IntegrationInterface {
       activity: 'Login'
     }
     const res = await post(loginUrl, formData)
-    console.log(res.headers);
-    console.log(res.body);
-
+    await redis.set('cinci-ticket', 'sessionCookies', JSON.stringify(res.cookies), 60*60)
+    return res.cookies
   }
-
-
-
 }
 
 
