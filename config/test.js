@@ -10,7 +10,7 @@ let ipAddress = getIpAddress()[0].address
 module.exports = {
   port: PORT,
   domain: `http://${ipAddress}:${PORT}`,
-  env: 'development',
+  env: 'test',
   stripe: {
     secretKey: 'sk_test_uKIHGA1q5UfwysISFvt6nHto'
   },

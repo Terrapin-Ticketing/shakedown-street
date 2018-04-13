@@ -29,7 +29,7 @@
         "uninitialized": "always"
     }],
     "quotes": [ 2, "single" ],
-    "semi": [ 2, "always" ],
+    "semi": [ 2, "never" ],
     "space-before-blocks": [ 2 ],
     "space-before-function-paren": [ 2, "never" ],
     "space-in-parens": [ 2 ]
@@ -41,6 +41,11 @@
     "browser": true
   },
   "extends": "eslint:recommended",
+  "globals": {
+    "expect": true,
+    "afterAll": true,
+    "beforeAll": true
+  },
   "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module",
