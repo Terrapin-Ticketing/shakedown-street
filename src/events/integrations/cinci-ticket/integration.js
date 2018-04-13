@@ -3,13 +3,12 @@ import { post } from '../../../_utils/http'
 import redis from '../../../_utils/redis'
 
 class CinciTicketIntegration extends IntegrationInterface {
-
   async login(username, password) {
     const serializedSessionCookies = await redis.get('cinci-ticket', 'sessionCookies')
     const sessionCookies = JSON.parse(serializedSessionCookies)
     if (sessionCookies) return sessionCookies
 
-    const loginUrl = 'https://cincyticket.showare.com/admin/login.asp'
+    const loginUrl = process.env.CINCI_TICKET_TEST_LOGIN_URL
     const formData = {
       frm_login: username,
       frm_password: password,

@@ -13,7 +13,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const sessionId = await redis.get('cinci-register', 'sessionId')
     if (sessionId) return sessionId
 
-    const loginUrl = 'https://cp.cincyregister.com/'
+    const loginUrl = process.env.CINCI_REGISTER_TEST_LOGIN_URL
     const formData = {
       username,
       password
