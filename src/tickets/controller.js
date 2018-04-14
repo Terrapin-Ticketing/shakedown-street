@@ -5,11 +5,14 @@ const mongoose = require('../_utils/db').default
 class TicketController {
   async find(query) {
     const tickets = await TicketModel.find(query)
+    const returnTickets = []
     for (let ticket of tickets) {
       let event = await Event.getEventById(ticket.eventId)
-      ticket.event = event // this will be hidden for some reason
+      let x = ticket.toJSON()
+      x.event = event
+      returnTickets.push(x)
     }
-    return tickets
+    return returnTickets
   }
 
   async getTicketByBarcode(barcode) {

@@ -2,7 +2,7 @@ import url from 'url'
 import Ticket from './controller'
 import User from '../users/controller'
 import Event from '../events/controller'
-import Emailer from '../users/email'
+import Emailer from '../email'
 import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
 import { isEmptyObject } from '../_utils'
@@ -77,7 +77,6 @@ export default {
         const event = await Event.getEventById(ticket.eventId)
         if (!event) return res.send({ error: 'invalid event' })
         const { integrationType } = event
-
 
         // check ticket validity
         if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })

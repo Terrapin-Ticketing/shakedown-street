@@ -2,7 +2,7 @@ import { sendToken } from '../_utils'
 import { Email } from '../_utils/param-types'
 import User from './controller'
 import redis from '../_utils/redis'
-import Emailer from './email'
+import Emailer from '../email'
 
 
 export default {
