@@ -2,13 +2,8 @@ import EventModel from './model'
 
 class EventController {
   async createEvent(event) {
-    try {
-      const savedEvent = await EventModel.create(event)
-      return savedEvent
-    } catch (e) {
-      if (~e.message.indexOf('ValidationError')) return null
-      throw e
-    }
+    const savedEvent = await EventModel.create(event)
+    return savedEvent
   }
 
   async getEventById(eventId) {

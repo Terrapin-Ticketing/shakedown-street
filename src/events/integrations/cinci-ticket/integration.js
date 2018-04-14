@@ -8,7 +8,7 @@ class CinciTicketIntegration extends IntegrationInterface {
     const sessionCookies = JSON.parse(serializedSessionCookies)
     if (sessionCookies) return sessionCookies
 
-    const loginUrl = process.env.CINCI_TICKET_TEST_LOGIN_URL
+    const loginUrl = process.env.CINCI_TICKET_LOGIN_URL
     const formData = {
       frm_login: username,
       frm_password: password,

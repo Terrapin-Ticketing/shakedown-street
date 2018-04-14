@@ -17,8 +17,8 @@ describe('Cinci Register Intergration', () => {
     await mongoose.dropCollection('tickets')
   })
   it('should login', async() => {
-    const username = process.env.CINCI_REGISTER_TEST_USERNAME
-    const password = process.env.CINCI_REGISTER_TEST_PASSWORD
+    const username = process.env.CINCI_REGISTER_USERNAME
+    const password = process.env.CINCI_REGISTER_PASSWORD
     const sessionId = await CinciRegisterIntegration.login(username, password)
     expect(sessionId).toBeTruthy()
     expect(sessionId.length).toEqual(32)

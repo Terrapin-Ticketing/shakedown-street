@@ -13,7 +13,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const sessionId = await redis.get('cinci-register', 'sessionId')
     if (sessionId) return sessionId
 
-    const loginUrl = process.env.CINCI_REGISTER_TEST_LOGIN_URL
+    const loginUrl = process.env.CINCI_REGISTER_LOGIN_URL
     const formData = {
       username,
       password
@@ -50,7 +50,10 @@ class CinciRegisterIntegration extends IntegrationInterface {
   }
 
   async issueTicket(event, user, ticketType) {
-    let sessionId = await this.login(event.username, event.password)
+    const username = process.env[event.username]
+    const password = process.env[event.password]
+
+    let sessionId = await this.login(username, password)
     let ticketIssueRoute = event.issueTicketRoute
     let ticketPortal = url.resolve(event.domain, ticketIssueRoute)
     let sVal = await getSValue(ticketPortal)
@@ -119,7 +122,9 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
   // expensive
   async _getTickets(event) {
-    let sessionId = await this.login(event.username, event.password)
+    const username = process.env[event.username]
+    const password = process.env[event.password]
+    let sessionId = await this.login(username, password)
     let csvExport = (await post(`${event.domain}/merchant/products/2/manage/tickets`, {
       form_id: event.externalEventId,
       from: 'January 1, 2000 2:35 PM',
@@ -168,11 +173,12 @@ class CinciRegisterIntegration extends IntegrationInterface {
   }
 
   async transferTicket(ticket, toUser) {
+    if (!toUser || !ticket) return false
     const { eventId, barcode } = ticket
     const success = await this.deactivateTicket(eventId, barcode)
     if (!success) return false
-
     const event = await Event.getEventById(eventId)
+    if (!event) return false
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
     if (!newBarcode) return false
 

@@ -6,7 +6,8 @@ class TicketController {
   async find(query) {
     const tickets = await TicketModel.find(query)
     for (let ticket of tickets) {
-      ticket.event = await Event.getEventById(ticket.eventId)
+      let event = await Event.getEventById(ticket.eventId)
+      ticket.event = event // this will be hidden for some reason
     }
     return tickets
   }

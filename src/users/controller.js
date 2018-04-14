@@ -58,6 +58,21 @@ class UserController {
     const passwordChangeUrl = `${config.clientDomain}/set-password/${token}`
     return passwordChangeUrl
   }
+
+  async addCharge(userId, charge) {
+    this.set(userId, {
+      $push: {
+        'stripe.charges': charge
+      }
+    })
+  }
+
+  async set(id, set) {
+    const user = await UserModel.findOneAndUpdate({ _id: id }, {
+      $set: set
+    }, { new: true })
+    return user
+  }
 }
 
 export default new UserController()

@@ -3,7 +3,7 @@ import url from 'url'
 import setCookie from 'set-cookie-parser'
 import queryString from 'query-string'
 
-export async function post(route, formData, cookieValue) {
+export async function post(route, formData, cookieValue, extraHeaders) {
   const { protocol, host, port } = url.parse(route)
   const domain = port ? `${protocol}//${host}:${port}` : `${protocol}//${host}`
 
@@ -18,7 +18,8 @@ export async function post(route, formData, cookieValue) {
     jar,
     form: formData,
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
+      ...extraHeaders
     }
   }
   return await new Promise((resolve, reject) => { // eslint-disable-line

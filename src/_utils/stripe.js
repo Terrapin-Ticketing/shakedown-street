@@ -6,18 +6,20 @@ const { secretKey } = config.stripe
 const stripe = require('stripe')(secretKey)
 
 class StripeInterface {
-  async setStripe(user) {
+  async createStripeId(user) {
     if (!user.stripeId) {
       let customer = await stripe.customers.create({
         email: user.email
       })
-      user = await User.setStripeId(user._id, customer.id)
+      user = await User.set(user._id, {
+        'stripe.id': customer.id
+      })
     }
     return user
   }
 
   async createCharge(user, token, total, metadata) {
-    user = await this.setStripe(user)
+    if (!user.stripeId) user = await this.createStripeId(user)
 
     let source = token.id
     if (config.env === 'development') {

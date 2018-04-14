@@ -1,6 +1,7 @@
 import url from 'url'
 import Ticket from './controller'
 import User from '../users/controller'
+import Event from '../events/controller'
 import Emailer from '../users/email'
 import Integrations from '../events/integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
@@ -62,17 +63,26 @@ export default {
 
         const ticket = await Ticket.getTicketById(id)
 
-        let transferToUser = await User.getUserById(user._id)
+        let transferToUser = await User.getUserByEmail(transferToEmail)
         let createdNewUser = false
         let passwordChangeUrl
         if (!transferToUser) {
           transferToUser = await User.createUser(transferToEmail, `${Math.random()}`)
-          passwordChangeUrl = await User.requestChangePasswordUrl(transferToUser)
+          if (!transferToUser) res.send({ error: 'username already taken' })
+          passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
           createdNewUser = true
         }
 
-        const Integration = Integrations[ticket.integrationType]
-        const newTicket = await Integration.transferTicket(ticket, transferToUser, user)
+        // get event
+        const event = await Event.getEventById(ticket.eventId)
+        if (!event) return res.send({ error: 'invalid event' })
+        const { integrationType } = event
+
+
+        // check ticket validity
+        if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
+        const Integration = Integrations[integrationType].integration
+        const newTicket = await Integration.transferTicket(ticket, transferToUser)
         if (!newTicket) return res.send({ error: 'error transfering ticket' })
 
         if (createdNewUser) {
@@ -95,8 +105,7 @@ export default {
         const { id } = req.params
         const ticketId = id
         const { token, transferToEmail } = req.body
-        const stripeToken = token
-
+        const stripeToken = JSON.parse(token)
         // const { Integration, user, passwordChangeUrl } = req
 
         // check if ticket has already been activated or isn't for sale
@@ -107,12 +116,10 @@ export default {
         // requireTicketIntegration
         if (!Integrations[ticket.event.integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
         const Integration = Integrations[integrationType].integration
-        const isValidTicket = await Integration.isValidTicket(ticket.barcode, event)
+        const isValidTicket = await Integration.isValidTicket(ticket.barcode, ticket.event)
         if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
 
-
         // create user if one doesn't exist
-        // requireCreateUser
         let user = req.user
         let passwordChangeUrl, charge
         if (!user) {
@@ -121,7 +128,7 @@ export default {
           passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
         }
 
-        const originalOwner = User.getUserById(ticket.ownerId)
+        const originalOwner = await User.getUserById(ticket.ownerId)
 
         // calculate total
         let event = await Event.getEventById(ticket.event)
@@ -136,7 +143,8 @@ export default {
           return res.send({ error: e.message })
         }
 
-        const newTicket = Integration.transferTicket(ticket, user)
+        const newTicket = await Integration.transferTicket(ticket, user)
+        if (!newTicket) return res.send({ error: 'error tranfering ticket' })
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)

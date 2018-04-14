@@ -13,8 +13,8 @@ describe('Cinci Ticket Intergration', () => {
   })
 
   it('should login', async() => {
-    const username = process.env.CINCI_TICKET_TEST_USERNAME
-    const password = process.env.CINCI_TICKET_TEST_PASSWORD
+    const username = process.env.CINCI_TICKET_USERNAME
+    const password = process.env.CINCI_TICKET_PASSWORD
     const res = await CinciTicketIntegration.login(username, password)
     expect(res).toHaveProperty('UserSession')
   })

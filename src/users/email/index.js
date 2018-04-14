@@ -123,9 +123,7 @@ class Emailer {
   }
 
 
-
-
-  async emailSoldTicket(user, ticket) {
+  async sendSoldTicketEmail(user, ticket) {
     let topText = `Someone bought your ticket to ${ticket.event.name}!`
     let emailHTML = (`
       <tr>
@@ -134,7 +132,7 @@ class Emailer {
               <br />
               Your ticket for ${ticket.event.name} sold on Terrapin Ticketing.
               <br /><br />
-              You will receive ${displayPrice(ticket.price)} in your ${user.payout[user.payout.default]} account on ${user.payout.default.charAt(0).toUpperCase() + user.payout.default.slice(1)} in the next 24 hours. <br /><br />
+              You will receive ${displayPrice(ticket.price)} in your ${user.payout.default && user.payout[user.payout.default]} account on ${user.payout.default && user.payout.default.charAt(0).toUpperCase() + user.payout.default && user.payout.default.slice(1)} in the next 24 hours. <br /><br />
               If you have any questions, please email info@terrapinticketing.com
               <br /><br />
               <p>Cheers,<br />

@@ -1,5 +1,7 @@
 import Ticket from '../tickets/controller'
 import User from '../users/controller'
+import jwt from 'jsonwebtoken'
+import config from 'config'
 // import Integrations from '../events/integrations'
 import { _get } from '.'
 
@@ -24,7 +26,6 @@ export async function requireTicketOwner(req, res) {
 
   if (String(ticket.ownerId) !== String(user._id)) return res.send({ error: 'unauthorized' })
 }
-
 // export function requireTicketIntegration(config) {
 //   return async(req, res) => {
 //     const identifier = _get(req, config.path)

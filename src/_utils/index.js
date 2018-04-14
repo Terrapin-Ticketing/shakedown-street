@@ -8,8 +8,7 @@ export const _set = __set
 
 const expire = 1000 * 60 * 60 * 24 * 2
 export function sendToken(res, user) {
-  const { email, password, _id, payout } = user
-  const token = jwt.sign({ email, password, _id, payout }, jwtSecret) // password is salted, so this is fine
+  const token = createJWT(user)
   return res.status(200)
     .cookie('cookieToken', token, {
       maxAge: expire,
@@ -20,4 +19,10 @@ export function sendToken(res, user) {
 
 export function isEmptyObject(obj) {
   return Object.keys(obj).length === 0 && obj.constructor === Object
+}
+
+export function createJWT(user) {
+  const { email, password, _id, payout } = user
+  const token = jwt.sign({ email, password, _id, payout }, jwtSecret) // password is salted, so this is fine
+  return token
 }

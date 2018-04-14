@@ -1,13 +1,13 @@
 require('../../../_utils/bootstrap')
 
 export default {
-  domain: process.env.CINCI_REGISTER_TEST_DOMAIN,
+  domain: process.env.CINCI_REGISTER_DOMAIN,
   issueTicketRoute: '/testfest',
 
   integrationType: 'CinciRegister',
   urlSafe: 'CinciRegisterTestEvent',
-  username: process.env.CINCI_REGISTER_TEST_USERNAME,
-  password: process.env.CINCI_REGISTER_TEST_PASSWORD,
+  username: 'CINCI_REGISTER_USERNAME',
+  password: 'CINCI_REGISTER_PASSWORD',
 
   date: '3/4/2019',
   name: 'Cinci Register Test Event',
