@@ -1,4 +1,4 @@
-require('../../../_utils/bootstrap')
+require('../../_utils/bootstrap')
 
 export default {
   domain: process.env.CINCI_REGISTER_DOMAIN,

@@ -2,7 +2,7 @@ import Ticket from '../tickets/controller'
 import User from '../users/controller'
 import jwt from 'jsonwebtoken'
 import config from 'config'
-// import Integrations from '../events/integrations'
+// import Integrations from '../integrations'
 import { _get } from '.'
 
 export function requireUser(req, res) {

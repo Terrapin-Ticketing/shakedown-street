@@ -3,8 +3,8 @@ const { mongoose } = require('../_utils/bootstrap')
 import httpMocks from 'node-mocks-http'
 import Event from '../events/controller'
 import User from '../users/controller'
-import cinciRegisterTestEvent from '../events/integrations/cinci-register/test-event'
-import CinciRegister from '../events/integrations/cinci-register/integration'
+import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
+import CinciRegister from '../integrations/cinci-register/integration'
 import config from 'config'
 import { post } from '../_utils/http'
 const { secretKey } = config.stripe

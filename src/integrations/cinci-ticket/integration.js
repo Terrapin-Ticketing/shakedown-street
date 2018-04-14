@@ -1,6 +1,6 @@
 import IntegrationInterface from '../IntegrationInterface'
-import { post } from '../../../_utils/http'
-import redis from '../../../_utils/redis'
+import { post } from '../../_utils/http'
+import redis from '../../_utils/redis'
 
 class CinciTicketIntegration extends IntegrationInterface {
   async login(username, password) {

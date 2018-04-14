@@ -1,10 +1,10 @@
 import url from 'url'
-import Event from '../../../events/controller'
-import Ticket from '../../../tickets/controller'
+import Event from '../../events/controller'
+import Ticket from '../../tickets/controller'
 
 import IntegrationInterface from '../IntegrationInterface'
-import { post, get } from '../../../_utils/http'
-import redis from '../../../_utils/redis'
+import { post, get } from '../../_utils/http'
+import redis from '../../_utils/redis'
 
 import csv from 'csvtojson'
 

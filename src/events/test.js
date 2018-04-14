@@ -4,7 +4,7 @@ import redis from '../_utils/redis'
 import httpMocks from 'node-mocks-http'
 
 import EventInterface from '.'
-import cinciRegisterTestEvent from './integrations/cinci-register/test-event'
+import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
 
 import Event from './controller'
 

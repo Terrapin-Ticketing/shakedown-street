@@ -1,4 +1,4 @@
-const { mongoose } = require('../../../_utils/bootstrap')
+const { mongoose } = require('../../_utils/bootstrap')
 
 import CinciTicketIntegration from './integration'
 

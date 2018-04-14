@@ -3,7 +3,7 @@ import Ticket from '../tickets/controller'
 import User from '../users/controller'
 import Emailer from '../users/email'
 import Event from './controller'
-import Integrations from './integrations'
+import Integrations from '../integrations'
 import { Email } from '../_utils/param-types'
 
 export default {

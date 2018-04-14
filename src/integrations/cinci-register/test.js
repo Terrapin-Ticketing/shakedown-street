@@ -1,9 +1,9 @@
-const { mongoose } = require('../../../_utils/bootstrap')
+const { mongoose } = require('../../_utils/bootstrap')
 
 import CinciRegisterIntegration from './integration'
-import Event from '../../../events/controller'
-import Ticket from '../../../tickets/controller'
-import User from '../../../users/controller'
+import Event from '../../events/controller'
+import Ticket from '../../tickets/controller'
+import User from '../../users/controller'
 
 import cinciRegisterTestEvent from './test-event'
 
