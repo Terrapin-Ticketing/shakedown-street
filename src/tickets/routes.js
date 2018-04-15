@@ -27,7 +27,7 @@ export default {
         const { id } = req.params
         const ticket = await Ticket.findOne({_id: id})
         if (!ticket) return res.send({ error: 'ticket not found' })
-        res.send({ ticket })
+        res.send({ ticket: stripBarcodes(ticket) })
       }
     },
     put: {
@@ -87,7 +87,7 @@ export default {
         } else {
           Emailer.sendExistingUserTicketRecieved(transferToUser, ticket)
         }
-        res.send({ ticket: newTicket })
+        res.send({ ticket: stripBarcodes(newTicket) })
       }
     }
   },
