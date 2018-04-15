@@ -3,7 +3,7 @@ import Ticket from './controller'
 import User from '../users/controller'
 import Event from '../events/controller'
 import Emailer from '../email'
-import Integrations from '../integrations'
+// import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
 import { requireTicketOwner, defineIntegration/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
 import { Email } from '../_utils/param-types'
@@ -95,12 +95,22 @@ export default {
   },
   ['/payment/:id']: {
     post: {
+      middleware: [
+        defineIntegration({
+          prop: 'Integration',
+          findOne: {
+            collection: 'tickets',
+            query: { _id: 'params.id' }
+          }
+        })
+      ],
       // middleware: [ /*requireTicketIntegration({path: 'body.token', mapTo: 'Integration'}), requireCreateUser('body.transferToEmail')*/ ],
       body: {
         token: String,
         transferToEmail: String
       },
       handler: async(req, res) => {
+        let { user, Integration } = req.props
         const { id } = req.params
         const ticketId = id
         const { token, transferToEmail } = req.body
@@ -111,15 +121,11 @@ export default {
         const ticket = await Ticket.getTicketById(ticketId)
         if (!ticket || !ticket.isForSale) return res.send({ error: 'invalid ticket' })
 
-        const { integrationType } = ticket.event
         // requireTicketIntegration
-        if (!Integrations[ticket.event.integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
-        const Integration = Integrations[integrationType].integration
         const isValidTicket = await Integration.isValidTicket(ticket.barcode, ticket.event)
         if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
 
         // create user if one doesn't exist
-        let user = req.props.user
         let passwordChangeUrl, charge
         if (!user) {
           user = await User.createUser(transferToEmail, `${Math.random()}`)
