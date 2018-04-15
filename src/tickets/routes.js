@@ -5,7 +5,7 @@ import Event from '../events/controller'
 import Emailer from '../email'
 import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
-import { requireTicketOwner/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
+import { requireTicketOwner, defineIntegration/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
 import { Email } from '../_utils/param-types'
 import stripe from '../_utils/stripe'
 
@@ -50,12 +50,21 @@ export default {
   },
   ['/tickets/:id/transfer']: {
     post: {
-      middleware: [requireTicketOwner],
+      middleware: [
+        requireTicketOwner,
+        defineIntegration({
+          prop: 'Integration',
+          findOne: {
+            collection: 'tickets',
+            query: { _id: 'params.id' }
+          }
+        })
+      ],
       body: {
-        transferToEmail: Email
+        transferToEmail: Email // RequiredUser????
       },
       handler: async(req, res) => {
-        let { user } = req.props
+        let { user, Integration } = req.props
         const { transferToEmail } = req.body
         const { id } = req.params
 
@@ -66,19 +75,12 @@ export default {
         let passwordChangeUrl
         if (!transferToUser) {
           transferToUser = await User.createUser(transferToEmail, `${Math.random()}`)
-          if (!transferToUser) res.send({ error: 'username already taken' })
+          if (!transferToUser) return res.send({ error: 'username already taken' })
           passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
           createdNewUser = true
         }
 
-        // get event
-        const event = await Event.getEventById(ticket.eventId)
-        if (!event) return res.send({ error: 'invalid event' })
-        const { integrationType } = event
-
         // check ticket validity
-        if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
-        const Integration = Integrations[integrationType].integration
         const newTicket = await Integration.transferTicket(ticket, transferToUser)
         if (!newTicket) return res.send({ error: 'error transfering ticket' })
 

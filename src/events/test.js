@@ -145,7 +145,7 @@ describe('Events', () => {
 
       await EventInterface.routes['/:urlSafe/validate'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.isValidTicket).toBeFalsy()
+      expect(actualResponseBody).toHaveProperty('isValidTicket', false)
     }, 10000)
   })
 })

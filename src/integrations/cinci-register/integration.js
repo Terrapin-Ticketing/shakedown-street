@@ -1,4 +1,5 @@
 import url from 'url'
+import config from 'config'
 import Event from '../../events/controller'
 import Ticket from '../../tickets/controller'
 
@@ -11,7 +12,7 @@ import csv from 'csvtojson'
 class CinciRegisterIntegration extends IntegrationInterface {
   async login(username, password) {
     const sessionId = await redis.get('cinci-register', 'sessionId')
-    if (sessionId) return sessionId
+    if (sessionId || config.env !== 'test') return sessionId
 
     const loginUrl = process.env.CINCI_REGISTER_LOGIN_URL
     const formData = {
@@ -27,7 +28,9 @@ class CinciRegisterIntegration extends IntegrationInterface {
   async deactivateTicket(eventId, barcode) {
     const event = await Event.getEventById(eventId)
     if (!event) return false
-    const { username, password, domain } = event
+    const { domain } = event
+    const username = process.env[event.username]
+    const password = process.env[event.password]
     let sessionId = await this.login(username, password)
     let ticketInfo = await this.getTicketInfo(barcode, event)
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false

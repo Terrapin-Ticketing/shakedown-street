@@ -2,9 +2,8 @@ import Ticket from '../tickets/controller'
 import User from '../users/controller'
 import Emailer from '../email'
 import Event from './controller'
-import Integrations from '../integrations'
 import { Email } from '../_utils/param-types'
-import { requireValidObject } from '../_utils/route-middleware'
+import { definePropFromDb, defineIntegration } from '../_utils/route-middleware'
 
 export default {
   ['/events/:id']: {
@@ -18,20 +17,28 @@ export default {
   },
   ['/:urlSafe/validate']: {
     post: {
+      middleware: [
+        definePropFromDb({
+          prop: 'event',
+          findOne: {
+            collection: 'events',
+            query: { urlSafe: 'params.urlSafe' }
+          }
+        }),
+        defineIntegration({
+          prop: 'Integration',
+          findOne: {
+            collection: 'events',
+            query: { urlSafe: 'params.urlSafe' }
+          }
+        })
+      ],
       body: {
         barcode: String
       },
       handler: async(req, res) => {
-        const { urlSafe } = req.params
+        const { Integration, event } = req.props
         const { barcode } = req.body
-        let ticket = await Ticket.getTicketByBarcode(barcode)
-        if (ticket) return res.send({ error: 'This ticket has already been activated' })
-
-        let event = await Event.getEventByUrlSafe(urlSafe)
-        const { integrationType } = event
-
-        if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
-        const Integration = Integrations[integrationType].integration
         const isValidTicket = await Integration.isValidTicket(barcode, event)
         res.send({ isValidTicket })
       }
@@ -40,18 +47,29 @@ export default {
   ['/:urlSafe/activate']: {
     post: { // have to have this to have muiltiple routes under same name
       middleware: [
-        requireValidObject({
-          collection: 'events',
-          query: { urlSafe: 'params.urlSafe' },
-          propName: 'event'
+        definePropFromDb({
+          prop: 'event',
+          findOne: {
+            collection: 'events',
+            query: { urlSafe: 'params.urlSafe' }
+          }
+        }),
+        defineIntegration({
+          prop: 'Integration',
+          findOne: {
+            collection: 'events',
+            query: { urlSafe: 'params.urlSafe' }
+          }
         })
       ],
       body: {
         email: Email,
         barcode: String
+        // email: RequiredUser,
+        // barcode: ValidTicket
       },
       handler: async(req, res) => {
-        const { event } = req.props
+        let { event, Integration } = req.props
         const { email, barcode } = req.body
         let user, passwordChangeUrl
 
@@ -63,9 +81,6 @@ export default {
         const ticket = await Ticket.getTicketByBarcode(barcode)
         if (ticket) return res.send({ error: 'This ticket has already been activated' })
 
-        // check ticket validity
-        if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
-        const Integration = Integrations[integrationType].integration
         const isValidTicket = await Integration.isValidTicket(barcode, event)
         if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
 

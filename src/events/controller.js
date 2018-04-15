@@ -25,6 +25,16 @@ class EventController {
     const event = await EventModel.findOne({ _id: eventId })
     return event && event.ticketTypes
   }
+
+  async findOne(query) {
+    const event = await EventModel.findOne(query)
+    return event
+  }
+
+  async findEventById(eventId) {
+    const event = await EventModel.findOne({ _id: eventId })
+    return event
+  }
 }
 
 export default new EventController()
