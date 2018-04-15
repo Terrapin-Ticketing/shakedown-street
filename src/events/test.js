@@ -23,6 +23,23 @@ describe('Events', () => {
       await mongoose.dropCollection('tickets')
     })
 
+    it('should get event by id', async() => {
+      const testEvent = cinciRegisterTestEvent
+      testEvent.urlSafe = 'TESTING'
+      const event = await Event.createEvent(testEvent)
+      const mockReq = httpMocks.createRequest({
+        method: 'get',
+        url: `/events/${event._id}`,
+        params: {
+          id: event._id
+        }
+      })
+      const mockRes = httpMocks.createResponse()
+      await EventInterface.routes['/events/:id'].get(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.event).toHaveProperty('_id', event._id)
+    })
+
     it('should activate a valid cinci register ticket', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'POST',
@@ -39,6 +56,25 @@ describe('Events', () => {
       await EventInterface.routes['/:urlSafe/activate'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
       expect(actualResponseBody.ticket).toHaveProperty('barcode', '7132317763492225')
+      expect(actualResponseBody.passwordChangeUrl).toBeTruthy()
+    }, 10000)
+
+    it('should return error for invalid event', async() => {
+      const mockReq = httpMocks.createRequest({
+        method: 'POST',
+        url: `/${cinciRegisterTestEvent.urlSafe}/activate`,
+        body: {
+          email: 'test@email.com',
+          barcode: '7132317763492225'
+        },
+        params: {
+          urlSafe: 'invalidevent'
+        }
+      })
+      const mockRes = httpMocks.createResponse()
+      await EventInterface.routes['/:urlSafe/activate'].post(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.error).toBeTruthy()
     }, 10000)
 
     it('shouldn\'t activate a barcode that already exists in the system', async() => {

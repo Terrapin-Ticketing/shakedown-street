@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken'
 import config from 'config'
 
 import routes from './src'
-import { isEmptyObject } from './src/_utils'
+import { isEmptyObject, _set } from './src/_utils'
 
 let app = express()
 
@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   // if the user sends us a webtoken, decode it
   if (req.cookies && req.cookies.cookieToken) {
     jwt.verify(req.cookies.cookieToken, config.user.secret, (err, decoded) => {
-      if (!err) req.user = decoded
+      if (!err) _set(req, 'props.user', decoded)
       return next()
     })
   } else {

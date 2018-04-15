@@ -5,7 +5,6 @@ import Event from '../events/controller'
 import Emailer from '../email'
 import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
-import { isEmptyObject } from '../_utils'
 import { requireTicketOwner/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
 import { Email } from '../_utils/param-types'
 import stripe from '../_utils/stripe'
@@ -16,7 +15,6 @@ export default {
       handler: async(req, res) => {
         const urlParts = url.parse(req.url, true)
         const query = urlParts.query
-        if (isEmptyObject(query)) res.send({}) // we shouldn't allow system wide ticket retreival
         const tickets = await Ticket.find(query)
         const santatizedTickets = stripBarcodes(tickets)
         res.send({ tickets: santatizedTickets })
@@ -57,7 +55,7 @@ export default {
         transferToEmail: Email
       },
       handler: async(req, res) => {
-        let { user } = req
+        let { user } = req.props
         const { transferToEmail } = req.body
         const { id } = req.params
 
@@ -119,7 +117,7 @@ export default {
         if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
 
         // create user if one doesn't exist
-        let user = req.user
+        let user = req.props.user
         let passwordChangeUrl, charge
         if (!user) {
           user = await User.createUser(transferToEmail, `${Math.random()}`)

@@ -14,6 +14,7 @@ export function addRoutes(routes) {
 export function createRoute(routeDef) {
   let routeFunc = async(req, res) => {
     const { middleware, body } = routeDef
+    if (!req.props) req.props = {} // initialize middleware props
     try {
       // check params
       checkBody(req, res, body)

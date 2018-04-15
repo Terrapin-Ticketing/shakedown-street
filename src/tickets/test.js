@@ -7,6 +7,7 @@ import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
 import CinciRegister from '../integrations/cinci-register/integration'
 import config from 'config'
 import { post } from '../_utils/http'
+import { _set } from '../_utils'
 const { secretKey } = config.stripe
 
 import TicketInterface from '.'
@@ -79,7 +80,7 @@ describe('Ticket', () => {
         }
       })
       const mockRes = httpMocks.createResponse()
-      mockReq.user = user
+      _set(mockReq, 'props.user', user)
       await TicketInterface.routes['/tickets/:id'].put(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
       expect(actualResponseBody.ticket).toHaveProperty('isForSale', true)
@@ -107,7 +108,7 @@ describe('Ticket', () => {
         }
       })
       const mockRes = httpMocks.createResponse()
-      mockReq.user = imposter
+      _set(mockReq, 'props.user', imposter)
       await TicketInterface.routes['/tickets/:id'].put(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
       expect(actualResponseBody.error).toBe('unauthorized')
@@ -131,7 +132,7 @@ describe('Ticket', () => {
         }
       })
 
-      mockReq.user = owner
+      _set(mockReq, 'props.user', owner)
       const mockRes = httpMocks.createResponse()
       await TicketInterface.routes['/tickets/:id/transfer'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
@@ -174,7 +175,7 @@ describe('Ticket', () => {
         }
       })
 
-      mockReq.user = buyer
+      _set(mockReq, 'props.user', buyer)
       const mockRes = httpMocks.createResponse()
       await TicketInterface.routes['/payment/:id'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()

@@ -1,10 +1,10 @@
-import config from 'config'
 import Ticket from '../tickets/controller'
 import User from '../users/controller'
 import Emailer from '../email'
 import Event from './controller'
 import Integrations from '../integrations'
 import { Email } from '../_utils/param-types'
+import { requireValidObject } from '../_utils/route-middleware'
 
 export default {
   ['/events/:id']: {
@@ -13,22 +13,6 @@ export default {
         let { id } = req.params
         let event = await Event.getEventById(id)
         res.send({ event })
-      }
-    }
-  },
-  ['/events']: {
-    post: {
-      body: {
-        event: Object
-      },
-      handler: async(req, res) => {
-        let { event } = req.body
-        // disable in production
-        if (config.env === 'production') return res.sendStatus(500)
-
-        let newEvent = await Event.createEvent(event)
-        if (!newEvent) return res.send({ error: 'failed to save event' })
-        res.send({ event: newEvent })
       }
     }
   },
@@ -55,19 +39,23 @@ export default {
   },
   ['/:urlSafe/activate']: {
     post: { // have to have this to have muiltiple routes under same name
-      middleware: [/*requireCreateUser('body.email')*/],
+      middleware: [
+        requireValidObject({
+          collection: 'events',
+          query: { urlSafe: 'params.urlSafe' },
+          propName: 'event'
+        })
+      ],
       body: {
         email: Email,
         barcode: String
       },
       handler: async(req, res) => {
-        const { urlSafe } = req.params
+        const { event } = req.props
         const { email, barcode } = req.body
         let user, passwordChangeUrl
 
         // get event
-        const event = await Event.getEventByUrlSafe(urlSafe)
-        if (!event) return res.send({ error: 'invalid event' })
         const { _id, integrationType } = event
         const eventId = _id
 

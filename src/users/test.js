@@ -18,7 +18,7 @@ describe('User', () => {
   describe('controller', () => {
     it('should sign user up', async() => {
       let user = await UserController.createUser('test@email.com', 'testpass')
-      expect(user)
+      expect(user).toBeTruthy()
     })
 
     it('should change users password', async() => {
@@ -32,7 +32,7 @@ describe('User', () => {
   describe('routes', () => {
     it('should create user by calling route', async() => {
       const mockReq = httpMocks.createRequest({
-        method: 'POST',
+        method: 'post',
         url: '/signup',
         body: {
           email: 'tesT@email.com',
@@ -48,7 +48,7 @@ describe('User', () => {
 
     it('should fail to sign up with invalid email', async() => {
       const mockReq = httpMocks.createRequest({
-        method: 'POST',
+        method: 'post',
         url: '/signup',
         body: {
           email: 'test',
@@ -62,11 +62,28 @@ describe('User', () => {
       expect(actualResponseBody.error).toBeTruthy()
     })
 
+    it('should log in existing user', async() => {
+      await UserController.createUser('test@email.com', 'testpass')
+      const mockReq = httpMocks.createRequest({
+        method: 'post',
+        url: '/login',
+        body: {
+          email: 'tesT@email.com',
+          password: 'testpass'
+        }
+      })
+      const mockRes = httpMocks.createResponse()
+
+      await User.routes['/login'].post(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.token)
+    })
+
     it('should set change password token', async() => {
       const userEmail = 'test@test.org'
       await UserController.createUser(userEmail, 'test')
       const mockReq = httpMocks.createRequest({
-        method: 'POST',
+        method: 'post',
         url: '/set-password',
         body: { email: userEmail }
       })
@@ -78,7 +95,7 @@ describe('User', () => {
 
     it('should change password token with given token', async() => {
       const mockReq = httpMocks.createRequest({
-        method: 'POST',
+        method: 'post',
         url: '/set-password/:token',
         body: {
           password: 'pass'
@@ -95,7 +112,7 @@ describe('User', () => {
 
     it('should set check a token', async() => {
       const mockReq = httpMocks.createRequest({
-        method: 'POST',
+        method: 'post',
         url: '/check-token',
         body: {
           token: 'not-a-valid-token'
