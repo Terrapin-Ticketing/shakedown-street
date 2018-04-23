@@ -1,3 +1,4 @@
+import url from 'url'
 import Ticket from '../tickets/controller'
 import User from '../users/controller'
 import Emailer from '../email'
@@ -6,6 +7,16 @@ import { Email } from '../_utils/param-types'
 import { definePropFromDb, defineIntegration } from '../_utils/route-middleware'
 
 export default {
+  ['/events']: {
+    get: {
+      handler: async(req, res) => {
+        const urlParts = url.parse(req.url, true)
+        const query = urlParts.query
+        const events = await Event.find(query)
+        res.send({ events })
+      }
+    }
+  },
   ['/events/:id']: {
     get: {
       handler: async(req, res) => {

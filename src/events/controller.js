@@ -31,6 +31,11 @@ class EventController {
     return event
   }
 
+  async find(query) {
+    const events = await EventModel.find(query)
+    return events
+  }
+
   async findEventById(eventId) {
     const event = await EventModel.findOne({ _id: eventId })
     return event

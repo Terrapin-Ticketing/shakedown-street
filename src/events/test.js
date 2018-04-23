@@ -40,6 +40,21 @@ describe('Events', () => {
       expect(actualResponseBody.event).toHaveProperty('_id', event._id)
     })
 
+    it('should get event using query string', async() => {
+      const urlSafe = 'urlSafeName'
+      const testEvent = cinciRegisterTestEvent
+      testEvent.urlSafe = urlSafe
+      await Event.createEvent(testEvent)
+      const mockReq = httpMocks.createRequest({
+        method: 'get',
+        url: `/events?urlSafe=${urlSafe}`
+      })
+      const mockRes = httpMocks.createResponse()
+      await EventInterface.routes['/events'].get(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.events[0]).toHaveProperty('urlSafe', urlSafe)
+    })
+
     it('should activate a valid cinci register ticket', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'POST',
