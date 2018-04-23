@@ -65,8 +65,6 @@ export default {
       body: {
         email: Email,
         barcode: String
-        // email: RequiredUser,
-        // barcode: ValidTicket
       },
       handler: async(req, res) => {
         let { event, Integration } = req.props

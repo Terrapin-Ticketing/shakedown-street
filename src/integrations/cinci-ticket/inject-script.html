@@ -1,0 +1,22 @@
+<script>
+  var divs = document.getElementsByTagName("div");
+  for(var i = 0; i < divs.length; i++){
+    var innerHTML = divs[i].innerHTML
+    var isBarcode = innerHTML.match(/[0-9]{22}/)
+    var hasRan = false
+    if (isBarcode && !hasRan) {
+      var barcode = innerHTML
+      var newLink = document.createElement("a");
+      newLink.setAttribute('href', 'http://localhost:3000/CincyTicketTest/activate?barcode=' + barcode);
+
+      var text = document.createTextNode("transfer or sell");
+      newLink.appendChild(text)
+
+      var ps = document.getElementsByTagName("div")
+      p = ps[ps.length - 1]
+      p.appendChild(newLink)
+      hasRan = true
+      console.log('here:', here)
+    }
+  }
+</script>

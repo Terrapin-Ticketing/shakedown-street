@@ -18,6 +18,10 @@ class CinciTicketIntegration extends IntegrationInterface {
     await redis.set('cinci-ticket', 'sessionCookies', JSON.stringify(res.cookies), 60*60)
     return res.cookies
   }
+
+  // async isValidTicket(barcode) {
+  //
+  // }
 }
 
 

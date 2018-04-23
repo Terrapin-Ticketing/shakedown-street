@@ -104,7 +104,6 @@ export default {
           }
         })
       ],
-      // middleware: [ /*requireTicketIntegration({path: 'body.token', mapTo: 'Integration'}), requireCreateUser('body.transferToEmail')*/ ],
       body: {
         token: String,
         transferToEmail: String
