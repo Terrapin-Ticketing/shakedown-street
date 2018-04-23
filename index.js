@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import jwt from 'jsonwebtoken'
 import config from 'config'
+console.log('config:', config)
 
 import routes from './src'
 import { isEmptyObject, _set } from './src/_utils'
@@ -29,7 +30,7 @@ app.set('trust proxy', 1) // trust first proxy
 app.use((req, res, next) => {
   // if the user sends us a webtoken, decode it
   if (req.cookies && req.cookies.cookieToken) {
-    jwt.verify(req.cookies.cookieToken, config.user.secret, (err, decoded) => {
+    jwt.verify(req.cookies.cookieToken, config.jwtSecret, (err, decoded) => {
       if (!err) _set(req, 'props.user', decoded)
       return next()
     })
