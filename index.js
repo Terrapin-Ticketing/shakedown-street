@@ -5,8 +5,6 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import jwt from 'jsonwebtoken'
 import config from 'config'
-console.log('config:', config)
-
 import routes from './src'
 import { isEmptyObject, _set } from './src/_utils'
 
