@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node index.js",
+    "populate": "babel-node bin/populate-db.js",
     "dev": "nodemon --exec npm start",
     "test": "jest --watch --runInBand --verbose"
   },
