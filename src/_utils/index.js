@@ -12,7 +12,7 @@ export function sendToken(res, user) {
   return res.status(200)
     .cookie('cookieToken', token, {
       maxAge: expire,
-      httpOnly: true
+      httpOnly: false
     })
     .send({ token })
 }
