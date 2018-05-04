@@ -13,7 +13,7 @@ describe('Mission Tix Ticket Intergration', () => {
   })
 
   it('should login', async() => {
-    const res = await MissionTix.login()
+    const res = await MissionTix.issueTicket()
     console.log('res:', res)
     // expect(res).toHaveProperty('UserSession')
   })

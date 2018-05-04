@@ -8,17 +8,25 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     const sessionCookies = JSON.parse(serializedSessionCookies)
     if (sessionCookies) return sessionCookies
 
-    const loginUrl = process.env.MISSION_TIX_LOGIN_URL
-    const res = await post(loginUrl, {}, {}, {
+    const eventUrl = process.env.MISSION_TIX_LOGIN_URL
+    const res = await post(eventUrl, {}, {}, {
       'dome-key': process.env.MISSION_TIX_API_KEY,
       'Content-Type': 'application/json'
     })
     console.log('res:', res)
   }
 
-  // async isValidTicket(barcode) {
-  //
-  // }
+  async isValidTicket(barcode) {
+
+  }
+
+  async issueTicket() {
+    const res = await post(eventUrl, {}, {}, {
+      'dome-key': process.env.MISSION_TIX_API_KEY,
+      'Content-Type': 'application/json'
+    })
+    console.log('res:', res)
+  }
 }
 
 
