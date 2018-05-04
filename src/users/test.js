@@ -58,8 +58,7 @@ describe('User', () => {
       const mockRes = httpMocks.createResponse()
 
       await User.routes['/signup'].post(mockReq, mockRes)
-      const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.error).toBeTruthy()
+      expect(mockRes.statusCode).toEqual(422)
     })
 
     it('should log in existing user', async() => {
@@ -93,7 +92,7 @@ describe('User', () => {
       expect(actualResponseBody.message).toBeTruthy()
     })
 
-    it('should change password token with given token', async() => {
+    it('should require valid token to change password', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'post',
         url: '/set-password/:token',
@@ -105,12 +104,11 @@ describe('User', () => {
         }
       })
       const mockRes = httpMocks.createResponse()
-      await User.routes['/set-password'].post(mockReq, mockRes)
-      const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.error).toBeTruthy()
+      await User.routes['/set-password/:token'].post(mockReq, mockRes)
+      expect(mockRes.statusCode).toEqual(403)
     })
 
-    it('should set check a token', async() => {
+    it('should check if token exists', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'post',
         url: '/check-token',
@@ -119,9 +117,9 @@ describe('User', () => {
         }
       })
       const mockRes = httpMocks.createResponse()
-      await User.routes['/set-password'].post(mockReq, mockRes)
+      await User.routes['/check-token'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.error).toBeTruthy()
+      expect(actualResponseBody.isValidToken).toBeFalsy()
     })
   })
 })
