@@ -26,7 +26,7 @@ export default {
       handler: async(req, res) => {
         const { id } = req.params
         const ticket = await Ticket.findOne({_id: id})
-        if (!ticket) return res.send({ error: 'ticket not found' })
+        if (!ticket) return res.status(404).send('ticket not found')
         res.send({ ticket: stripBarcodes(ticket) })
       }
     },
@@ -42,7 +42,7 @@ export default {
           isForSale,
           price
         })
-        if (!newTicket) return res.send({ error: 'error updating ticket' })
+        if (!newTicket) return res.status(400).send('error updating ticket')
 
         res.send({ ticket: newTicket })
       }
@@ -75,14 +75,14 @@ export default {
         let passwordChangeUrl
         if (!transferToUser) {
           transferToUser = await User.createUser(transferToEmail, `${Math.random()}`)
-          if (!transferToUser) return res.send({ error: 'username already taken' })
+          if (!transferToUser) return res.status(400).send('username already taken')
           passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
           createdNewUser = true
         }
 
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, transferToUser)
-        if (!newTicket) return res.send({ error: 'error transfering ticket' })
+        if (!newTicket) return res.status(400).send('error transfering ticket')
 
         if (createdNewUser) {
           Emailer.sendNewUserTicketRecieved(transferToEmail, user.email, ticket, passwordChangeUrl)
@@ -118,17 +118,17 @@ export default {
 
         // check if ticket has already been activated or isn't for sale
         const ticket = await Ticket.getTicketById(ticketId)
-        if (!ticket || !ticket.isForSale) return res.send({ error: 'invalid ticket' })
+        if (!ticket || !ticket.isForSale) return res.status(400).send('invalid ticket')
 
         // requireTicketIntegration
         const isValidTicket = await Integration.isValidTicket(ticket.barcode, ticket.event)
-        if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
+        if (!isValidTicket) return res.status(400).send('Invalid Ticket ID')
 
         // create user if one doesn't exist
         let passwordChangeUrl, charge
         if (!user) {
           user = await User.createUser(transferToEmail, `${Math.random()}`)
-          if (!user) return res.send({ error: 'username already taken' })
+          if (!user) return res.status(400).send('username already taken')
           passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
         }
 
@@ -144,11 +144,11 @@ export default {
         try {
           charge = await stripe.createCharge(user, stripeToken, total)
         } catch (e) {
-          return res.send({ error: e.message })
+          return res.status(400).send(e.message)
         }
 
         const newTicket = await Integration.transferTicket(ticket, user)
-        if (!newTicket) return res.send({ error: 'error tranfering ticket' })
+        if (!newTicket) return res.status(400).send('error tranfering ticket')
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)

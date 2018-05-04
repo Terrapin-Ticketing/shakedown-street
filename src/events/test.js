@@ -89,7 +89,8 @@ describe('Events', () => {
       const mockRes = httpMocks.createResponse()
       await EventInterface.routes['/:urlSafe/activate'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.error).toBeTruthy()
+      expect(mockRes.statusCode).toEqual(404)
+      expect(actualResponseBody).toBe('event not found')
     }, 10000)
 
     it('shouldn\'t activate a barcode that already exists in the system', async() => {
@@ -123,7 +124,8 @@ describe('Events', () => {
       const mockRes2 = httpMocks.createResponse()
       await EventInterface.routes['/:urlSafe/activate'].post(mockReq2, mockRes2)
       const actualResponseBody2 = mockRes2._getData()
-      expect(actualResponseBody2.error).toBe('This ticket has already been activated')
+      expect(mockRes2.statusCode).toEqual(400)
+      expect(actualResponseBody2).toBe('This ticket has already been activated')
     }, 10000)
 
     it('shouldn\'t activate an invalid barcode', async() => {
@@ -142,7 +144,8 @@ describe('Events', () => {
 
       await EventInterface.routes['/:urlSafe/activate'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.error).toBe('Invalid Ticket ID')
+      expect(mockRes.statusCode).toEqual(400)
+      expect(actualResponseBody).toBe('Invalid Ticket ID')
     }, 10000)
 
     it('shouldn\'t validate an invalid barcode', async() => {

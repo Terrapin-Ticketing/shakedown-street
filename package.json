@@ -31,7 +31,8 @@
     "dotenv": "^5.0.1",
     "eslint": "^4.19.1",
     "jest": "^22.4.3",
-    "node-mocks-http": "^1.5.8"
+    "node-mocks-http": "^1.5.8",
+    "nodemon": "^1.17.3"
   },
   "dependencies": {
     "bcrypt": "^2.0.0",

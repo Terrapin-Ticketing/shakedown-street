@@ -111,7 +111,8 @@ describe('Ticket', () => {
       _set(mockReq, 'props.user', imposter)
       await TicketInterface.routes['/tickets/:id'].put(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.error).toBe('unauthorized')
+      expect(actualResponseBody).toBe('unauthorized')
+      expect(mockRes.statusCode).toEqual(401)
     }, 8000)
 
     it('should transfer ticket to new user', async() => {

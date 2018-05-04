@@ -12,7 +12,7 @@ import csv from 'csvtojson'
 class CinciRegisterIntegration extends IntegrationInterface {
   async login(username, password) {
     const sessionId = await redis.get('cinci-register', 'sessionId')
-    if (sessionId || config.env !== 'test') return sessionId
+    if (sessionId && config.env !== 'test') return sessionId
 
     const loginUrl = process.env.CINCI_REGISTER_LOGIN_URL
     const formData = {
@@ -138,23 +138,28 @@ class CinciRegisterIntegration extends IntegrationInterface {
     }, { session_id: sessionId })).body
 
     let ticketLookupTable = {}
-    await new Promise((resolve) => {
+    await new Promise((resolve, reject) => {
       csv().fromString(csvExport)
         .on('csv', async(row) => {
-          let ticketNum = row[2].substring(1, row[2].length)
-          let ticketEntry = ticketLookupTable[ticketNum] = {
-            lookupId: ticketNum.substring(9, ticketNum.length)
-          }
-          for (let i = 0; i < row.length; i++) {
-            ticketEntry[fields[i]] = row[i]
-            // set the ticket price based on the ticket level (ticket type)
-            if (fields[i] === 'Ticket Level') {
-              let ticketLevel = ticketEntry[fields[i]]
-              ticketEntry.price = event.ticketTypes[ticketLevel].price
-              ticketEntry.type = ticketLevel
+          try {
+            let ticketNum = row[2].substring(1, row[2].length)
+            let ticketEntry = ticketLookupTable[ticketNum] = {
+              lookupId: ticketNum.substring(9, ticketNum.length)
             }
+            for (let i = 0; i < row.length; i++) {
+              ticketEntry[fields[i]] = row[i]
+              // set the ticket price based on the ticket level (ticket type)
+              if (fields[i] === 'Ticket Level') {
+                let ticketLevel = ticketEntry[fields[i]]
+                ticketEntry.price = event.ticketTypes[ticketLevel].price
+                ticketEntry.type = ticketLevel
+              }
+            }
+          } catch (e) {
+            reject(e)
           }
         })
+        .on('error', reject)
         .on('done', resolve)
     })
     return ticketLookupTable

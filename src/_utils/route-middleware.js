@@ -12,7 +12,7 @@ export function requireUser(req, res) {
 
 export async function requireTicketOwner(req, res) {
   const { id } = req.params
-  if (!id) res.send({ error: 'missing ticket id' })
+  if (!id) res.status(400).send('missing ticket id')
 
   requireUser(req, res)
   if (res.headersSent) return
@@ -20,12 +20,12 @@ export async function requireTicketOwner(req, res) {
   const { user } = req.props
 
   const isUser = await User.getUserById(user._id)
-  if (!isUser) return res.send({ error: 'user not found' })
+  if (!isUser) return res.status(404).send('user not found')
 
   const ticket = await Ticket.getTicketById(id)
-  if (!ticket) return res.send({ error: 'ticket not found' })
+  if (!ticket) return res.status(404).send('ticket not found')
 
-  if (String(ticket.ownerId) !== String(user._id)) return res.send({ error: 'unauthorized' })
+  if (String(ticket.ownerId) !== String(user._id)) return res.status(401).send('unauthorized')
 }
 
 export async function queryCollection(collection, query) {
@@ -57,7 +57,7 @@ export function definePropFromDb({ prop, findOne }) {
     const normalizedQuery = convertQuery(query, req)
     let entries = await queryCollection(collection, normalizedQuery)
     entries = entries.length === 1 ? entries[0] : entries
-    if (entries === null || entries.length === 0) return res.send({ error: `${prop} not found` })
+    if (entries === null || entries.length === 0) return res.status(404).send(`${prop} not found`)
     _set(req, `props.${prop}`, entries)
   }
 }
@@ -72,7 +72,7 @@ export function defineIntegration({ prop, findOne }) {
     let doc = docs[0] // grab first event
     if (collection === 'tickets') doc = await Event.findEventById(doc.eventId)
     const { integrationType } = doc
-    if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
+    if (!Integrations[integrationType]) return res.status(400).send(`invalid integration type ${integrationType}`)
     const Integration = Integrations[integrationType].integration
     _set(req, `props.${prop}`, Integration)
   }
@@ -85,10 +85,10 @@ export function defineIntegration({ prop, findOne }) {
 //     const event = await Event.findOne({ urlSafe: req.params.urlSafe })
 //
 //     const { integrationType } = event
-//     if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
+//     if (!Integrations[integrationType]) return res.status(400).send(`invalid integration type ${integrationType}`)
 //     const Integration = Integrations[integrationType].integration
 //     const isValidTicket = await Integration.isValidTicket(query.barcode, event)
-//     if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
+//     if (!isValidTicket) return res.status(400).send('Invalid Ticket ID')
 //     _set(req, `props.${prop}`, Integration)
 //   }
 // }
@@ -99,7 +99,7 @@ export function defineIntegration({ prop, findOne }) {
 //     if (!req.props.user) {
 //       const transferToEmail = _get(req, path)
 //       const user = await User.createUser(transferToEmail, `${Math.random()}`)
-//       if (!user) return res.send({ error: 'username already taken' })
+//       if (!user) return res.status(400).send('username already taken')
 //       const passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
 //       req.props.user = user
 //       req.passwordChangeUrl = passwordChangeUrl

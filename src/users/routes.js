@@ -15,7 +15,7 @@ export default {
       handler: async(req, res) => {
         const { email, password } = req.body
         const user = await User.createUser(email, password)
-        if (!user) return res.send({ error: 'username already taken' })
+        if (!user) return res.status(400).send('username already taken')
         sendToken(res, user)
       }
     }
@@ -29,7 +29,7 @@ export default {
       handler: async(req, res) => {
         const { email, password } = req.body
         const user = await User.login(email, password)
-        if (!user) return res.status(403).send({ error: 'invalid email or password' })
+        if (!user) return res.status(403).send('invalid email or password')
         sendToken(res, user)
       }
     }
@@ -42,7 +42,7 @@ export default {
       handler: async(req, res) => {
         const { email } = req.body
         const user = await User.getUserByEmail(email)
-        if (!user) return res.send({ error: 'user doesnt exist'})
+        if (!user) return res.status(400).send('user doesnt exist')
         const passwordChangeUrl = await User.requestChangePasswordUrl(email)
         await Emailer.sendChangePassword(email, passwordChangeUrl)
         res.send({ message: 'password change email sent' })
@@ -58,9 +58,9 @@ export default {
         const { token } = req.params
         const { password } = req.body
         const email = await redis.get('set-password', token)
-        if (!email) return res.status(403).send({ error: 'invalid token' })
+        if (!email) return res.status(403).send('invalid token')
         const user = await User.changePassword(email, password)
-        if (!user) return res.send({ error: 'user not found' })
+        if (!user) return res.status(404).send('user not found')
         sendToken(res, user)
       }
     }

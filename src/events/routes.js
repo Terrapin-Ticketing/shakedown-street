@@ -88,23 +88,23 @@ export default {
 
         // check if ticket has already been activated
         const ticket = await Ticket.getTicketByBarcode(barcode)
-        if (ticket) return res.send({ error: 'This ticket has already been activated' })
+        if (ticket) return res.status(400).send('This ticket has already been activated')
 
         const isValidTicket = await Integration.isValidTicket(barcode, event)
-        if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
+        if (!isValidTicket) return res.status(400).send('Invalid Ticket ID')
 
         // get user
         user = await User.getUserByEmail(email)
         if (!user) {
           user = await User.createUser(email, `${Math.random()}`)
-          if (!user) return res.send({ error: 'username already taken' })
+          if (!user) return res.status(400).send('username already taken')
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
         }
         let userId = user._id
 
         // get ticket info
         const ticketInfo = await Integration.getTicketInfo(barcode, event)
-        if (!ticketInfo || !ticketInfo.type || ticketInfo.price !== 0) return res.send({ error: `error getting ticket info from ${integrationType}` })
+        if (!ticketInfo || !ticketInfo.type || isNaN(ticketInfo.price)) return res.status(400).send(`error getting ticket info from ${integrationType}`)
         const { type, price } = ticketInfo
 
         // create new ticket

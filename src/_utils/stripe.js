@@ -22,7 +22,7 @@ class StripeInterface {
     if (!user.stripeId) user = await this.createStripeId(user)
 
     let source = token.id
-    if (config.env === 'development') {
+    if (config.env !== 'production') {
       // source = 'tok_chargeDeclined';
       source = 'tok_visa'
     }
