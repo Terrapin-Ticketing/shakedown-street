@@ -12,14 +12,21 @@ export async function post(route, formData, cookieValue, extraHeaders) {
   let cookie = request.cookie(stringifiedCookie)
 
   jar.setCookie(cookie, domain)
+  // let headers = {
+  //   'Content-Type': 'application/x-www-form-urlencoded',
+  //   ...extraHeaders
+  // }
+  // console.log(':', )
   let options = {
     method: 'POST',
     url: route,
     jar,
     form: formData,
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      ...extraHeaders
+      'dome-key': '1jjdk2300dkk99wecsp98fuhj923r9uh20hfm',
+      // 'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+      // ...extraHeaders
     }
   }
   return await new Promise((resolve, reject) => { // eslint-disable-line
