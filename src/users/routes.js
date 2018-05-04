@@ -1,5 +1,5 @@
 import { sendToken } from '../_utils'
-import { Email } from '../_utils/param-types'
+import { Email } from '../_utils/param-validators'
 import User from './controller'
 import redis from '../_utils/redis'
 import Emailer from '../email'

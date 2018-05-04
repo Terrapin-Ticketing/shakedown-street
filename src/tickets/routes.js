@@ -6,7 +6,7 @@ import Emailer from '../email'
 // import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
 import { requireTicketOwner, defineIntegration/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
-import { Email } from '../_utils/param-types'
+import { Email } from '../_utils/param-validators'
 import stripe from '../_utils/stripe'
 
 export default {
