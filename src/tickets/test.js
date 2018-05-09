@@ -37,7 +37,7 @@ describe('Ticket', () => {
       const mockRes = httpMocks.createResponse()
       await TicketInterface.routes['/tickets'].get(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.tickets[0]).toHaveProperty('ownerId', user._id)
+      expect(actualResponseBody[0]).toHaveProperty('ownerId', user._id)
     }, 8000)
 
     it('should remove barcodes from tickets', async() => {
@@ -57,7 +57,7 @@ describe('Ticket', () => {
       const mockRes = httpMocks.createResponse()
       await TicketInterface.routes['/tickets'].get(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.tickets[0]).toHaveProperty('barcode', null)
+      expect(actualResponseBody[0]).toHaveProperty('barcode', null)
     }, 10000)
 
     it('should update owned ticket', async() => {
@@ -83,7 +83,7 @@ describe('Ticket', () => {
       _set(mockReq, 'props.user', user)
       await TicketInterface.routes['/tickets/:id'].put(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.ticket).toHaveProperty('isForSale', true)
+      expect(actualResponseBody).toHaveProperty('isForSale', true)
     }, 8000)
 
     it('should NOT allow update of unowned ticket', async() => {
@@ -138,8 +138,8 @@ describe('Ticket', () => {
       await TicketInterface.routes['/tickets/:id/transfer'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
       const newUser = await User.getUserByEmail('newUser@test.com')
-      expect(actualResponseBody.ticket).toHaveProperty('_id', ticket._id)
-      expect(actualResponseBody.ticket).toHaveProperty('ownerId', newUser._id)
+      expect(actualResponseBody).toHaveProperty('_id', ticket._id)
+      expect(actualResponseBody).toHaveProperty('ownerId', newUser._id)
     }, 15000)
 
     it('should purchace ticket with stripe token', async() => {

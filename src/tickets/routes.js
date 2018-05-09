@@ -17,7 +17,7 @@ export default {
         const query = urlParts.query
         const tickets = await Ticket.find(query)
         const santatizedTickets = stripBarcodes(tickets)
-        res.send({ tickets: santatizedTickets })
+        res.send(santatizedTickets)
       }
     }
   },
@@ -27,7 +27,7 @@ export default {
         const { id } = req.params
         const ticket = await Ticket.findOne({_id: id})
         if (!ticket) return res.status(404).send('ticket not found')
-        res.send({ ticket: stripBarcodes(ticket) })
+        res.send(stripBarcodes(ticket))
       }
     },
     put: {
@@ -35,16 +35,13 @@ export default {
       handler: async(req, res) => {
         const { isForSale, price } = req.body
         const { id } = req.params
-
         const ticket = await Ticket.getTicketById(id)
-
         const newTicket = await Ticket.set(ticket._id, {
           isForSale,
           price
         })
         if (!newTicket) return res.status(400).send('error updating ticket')
-
-        res.send({ ticket: newTicket })
+        res.send(newTicket)
       }
     }
   },
@@ -89,7 +86,7 @@ export default {
         } else {
           Emailer.sendExistingUserTicketRecieved(transferToUser, ticket)
         }
-        res.send({ ticket: stripBarcodes(newTicket) })
+        res.send(stripBarcodes(newTicket))
       }
     }
   },
