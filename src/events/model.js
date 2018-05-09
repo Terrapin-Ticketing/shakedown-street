@@ -28,6 +28,7 @@ let EventSchema = new mongoose.Schema({
   backgroundColor: { type: String },
 
   // * Third Party *
+  auth: {}, // this is used to store any integration specific auth info
 
   username: { type: String },
   password: { type: String },
@@ -40,7 +41,7 @@ let EventSchema = new mongoose.Schema({
 
   ticketTypes: {},
 
-  externalEventId: { type: String },
+  externalEventId: { type: String, required: true },
   promoCode: { type: String },
 
 

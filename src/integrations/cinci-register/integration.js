@@ -10,6 +10,8 @@ import redis from '../../_utils/redis'
 import csv from 'csvtojson'
 
 class CinciRegisterIntegration extends IntegrationInterface {
+  static integrationType = 'CinciRegister'
+
   async login(username, password) {
     const sessionId = await redis.get('cinci-register', 'sessionId')
     if (sessionId || config.env !== 'test') return sessionId

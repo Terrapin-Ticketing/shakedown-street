@@ -1,5 +1,6 @@
 import CinciRegisterIntegration from './integration'
 
 export default {
-  integration: CinciRegisterIntegration
+  integration: CinciRegisterIntegration,
+  integrationType: CinciRegisterIntegration.integrationType
 }

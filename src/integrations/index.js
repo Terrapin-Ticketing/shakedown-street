@@ -1,5 +1,7 @@
 import CinciRegister from './cinci-register'
+import MissionTix from './mission-tix'
 
 export default {
-  CinciRegister
+  [CinciRegister.integrationType]: CinciRegister,
+  [MissionTix.integrationType]: MissionTix
 }

@@ -1,5 +1,6 @@
-import CinciTicketIntegration from './integration'
+import MissionTixIntegraion from './integration'
 
 export default {
-  integration: CinciTicketIntegration
+  integration: MissionTixIntegraion,
+  integrationType: MissionTixIntegraion.integrationType
 }
