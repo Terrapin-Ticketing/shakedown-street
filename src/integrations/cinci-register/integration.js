@@ -1,5 +1,4 @@
 import url from 'url'
-import config from 'config'
 import Event from '../../events/controller'
 import Ticket from '../../tickets/controller'
 
@@ -26,7 +25,6 @@ class CinciRegisterIntegration extends IntegrationInterface {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
-    console.log('res:', res.body)
     const newSessionId = res.cookies['session_id']
     await redis.set('cinci-register', 'sessionId', newSessionId, 60*60)
     return newSessionId

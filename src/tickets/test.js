@@ -114,7 +114,7 @@ describe('Ticket', () => {
       expect(actualResponseBody.error).toBe('unauthorized')
     }, 8000)
 
-    it.only('should transfer ticket to new user', async() => {
+    it('should transfer ticket to new user', async() => {
       const owner = await User.createUser('test@test.com', 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
@@ -136,7 +136,6 @@ describe('Ticket', () => {
       const mockRes = httpMocks.createResponse()
       await TicketInterface.routes['/tickets/:id/transfer'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      console.log('actualResponseBody:', actualResponseBody)
       const newUser = await User.getUserByEmail('newUser@test.com')
       expect(actualResponseBody.ticket).toHaveProperty('_id', ticket._id)
       expect(actualResponseBody.ticket).toHaveProperty('ownerId', newUser._id)
@@ -146,6 +145,7 @@ describe('Ticket', () => {
       const owner = await User.createUser('test@test.com', 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
+      if (!owner) console.log('no owner:', owner)
       const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
       const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
       const ticket = await Ticket.set(initTicket._id, {
@@ -163,9 +163,10 @@ describe('Ticket', () => {
       const res = await post({
         url: 'https://api.stripe.com/v1/tokens',
         form: {
-          cardInfo
+          ...cardInfo
         },
         headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Bearer ${secretKey}`
         }
       })
@@ -193,7 +194,7 @@ describe('Ticket', () => {
     }, 15000)
 
     it('should purchace ticket by new user', async() => {
-      const owner = await User.createUser('test@test.com', 'test')
+      const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
       const barcode = await CinciRegister.issueTicket(event, owner, ticketType)

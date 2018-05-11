@@ -105,6 +105,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
   async addTicketsToCart(eventId, authHeaders, nextTokens) {
     // add tickets to cart
     const res_addToCart = await post({
+      method: 'post',
       url: `https://www.mt.cm/node/${eventId}/${eventId}`,
       form: {
         ...nextTokens,
@@ -141,15 +142,11 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     }
   }
 
-  async getCheckoutUrl() {
-
-  }
-
   async issueTicket(event, user, ticketType) {
     const eventId = event.externalEventId
     const authHeaders = await this.login(event._id)
 
-    let orderId, res_addCoupon, res_payment
+    let orderId, res_payment
     do {
       let nextTokens = await this.getInitialTokens(authHeaders)
 
@@ -181,7 +178,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
       let form_build_id = $('input[name=form_build_id]').val()
 
       // add coupon to order
-      res_addCoupon = await post({
+      await post({
         url: 'https://www.mt.cm/system/ajax',
         form: {
           form_build_id,

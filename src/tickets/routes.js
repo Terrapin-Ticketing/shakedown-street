@@ -146,7 +146,6 @@ export default {
         } catch (e) {
           return res.send({ error: e.message })
         }
-
         const newTicket = await Integration.transferTicket(ticket, user)
         if (!newTicket) return res.send({ error: 'error tranfering ticket' })
 

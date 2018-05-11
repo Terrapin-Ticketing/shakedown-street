@@ -4,11 +4,11 @@ import setCookie from 'set-cookie-parser'
 import queryString from 'query-string'
 
 export async function post(config) {
-  return await x({ ...config, method: 'post' })
+  return await x({ method: 'POST', ...config })
 }
 
 export async function get(url, config) {
-  return await x({ ...config, url, method: 'get' })
+  return await x({ ...config, url, method: 'GET' })
 }
 
 async function x(config) {
