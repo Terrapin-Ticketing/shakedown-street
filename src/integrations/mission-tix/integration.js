@@ -4,8 +4,7 @@ import { post, get } from '../../_utils/http'
 
 import IntegrationInterface from '../IntegrationInterface'
 import Event from '../../events/controller'
-import Ticket from '../../events/controller'
-
+import Ticket from '../../tickets/controller'
 
 class MissionTixTicketIntegration extends IntegrationInterface {
   async login(eventId) {
@@ -38,12 +37,12 @@ class MissionTixTicketIntegration extends IntegrationInterface {
 
   async isValidTicket(barcode, event) {
     const authHeaders = await this.login(event._id)
-    const { externalEventId } = event
-    const url = `https://www.mt.cm/domefest/${externalEventId}/order-all-checkin`
+    const { auth, externalEventId } = event
+    const url = `https://www.mt.cm/domefest/getTicketDetails?user_id=${auth.userId}&event_id=${externalEventId}&data=${barcode}`
     const res = await get(url, {
       headers: authHeaders
     })
-    const { body } = res
+    const body = JSON.parse(res.body)
     const isValid = body.status === 'ok' && body.result_msg === 'Barcode is valid.'
     return isValid
   }
@@ -52,7 +51,8 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     const event = await Event.getEventById(eventId)
     if (!event) return false
 
-    const isValid = this.isValidTicket(barcode, event)
+    // let isValid = await this.isValidTicket(barcode, event)
+    let isValid = true
     if (!isValid) return false
 
     const authHeaders = await this.login(eventId)
@@ -62,8 +62,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     const res = await get(url, {
       headers: authHeaders
     })
-
-    const { body } = res
+    const body = JSON.parse(res.body)
     const success = body.status === 'ok' && body.result_msg === 'Barcode is valid.'
     return success
   }
@@ -142,7 +141,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     }
   }
 
-  async issueTicket(event, user, ticketType) {
+  async issueTicket(event) {
     const eventId = event.externalEventId
     const authHeaders = await this.login(event._id)
 
@@ -151,6 +150,10 @@ class MissionTixTicketIntegration extends IntegrationInterface {
       let nextTokens = await this.getInitialTokens(authHeaders)
 
       nextTokens = await this.addTicketsToCart(eventId, authHeaders, nextTokens)
+      if (nextTokens['form_id'] === 'pos_input_form') {
+        console.log('no stock left')
+        return false
+      }
 
       // checkout cart
       const res_checkout = await post({
@@ -223,8 +226,6 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     let $ = cheerio.load(res_printTickets.body)
     const viewTicketUrl = $('a.btn.btn-default.form-submit').attr('href')
 
-    // https://www.mt.cm/commerce/coupons/order/remove/1233030/1884223?destination=checkout/1884223&token=NNr6e20yVB6dertmhYYrDCHmMJDeE-t0VMf4NlMoG1w
-    console.log('viewTicketUrl:', viewTicketUrl)
     const res_viewTickets = await get(viewTicketUrl, {
       headers: authHeaders
     })
@@ -232,8 +233,6 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     $ = cheerio.load(res_viewTickets.body)
 
     const barcode = $('.qr-code-token').text()
-
-    console.log('barcode:', barcode)
 
     return barcode
   }

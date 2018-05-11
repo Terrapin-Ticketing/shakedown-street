@@ -162,9 +162,7 @@ describe('Ticket', () => {
       }
       const res = await post({
         url: 'https://api.stripe.com/v1/tokens',
-        form: {
-          ...cardInfo
-        },
+        form: cardInfo,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Bearer ${secretKey}`
@@ -191,7 +189,7 @@ describe('Ticket', () => {
       expect(charge).toBeTruthy()
       expect(passwordChangeUrl).toBeFalsy() // TODO: test with new user
       expect(actualResponseBody.ticket).toHaveProperty('ownerId', buyer._id)
-    }, 15000)
+    }, 30000)
 
     it('should purchace ticket by new user', async() => {
       const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
@@ -235,6 +233,6 @@ describe('Ticket', () => {
       const { charge, passwordChangeUrl } = actualResponseBody
       expect(charge).toBeTruthy()
       expect(passwordChangeUrl).toBeTruthy()
-    }, 15000)
+    }, 30000)
   })
 })
