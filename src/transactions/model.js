@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 let TicketEventSchema = new mongoose.Schema({
   date: { Type: Date },
   ticketId: { Type: ObjectId},
-  type: { enum[ 'SELL', 'ACTIVATE', 'PRICE_CHANGE', 'TRANSFER', 'SET_IS_FOR_SALE']  },
+  // type: { enum[ 'SELL', 'ACTIVATE', 'PRICE_CHANGE', 'TRANSFER', 'SET_IS_FOR_SALE']  },
   recipientUserId: {},
   senderUserId: {},
   newParams: {
