@@ -12,7 +12,7 @@ export async function get(url, config) {
 }
 
 async function x(config) {
-  const { url, form, json, cookieValue, headers, method, followRedirect } = config
+  const { url, form, json, cookieValue, headers, method, followRedirect, formData } = config
 
   const { protocol, host, port } = urlParse.parse(url)
   const domain = port ? `${protocol}//${host}:${port}` : `${protocol}//${host}`
@@ -29,6 +29,7 @@ async function x(config) {
     json,
     form,
     headers,
+    formData,
     followRedirect
   }
 

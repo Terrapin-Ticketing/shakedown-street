@@ -2,9 +2,9 @@ export function addRoutes(routes) {
   const wrappedRoutes = {}
   for (let routeName in routes) {
     const routeMethods = routes[routeName]
+    wrappedRoutes[routeName] = {}
     for (let routeMethod in routeMethods) {
       const routeDef = routes[routeName][routeMethod]
-      wrappedRoutes[routeName] = {}
       wrappedRoutes[routeName][routeMethod] = createRoute(routeDef)
     }
   }

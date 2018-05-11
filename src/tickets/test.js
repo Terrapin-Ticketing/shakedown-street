@@ -60,7 +60,7 @@ describe('Ticket', () => {
       expect(actualResponseBody.tickets[0]).toHaveProperty('barcode', null)
     }, 10000)
 
-    it('should update owned ticket', async() => {
+    it.only('should update owned ticket', async() => {
       const user = await User.createUser('test@test.com', 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]

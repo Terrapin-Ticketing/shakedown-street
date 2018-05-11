@@ -2,6 +2,7 @@ import url from 'url'
 import Ticket from './controller'
 import User from '../users/controller'
 import Event from '../events/controller'
+import Payout from '../payouts/controller'
 import Emailer from '../email'
 // import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
@@ -33,7 +34,7 @@ export default {
       handler: async(req, res) => {
         const { user } = req.props
         const { id } = req.params
-        let ticket = await Ticket.findOne({_id: id})
+        let ticket = await Ticket.getTicketById(id)
         if (!ticket) return res.send({ error: 'ticket not found' })
         if (String(ticket.ownerId) !== String(user._id)) {
           ticket = stripBarcodes(ticket)
@@ -162,6 +163,14 @@ export default {
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)
+        await Payout.create({
+          date: Date.now(),
+          price: ticket.price,
+          stripeChargeId: charge.id,
+          sellerId: originalOwner._id,
+          buyerId: user._id,
+          isPaid: false
+        })
 
         return res.send({
           charge,

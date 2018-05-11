@@ -42,7 +42,7 @@ describe('Mission Tix Ticket Intergration', () => {
     expect(eventInfo).toHaveProperty('user_id', event.auth.userId)
   })
 
-  it('should issue a new ticket', async() => {
+  it.only('should issue a new ticket', async() => {
     const event = await Event.createEvent(missionTixTestEvent)
     const user = await User.createUser('test@test.com', 'test')
     const barcode = await MissionTix.issueTicket(event, user)
