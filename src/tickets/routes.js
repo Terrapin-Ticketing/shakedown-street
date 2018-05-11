@@ -75,7 +75,6 @@ export default {
         transferToEmail: Email // RequiredUser????
       },
       handler: async(req, res) => {
-        console.log('herer')
         let { user, Integration } = req.props
         const { transferToEmail } = req.body
         const { id } = req.params
@@ -91,8 +90,6 @@ export default {
           passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
           createdNewUser = true
         }
-
-        console.log('transferToUser', transferToUser)
 
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, transferToUser)
