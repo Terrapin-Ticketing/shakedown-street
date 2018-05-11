@@ -52,13 +52,13 @@ describe('Mission Tix Ticket Intergration', () => {
   it('should transfer ticket', async() => {
     const event = await Event.createEvent(missionTixTestEvent)
 
-    const fromUser = await User.createUser('fromUser@test.com', 'test')
-    const toUser = await User.createUser('toUser@test.com', 'test')
+    const fromUser = await User.createUser(`fromUser${Math.random()}@test.com`, 'test')
+    const toUser = await User.createUser(`toUser${Math.random()}@test.com`, 'test')
 
     const barcode = await MissionTix.issueTicket(event, fromUser)
     let price = 1000
     const ticket = await Ticket.createTicket(event._id, fromUser._id, barcode, price, 'GA')
     const newTicket = await MissionTix.transferTicket(ticket, toUser)
     expect(newTicket).toHaveProperty('ownerId', toUser._id)
-  }, 60000)
+  }, 100000)
 })

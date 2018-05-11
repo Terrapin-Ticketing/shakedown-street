@@ -5,13 +5,17 @@ import cinciRegisterTestEvent from '../src/integrations/cinci-register/test-even
 import CinciRegister from '../src/integrations/cinci-register/integration'
 
 import missionTixTestEvent from '../src/integrations/mission-tix/test-event'
-import MissinTix from '../src/integrations/cinci-register/integration'
+import MissinTix from '../src/integrations/mission-tix/integration'
 
 (async function() {
   await clearDb()
 
-  const barcode = await createCinciReigsterTicket()
-  console.log('Barcode: ', barcode)
+  const cinciRegisterBarcode = await createCinciReigsterTicket()
+  console.log('cinciRegisterBarcode: ', cinciRegisterBarcode)
+  const missionTixBarcode = await createMissionTixTicket()
+  console.log('missionTixBarcode:', missionTixBarcode)
+  const user = await User.createUser('reeder@terrapinticketing.com', 'test')
+  console.log('created user:', user.email)
   process.exit()
 })()
 
@@ -19,7 +23,11 @@ async function createMissionTixTicket() {
   const user = await User.createUser('test1@test.com', 'test')
   const event = await Event.createEvent(missionTixTestEvent)
 
-
+  const barcode = await MissinTix.issueTicket(event, user)
+  // drop database
+  await mongoose.dropCollection('users')
+  await mongoose.dropCollection('tickets')
+  return barcode
 }
 
 async function createCinciReigsterTicket() {

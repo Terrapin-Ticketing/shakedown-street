@@ -30,7 +30,7 @@ export default {
     state: 'OH',
     zip: 43215
   },
-  imageUrl: 'http://liveatthebluestone.com/wp-content/uploads/2017/12/24068068_528690924147257_2284411860158418511_n.png', //brewgrass
+  imageUrl: 'https://www.mt.cm/sites/default/files/styles/event-image/public/dome.jpg?itok=TEZaI3qa', //brewgrass
   thumbnail_image_url: 'https://scontent.fluk1-1.fna.fbcdn.net/v/t1.0-9/24177011_1547905021954884_5574619907091705671_n.jpg?oh=1480971f3c87383c4aebe2241f254fd3&oe=5AF3C3F9',
 
 

@@ -104,7 +104,7 @@ export default {
 
         // get ticket info
         const ticketInfo = await Integration.getTicketInfo(barcode, event)
-        if (!ticketInfo || !ticketInfo.type || ticketInfo.price !== 0) return res.send({ error: `error getting ticket info from ${integrationType}` })
+        if (!ticketInfo || !ticketInfo.type) return res.send({ error: `error getting ticket info from ${integrationType}` })
         const { type, price } = ticketInfo
 
         // create new ticket
