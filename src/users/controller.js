@@ -46,7 +46,7 @@ class UserController {
   async changePassword(email, password) {
     let user = await UserModel.findOneAndUpdate({ email }, {
       $set: {
-        password
+        password: saltPassword(password)
       }
     }, { new: true })
     return user

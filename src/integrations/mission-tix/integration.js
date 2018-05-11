@@ -39,23 +39,20 @@ class MissionTixTicketIntegration extends IntegrationInterface {
   async isValidTicket(barcode, event) {
     const authHeaders = await this.login(event._id)
     const { auth, externalEventId } = event
-    const url = `https://www.mt.cm/domefest/getTicketDetails?user_id=${auth.userId}&event_id=${externalEventId}&data=${barcode}`
+    const url = `https://www.mt.cm/domefest/getTicketDetails?user_id=${auth.userId}&event_id=${externalEventId}&data=${barcode}&skip_save=true`
     const res = await get(url, {
       headers: authHeaders
     })
     const body = JSON.parse(res.body)
     const isValid = body.status === 'ok' && body.result_msg === 'Barcode is valid.'
-    if (config.env === 'test') return isValid
-    return true
-    // return true
+    return isValid
   }
 
   async deactivateTicket(eventId, barcode) {
     const event = await Event.getEventById(eventId)
     if (!event) return false
 
-    // let isValid = await this.isValidTicket(barcode, event)
-    let isValid = true
+    let isValid = await this.isValidTicket(barcode, event)
     if (!isValid) return false
 
     const authHeaders = await this.login(eventId)
@@ -251,12 +248,15 @@ class MissionTixTicketIntegration extends IntegrationInterface {
   async transferTicket(ticket, toUser) {
     if (!toUser || !ticket) return false
     const { eventId, barcode } = ticket
-    const success = await this.deactivateTicket(eventId, barcode)
-    if (!success) return false
+
     const event = await Event.getEventById(eventId)
     if (!event) return false
+
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
     if (!newBarcode) return false
+
+    const success = await this.deactivateTicket(eventId, barcode)
+    if (!success) return false
 
     const newTicket = await Ticket.set(ticket._id, {
       ownerId: toUser._id,

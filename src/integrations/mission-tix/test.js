@@ -30,7 +30,7 @@ describe('Mission Tix Ticket Intergration', () => {
     expect(isValid).toBeFalsy()
   })
 
-  it('should reject already scanned barcode', async() => {
+  it.skip('should reject already scanned barcode', async() => {
     const event = await Event.createEvent(missionTixTestEvent)
     const isValid = await MissionTix.isValidTicket('TAM1PCT1TD', event)
     expect(isValid).toBeFalsy()

@@ -68,7 +68,9 @@ export function defineIntegration({ prop, findOne }) {
   return async(req, res) => {
     const { query, collection } = findOne
     const cQuery = convertQuery(query, req)
+    console.log(collection)
     const docs = await queryCollection(collection, cQuery)
+    console.log(doc)
     let doc = docs[0] // grab first event
     if (collection === 'tickets') doc = await Event.findEventById(doc.eventId)
     const { integrationType } = doc

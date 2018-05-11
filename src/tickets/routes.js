@@ -13,21 +13,32 @@ export default {
   ['/tickets']: { // this shouldn't be used, we should return tickets with the user
     get: {
       handler: async(req, res) => {
+        const { user } = req.props
         const urlParts = url.parse(req.url, true)
         const query = urlParts.query
-        const tickets = await Ticket.find(query)
-        const santatizedTickets = stripBarcodes(tickets)
-        res.send({ tickets: santatizedTickets })
+        let tickets = await Ticket.find(query)
+        // strip barcodes of tickets if not called by owner
+        tickets = tickets.map((ticket) => {
+          if (String(ticket.ownerId) !== String(user._id)) {
+            return stripBarcodes(ticket)
+          }
+          return ticket
+        })
+        res.send({ tickets })
       }
     }
   },
   ['/tickets/:id']: {
     get: {
       handler: async(req, res) => {
+        const { user } = req.props
         const { id } = req.params
-        const ticket = await Ticket.findOne({_id: id})
+        let ticket = await Ticket.findOne({_id: id})
         if (!ticket) return res.send({ error: 'ticket not found' })
-        res.send({ ticket: stripBarcodes(ticket) })
+        if (String(ticket.ownerId) !== String(user._id)) {
+          ticket = stripBarcodes(ticket)
+        }
+        res.send({ ticket })
       }
     },
     put: {
@@ -64,6 +75,7 @@ export default {
         transferToEmail: Email // RequiredUser????
       },
       handler: async(req, res) => {
+        console.log('herer')
         let { user, Integration } = req.props
         const { transferToEmail } = req.body
         const { id } = req.params
@@ -79,6 +91,8 @@ export default {
           passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
           createdNewUser = true
         }
+
+        console.log('transferToUser', transferToUser)
 
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, transferToUser)
