@@ -19,7 +19,7 @@ export default {
         let tickets = await Ticket.find(query)
         // strip barcodes of tickets if not called by owner
         tickets = tickets.map((ticket) => {
-          if (String(ticket.ownerId) !== String(user._id)) {
+          if (!user || String(ticket.ownerId) !== String(user._id)) {
             return stripBarcodes(ticket)
           }
           return ticket
@@ -101,7 +101,7 @@ export default {
           Emailer.sendExistingUserTicketRecieved(transferToUser, ticket)
         }
         res.send({ ticket: stripBarcodes(newTicket) })
-      }
+      }//
     }
   },
   ['/payment/:id']: {

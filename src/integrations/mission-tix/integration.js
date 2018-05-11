@@ -63,7 +63,6 @@ class MissionTixTicketIntegration extends IntegrationInterface {
       headers: authHeaders
     })
     const body = JSON.parse(res.body)
-    console.log(body)
     const success = body.status === 'ok' && body.result_msg === 'Barcode is valid.'
     return success
   }
@@ -257,7 +256,6 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     if (!newBarcode) return false
 
     const success = await this.deactivateTicket(eventId, barcode)
-    console.log('success', success)
     if (!success) return false
 
     const newTicket = await Ticket.set(ticket._id, {
