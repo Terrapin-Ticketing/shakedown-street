@@ -10,18 +10,23 @@ import redis from '../../_utils/redis'
 import csv from 'csvtojson'
 
 class CinciRegisterIntegration extends IntegrationInterface {
-  static integrationType = 'CinciRegister'
-
   async login(username, password) {
-    const sessionId = await redis.get('cinci-register', 'sessionId')
-    if (sessionId || config.env !== 'test') return sessionId
+    // const sessionId = await redis.get('cinci-register', 'sessionId')
+    // if (sessionId || config.env !== 'test') return sessionId
 
     const loginUrl = process.env.CINCI_REGISTER_LOGIN_URL
     const formData = {
       username,
       password
     }
-    const res = await post(loginUrl, formData)
+    const res = await post({
+      url: loginUrl,
+      form: formData,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    console.log('res:', res.body)
     const newSessionId = res.cookies['session_id']
     await redis.set('cinci-register', 'sessionId', newSessionId, 60*60)
     return newSessionId
@@ -38,13 +43,17 @@ class CinciRegisterIntegration extends IntegrationInterface {
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false
 
     // all properties are required
-    await post(`${domain}/merchant/products/2/manage/tickets`, {
-      name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
-      status: 'void',
-      scanned: ticketInfo['Scanned'],
-      cmd: 'edit',
-      id: ticketInfo.lookupId
-    }, { session_id: sessionId})
+    await post({
+      url: `${domain}/merchant/products/2/manage/tickets`,
+      form: {
+        name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
+        status: 'void',
+        scanned: ticketInfo['Scanned'],
+        cmd: 'edit',
+        id: ticketInfo.lookupId
+      },
+      cookieValue: { session_id: sessionId }
+    })
 
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event)
@@ -96,15 +105,23 @@ class CinciRegisterIntegration extends IntegrationInterface {
     issueTicketRequestBody['coupon_code'] = event.promoCode
 
     // SUBMIT this sVal ORDER
-    await post(ticketPortal, issueTicketRequestBody, { session_id: sessionId })
+    await post({
+      url: ticketPortal,
+      form: issueTicketRequestBody,
+      cookieValue: { session_id: sessionId }
+    })
 
     // USER sVal ORDER to print ticket
-    let printTicketRes = await post(ticketPortal, {
-      s: sVal,
-      step: 1,
-      r: 0,
-      'cmd=tprint': 'Print Tickets'
-    }, { session_id: sessionId })
+    let printTicketRes = await post({
+      url: ticketPortal,
+      form: {
+        s: sVal,
+        step: 1,
+        r: 0,
+        'cmd=tprint': 'Print Tickets'
+      },
+      cookieValue: { session_id: sessionId }
+    })
     // console.log('printTicketRes', printTicketRes);
     let printableTicket = printTicketRes.body
     // console.log('printableTicket', printableTicket);
@@ -130,14 +147,18 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const username = process.env[event.username]
     const password = process.env[event.password]
     let sessionId = await this.login(username, password)
-    let csvExport = (await post(`${event.domain}/merchant/products/2/manage/tickets`, {
-      form_id: event.externalEventId,
-      from: 'January 1, 2000 2:35 PM',
-      to: 'January 1, 2030 2:35 PM',
-      fields: requestFields,
-      filename: 'export.csv',
-      cmd: 'export'
-    }, { session_id: sessionId })).body
+    let csvExport = (await post({
+      url: `${event.domain}/merchant/products/2/manage/tickets`,
+      form: {
+        form_id: event.externalEventId,
+        from: 'January 1, 2000 2:35 PM',
+        to: 'January 1, 2030 2:35 PM',
+        fields: requestFields,
+        filename: 'export.csv',
+        cmd: 'export'
+      },
+      cookieValue: { session_id: sessionId }
+    })).body
 
     let ticketLookupTable = {}
     await new Promise((resolve) => {

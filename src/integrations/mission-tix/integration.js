@@ -1,23 +1,17 @@
-import config from 'config'
-
+import path from 'path'
+import cheerio from 'cheerio'
 import { post, get } from '../../_utils/http'
-import redis from '../../_utils/redis'
 
 import IntegrationInterface from '../IntegrationInterface'
 import Event from '../../events/controller'
+import Ticket from '../../events/controller'
 
 
 class MissionTixTicketIntegration extends IntegrationInterface {
-  static integrationType = 'MissionTix'
-
   async login(eventId) {
-    // const authKey = await redis.get('mission-tix', 'authKey')
-    // if (authKey || config.env !== 'test') return authKey
     const event = await Event.getEventById(eventId)
     if (!event) return false
     const { auth, username, password } = await Event.getEventById(eventId)
-
-
     const res = await post({
       url: auth.loginUrl,
       json: {
@@ -29,33 +23,27 @@ class MissionTixTicketIntegration extends IntegrationInterface {
         'Content-Type': 'application/json'
       }
     })
-
-    const res = await post(auth.loginUrl, null, {}, {
-      [auth.apiKeyName]: auth.apiKey,
-      'Content-Type': 'application/json'
-    }, {
-      username,
-      password
-    })
-    console.log('res.body:', res.body)
     const authKey = res.body.auth_key
 
+    let cookie = ''
+    for (let c in res.cookies) {
+      cookie += `${c}=${res.cookies[c]}; `
+    }
     return {
-      apiKey: auth.apiKey,
-      authKey
+      [auth.apiKeyName]: auth.apiKey,
+      'auth-key': authKey,
+      cookie
     }
   }
 
   async isValidTicket(barcode, event) {
-    const { auth, externalEventId } = event
-    // const url = `https://www.mt.cm/domefest/getTicketDetails?user_id=${auth.userId}&event_id=${externalEventId}&data=${barcode}`
+    const authHeaders = await this.login(event._id)
+    const { externalEventId } = event
     const url = `https://www.mt.cm/domefest/${externalEventId}/order-all-checkin`
-    const res = await get(url, {}, {
-      [auth.apiKeyName]: auth.apiKey,
-      'auth-key': auth.authKey
+    const res = await get(url, {
+      headers: authHeaders
     })
     const { body } = res
-    console.log('body:', res)
     const isValid = body.status === 'ok' && body.result_msg === 'Barcode is valid.'
     return isValid
   }
@@ -67,11 +55,12 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     const isValid = this.isValidTicket(barcode, event)
     if (!isValid) return false
 
+    const authHeaders = await this.login(eventId)
+
     const { auth, externalEventId } = event
     const url = `https://www.mt.cm/domefest/getTicketDetails?user_id=${auth.userId}&event_id=${externalEventId}&data=${barcode}`
-    const res = await get(url, {}, {
-      [auth.apiKeyName]: auth.apiKey,
-      'auth-key': auth.authKey
+    const res = await get(url, {
+      headers: authHeaders
     })
 
     const { body } = res
@@ -85,30 +74,192 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     const { auth, externalEventId } = event
     const url = `https://www.mt.cm/domefest/details/${auth.userId}/${externalEventId}`
 
-    const res = await get(url, {}, {
-      [auth.apiKeyName]: auth.apiKey,
-      'auth-key': auth.authKey
+    const res = await get(url, {
+      headers: await this.login(eventId)
     })
     if (!res.body) return false
     return JSON.parse(res.body)
   }
-  // deactivateTicket(eventId, barcode) { throw new Error('not implemented') }
-  // issueTicket(event, user, type) { throw new Error('not implemented') }
-  // isValidTicket(ticketId) { throw new Error('not implemented') }
+
+  async getInitialTokens(authHeaders) {
+    // get form tokens from initial page
+    const res = await get('https://www.mt.cm/testing-terrapin-ticketing-domefest-resale', {
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders
+      }
+    })
+    const htmlDoc = res.body
+    const $ = cheerio.load(htmlDoc)
+
+    const form_id = $('input[name=form_id]').val()
+    const form_token = $('input[name=form_token]').val()
+    const form_build_id = $('input[name=form_build_id]').val()
+    return {
+      form_id,
+      form_token,
+      form_build_id
+    }
+  }
+
+  async addTicketsToCart(eventId, authHeaders, nextTokens) {
+    // add tickets to cart
+    const res_addToCart = await post({
+      url: `https://www.mt.cm/node/${eventId}/${eventId}`,
+      form: {
+        ...nextTokens,
+        'add_to_cart_quantity[0][select]': 1,
+        op: 'PURCHASE TICKETS'
+      },
+      headers: authHeaders
+    })
+    const $ = cheerio.load(res_addToCart.body)
+
+    const form_id = $('input[name=form_id]').val()
+    const form_token = $('input[name=form_token]').val()
+    const form_build_id = $('input[name=form_build_id]').val()
+    return {
+      form_id,
+      form_token,
+      form_build_id
+    }
+  }
+
+  async getCart(authHeaders) {
+    const res_cart = await get('https://www.mt.cm/cart', {
+      headers: authHeaders
+    })
+
+    const $ = cheerio.load(res_cart.body)
+    const form_id = $('input[name=form_id]').val()
+    const form_token = $('input[name=form_token]').val()
+    const form_build_id = $('input[name=form_build_id]').val()
+    return {
+      form_id,
+      form_token,
+      form_build_id
+    }
+  }
+
+  async getCheckoutUrl() {
+
+  }
+
+  async issueTicket(event, user, ticketType) {
+    const eventId = event.externalEventId
+    const authHeaders = await this.login(event._id)
+
+    let orderId, res_addCoupon, res_payment
+    do {
+      let nextTokens = await this.getInitialTokens(authHeaders)
+
+      nextTokens = await this.addTicketsToCart(eventId, authHeaders, nextTokens)
+
+      // checkout cart
+      const res_checkout = await post({
+        url: 'https://www.mt.cm/cart',
+        form: {
+          ...nextTokens,
+          'edit_quantity[0]': 1,
+          op: 'Checkout'
+        },
+        headers: authHeaders,
+        followRedirect: false
+      })
+
+      const checkoutUrl = res_checkout.headers.location
+      orderId = path.basename(checkoutUrl.substring(8, checkoutUrl.length))
+
+      // get checkout url
+      const res_paymentForm = await get(checkoutUrl, {
+        headers: authHeaders
+      })
+      let $ = cheerio.load(res_paymentForm.body)
+
+      let form_id = $('input[name=form_id]').val()
+      let form_token = $('input[name=form_token]').val()
+      let form_build_id = $('input[name=form_build_id]').val()
+
+      // add coupon to order
+      res_addCoupon = await post({
+        url: 'https://www.mt.cm/system/ajax',
+        form: {
+          form_build_id,
+          form_id,
+          form_token,
+          _triggering_element_name: 'coupon_add',
+          _triggering_element_value: 'Add coupon',
+          'commerce_coupon[coupon_code]': 'terrapin1'
+        },
+        headers: authHeaders,
+        followRedirect: false
+      })
+
+      res_payment = await post({
+        url: `https://www.mt.cm/checkout/${orderId}`,
+        form: {
+          form_build_id,
+          form_id,
+          form_token,
+          'customer_profile_billing[commerce_customer_address][und][0][country]': 'US',
+          'customer_profile_billing[commerce_customer_address][und][0][name_line]': 'TERRAPIN',
+          'customer_profile_billing[commerce_customer_address][und][0][thoroughfare]': 'TERRAPIN',
+          'customer_profile_billing[commerce_customer_address][und][0][locality]': 'TERRAPIN',
+          'customer_profile_billing[commerce_customer_address][und][0][administrative_area]': 'AZ',
+          'customer_profile_billing[commerce_customer_address][und][0][postal_code]': 44444,
+          'customer_profile_billing[field_name_to_print][und][0][value]': 'TERRAPIN',
+          // 'customer_profile_shipping[commerce_customer_profile_copy]': 1,
+          phone_number: 1,
+          'commerce_payment[payment_method]': 'commerce_no_payment|commerce_payment_commerce_no_payment',
+          op: 'PLACE YOUR ORDER'
+        },
+        headers: authHeaders,
+        followRedirect: false
+      })
+
+    } while (res_payment.body)
+
+    const res_printTickets = await get(`https://www.mt.cm/checkout/${orderId}/complete`, {
+      headers: authHeaders
+    })
+
+    let $ = cheerio.load(res_printTickets.body)
+    const viewTicketUrl = $('a.btn.btn-default.form-submit').attr('href')
+
+    // https://www.mt.cm/commerce/coupons/order/remove/1233030/1884223?destination=checkout/1884223&token=NNr6e20yVB6dertmhYYrDCHmMJDeE-t0VMf4NlMoG1w
+    console.log('viewTicketUrl:', viewTicketUrl)
+    const res_viewTickets = await get(viewTicketUrl, {
+      headers: authHeaders
+    })
+
+    $ = cheerio.load(res_viewTickets.body)
+
+    const barcode = $('.qr-code-token').text()
+
+    console.log('barcode:', barcode)
+
+    return barcode
+  }
   // getTicketInfo(ticketId) { throw new Error('not implemented') } // all integrations should return same format for getTicketInfo
-  // // getEventInfo can be used to hit the event's api if we want live data
-  // getEventInfo(eventId) { throw new Error('not implemented') } // all integrations should return same format for getEventInfo
   // getTicketTypes(eventId) { throw new Error('not implemented') }
-  // transferTicket(ticket, toUser) { throw new Error('not implemented') }
 
+  async transferTicket(ticket, toUser) {
+    if (!toUser || !ticket) return false
+    const { eventId, barcode } = ticket
+    const success = await this.deactivateTicket(eventId, barcode)
+    if (!success) return false
+    const event = await Event.getEventById(eventId)
+    if (!event) return false
+    const newBarcode = await this.issueTicket(event, toUser, ticket.type)
+    if (!newBarcode) return false
 
-  // async issueTicket() {
-  //   const res = await post(eventUrl, {}, {}, {
-  //     [auth.apiKeyName]: process.env.MISSION_TIX_API_KEY,
-  //     'Content-Type': 'application/json'
-  //   })
-  //   console.log('res:', res)
-  // }
+    const newTicket = await Ticket.set(ticket._id, {
+      ownerId: toUser._id,
+      newBarcode
+    })
+
+    return newTicket
+  }
 }
 
 

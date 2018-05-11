@@ -114,7 +114,7 @@ describe('Ticket', () => {
       expect(actualResponseBody.error).toBe('unauthorized')
     }, 8000)
 
-    it('should transfer ticket to new user', async() => {
+    it.only('should transfer ticket to new user', async() => {
       const owner = await User.createUser('test@test.com', 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
@@ -136,6 +136,7 @@ describe('Ticket', () => {
       const mockRes = httpMocks.createResponse()
       await TicketInterface.routes['/tickets/:id/transfer'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
+      console.log('actualResponseBody:', actualResponseBody)
       const newUser = await User.getUserByEmail('newUser@test.com')
       expect(actualResponseBody.ticket).toHaveProperty('_id', ticket._id)
       expect(actualResponseBody.ticket).toHaveProperty('ownerId', newUser._id)
@@ -159,8 +160,14 @@ describe('Ticket', () => {
         'card[exp_year]': 2019,
         'card[cvc]': 123
       }
-      const res = await post('https://api.stripe.com/v1/tokens', cardInfo, null, {
-        'Authorization': `Bearer ${secretKey}`
+      const res = await post({
+        url: 'https://api.stripe.com/v1/tokens',
+        form: {
+          cardInfo
+        },
+        headers: {
+          'Authorization': `Bearer ${secretKey}`
+        }
       })
 
       const mockReq = httpMocks.createRequest({
@@ -201,8 +208,12 @@ describe('Ticket', () => {
         'card[exp_year]': 2019,
         'card[cvc]': 123
       }
-      const res = await post('https://api.stripe.com/v1/tokens', cardInfo, null, {
-        'Authorization': `Bearer ${secretKey}`
+      const res = await post({
+        url: 'https://api.stripe.com/v1/tokens',
+        form: cardInfo,
+        headers: {
+          'Authorization': `Bearer ${secretKey}`
+        }
       })
 
       const mockReq = httpMocks.createRequest({

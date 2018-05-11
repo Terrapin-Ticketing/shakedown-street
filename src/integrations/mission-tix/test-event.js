@@ -12,7 +12,6 @@ export default {
 
   auth: {
     apiKey: process.env.MISSION_TIX_API_KEY,
-    authKey: process.env.MISSION_TIX_AUTH_KEY,
     userId: process.env.MISSION_TIX_USER_ID,
     apiKeyName: 'dome-key',
     loginUrl: process.env.MISSION_TIX_LOGIN_URL

@@ -2,7 +2,7 @@ const { mongoose } = require('../../_utils/bootstrap')
 
 import Event from '../../events/controller'
 // import Ticket from '../../tickets/controller'
-// import User from '../../users/controller'
+import User from '../../users/controller'
 
 import MissionTix from './integration'
 import missionTixTestEvent from './test-event'
@@ -17,10 +17,11 @@ describe('Mission Tix Ticket Intergration', () => {
     await mongoose.dropCollection('tickets')
   })
 
-  it.only('should log in', async() => {
+  it('should log in', async() => {
     const event = await Event.createEvent(missionTixTestEvent)
-    const authKeys = await MissionTix.login(event._id)
-    console.log('authKeys:', authKeys)
+    const authHeaders = await MissionTix.login(event._id)
+    expect(authHeaders['dome-key']).toBeDefined()
+    expect(authHeaders['auth-key']).toBeDefined()
   })
 
   it('should reject invalid barcode', async() => {
@@ -40,5 +41,12 @@ describe('Mission Tix Ticket Intergration', () => {
     const eventInfo = await MissionTix.getEventInfo(event._id)
     expect(eventInfo).toHaveProperty('user_id', event.auth.userId)
   })
+
+  it('should issue a new ticket', async() => {
+    const event = await Event.createEvent(missionTixTestEvent)
+    const user = await User.createUser('test@test.com', 'test')
+    const barcode = await MissionTix.issueTicket(event, user)
+    expect(barcode).toBeDefined()
+  }, 35000)
 
 })

@@ -14,7 +14,10 @@ class CinciTicketIntegration extends IntegrationInterface {
       frm_password: password,
       activity: 'Login'
     }
-    const res = await post(loginUrl, formData)
+    const res = await post({
+      url: loginUrl,
+      form: formData
+    })
     await redis.set('cinci-ticket', 'sessionCookies', JSON.stringify(res.cookies), 60*60)
     return res.cookies
   }
