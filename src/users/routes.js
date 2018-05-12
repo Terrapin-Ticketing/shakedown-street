@@ -6,6 +6,16 @@ import Emailer from '../email'
 
 
 export default {
+  ['/users/:id']: {
+    put: {
+      handler: async(req, res) => {
+        const { id } = req.params
+        const user = await User.set(id, req.body)
+        if (!user) return res.send({ error: 'failed to update user' })
+        sendToken(res, user)
+      }
+    }
+  },
   ['/signup']: {
     post: { // have to have this to have muiltiple routes under same name
       body: {

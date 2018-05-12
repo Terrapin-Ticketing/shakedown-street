@@ -152,9 +152,8 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     const eventId = event.externalEventId
     const authHeaders = await this.login(event._id)
 
-    await this.increaseStock(authHeaders)
-
     let orderId, res_payment
+    let retry = 6
     do {
       let nextTokens = await this.getInitialTokens(authHeaders)
 
@@ -169,12 +168,14 @@ class MissionTixTicketIntegration extends IntegrationInterface {
         url: 'https://www.mt.cm/cart',
         form: {
           ...nextTokens,
-          'edit_quantity[0]': 1,
+          'edit_quantity[3]': 1,
           op: 'Checkout'
         },
         headers: authHeaders,
         followRedirect: false
       })
+
+      console.log(res_checkout.body)
 
       const checkoutUrl = res_checkout.headers.location
       orderId = path.basename(checkoutUrl.substring(8, checkoutUrl.length))
@@ -225,7 +226,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
         headers: authHeaders,
         followRedirect: false
       })
-    } while (res_payment.body)
+    } while (res_payment.body && retry--)
 
     const res_printTickets = await get(`https://www.mt.cm/checkout/${orderId}/complete`, {
       headers: authHeaders
