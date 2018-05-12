@@ -9,10 +9,12 @@ export default {
   ['/users/:id']: {
     put: {
       handler: async(req, res) => {
+        const { user } = req.props
         const { id } = req.params
-        const user = await User.set(id, req.body)
-        if (!user) return res.send({ error: 'failed to update user' })
-        sendToken(res, user)
+        if (!user || String(user._id) !== String(id)) return res.status(401).send({ error: 'unautherized'})
+        const newUser = await User.set(id, req.body)
+        if (!newUser) return res.send({ error: 'failed to update user' })
+        sendToken(res, newUser)
       }
     }
   },

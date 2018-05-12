@@ -46,6 +46,25 @@ describe('User', () => {
       expect(actualResponseBody.token)
     })
 
+    it('should not allow user update from different user', async() => {
+      const user = await UserController.createUser('test@test.com', 'test')
+      const mockReq = httpMocks.createRequest({
+        method: 'post',
+        url: `/users/${user._id}`,
+        body: {
+          'payout.default': 'venmo'
+        },
+        params: {
+          id: user._id
+        }
+      })
+      const mockRes = httpMocks.createResponse()
+
+      await User.routes['/users/:id'].put(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.error).toBeTruthy()
+    })
+
     it('should fail to sign up with invalid email', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'post',
