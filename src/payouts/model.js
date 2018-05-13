@@ -4,6 +4,7 @@ let Payout = new mongoose.Schema({
   date: { type: Date, required: true },
   price: { type: Number, required: true },
   stripeChargeId: { type: String },
+  ticketId: mongoose.Schema.Types.ObjectId,
   sellerId: mongoose.Schema.Types.ObjectId,
   buyerId: mongoose.Schema.Types.ObjectId,
   settled: mongoose.Schema.Types.ObjectId,

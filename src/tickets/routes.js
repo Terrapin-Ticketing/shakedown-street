@@ -36,7 +36,7 @@ export default {
         const { id } = req.params
         let ticket = await Ticket.getTicketById(id)
         if (!ticket) return res.send({ error: 'ticket not found' })
-        if (String(ticket.ownerId) !== String(user._id)) {
+        if (!user || String(ticket.ownerId) !== String(user._id)) {
           ticket = stripBarcodes(ticket)
         }
         res.send({ ticket })
@@ -125,8 +125,7 @@ export default {
         const { id } = req.params
         const ticketId = id
         const { token, transferToEmail } = req.body
-        const stripeToken = JSON.parse(token)
-        // const { Integration, user, passwordChangeUrl } = req
+        const stripeToken = token
 
         // check if ticket has already been activated or isn't for sale
         const ticket = await Ticket.getTicketById(ticketId)

@@ -1,5 +1,3 @@
-import path from 'path'
-import config from 'config'
 import cheerio from 'cheerio'
 import { post, get } from '../../_utils/http'
 
@@ -251,7 +249,8 @@ class MissionTixTicketIntegration extends IntegrationInterface {
 
     const newTicket = await Ticket.set(ticket._id, {
       ownerId: toUser._id,
-      barcode: newBarcode
+      barcode: newBarcode,
+      isForSale: false
     })
 
     return newTicket
