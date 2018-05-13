@@ -7,6 +7,8 @@ let EventSchema = new mongoose.Schema({
 
   totalMarkupPercent: { type: Number }, // this would be nice on "ticketType"
 
+  ticketRenderMethod: { type: String },
+
 
   date: { type: String, required: true },
   name: { type: String, index: { unique: true }, required: true },

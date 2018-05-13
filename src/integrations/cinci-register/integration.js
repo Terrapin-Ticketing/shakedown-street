@@ -11,8 +11,8 @@ import csv from 'csvtojson'
 
 class CinciRegisterIntegration extends IntegrationInterface {
   async login(username, password) {
-    const sessionId = await redis.get('cinci-register', 'sessionId')
-    if (sessionId || config.env !== 'test') return sessionId
+    // const sessionId = await redis.get('cinci-register', 'sessionId')
+    // if (sessionId || config.env !== 'test') return sessionId
 
     const loginUrl = process.env.CINCI_REGISTER_LOGIN_URL
     const formData = {
@@ -209,7 +209,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
     const newTicket = await Ticket.set(ticket._id, {
       ownerId: toUser._id,
-      newBarcode
+      barcode: newBarcode
     })
 
     return newTicket

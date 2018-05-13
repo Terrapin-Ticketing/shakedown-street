@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 let Payout = new mongoose.Schema({
   date: { type: Date, required: true },
   price: { type: Number, required: true },
-  stripeChargeId: { type: String, required: true },
+  stripeChargeId: { type: String },
   sellerId: mongoose.Schema.Types.ObjectId,
   buyerId: mongoose.Schema.Types.ObjectId,
   settled: mongoose.Schema.Types.ObjectId,

@@ -14,9 +14,11 @@ export default {
     apiKey: process.env.MISSION_TIX_API_KEY,
     userId: process.env.MISSION_TIX_USER_ID,
     apiKeyName: 'dome-key',
-    loginUrl: process.env.MISSION_TIX_LOGIN_URL
+    loginUrl: process.env.MISSION_TIX_LOGIN_URL,
+    externalTicketId: 10758
   },
 
+  ticketRenderMethod: 'QR',
 
   urlSafe: 'TestMissionTix',
 
@@ -35,30 +37,5 @@ export default {
 
 
   totalMarkupPercent: 0.00,
-  ticketTypes: {
-    'VIP 2-Day Pass': {
-      paramName: 'vip_2day',
-      price: 1000
-    },
-    'VIP Single Day 12/1': {
-      paramName: 'vip_single_day_121',
-      price: 0
-    },
-    'VIP Single Day 12/2': {
-      paramName: 'vip_single_day_122',
-      price: 0
-    },
-    'General Admission Two-Day Pass': {
-      paramName: 'general_admission',
-      price: 0
-    },
-    'General Admission Single Day 12/1': {
-      paramName: 'gen_121',
-      price: 0
-    },
-    'General Admission Single Day 12/2': {
-      paramName: 'gen_122',
-      price: 0
-    }
-  }
+  ticketTypes: {}
 }

@@ -148,91 +148,79 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     }
   }
 
+  getTokens(htmlDoc) {
+    const $ = cheerio.load(htmlDoc)
+
+    const form_id = $('input[name=form_id]').val()
+    const form_token = $('input[name=form_token]').val()
+    const form_build_id = $('input[name=form_build_id]').val()
+
+    return {
+      form_id,
+      form_token,
+      form_build_id
+    }
+  }
+
   async issueTicket(event) {
-    const eventId = event.externalEventId
+    const { auth } = event
     const authHeaders = await this.login(event._id)
 
-    let orderId, res_payment
-    let retry = 6
-    do {
-      let nextTokens = await this.getInitialTokens(authHeaders)
+    let $, tokens
+    const boxOffice = await get('https://www.mt.cm/admin/commerce/pos', {
+      headers: authHeaders
+    })
+    tokens = this.getTokens(boxOffice.body)
 
-      nextTokens = await this.addTicketsToCart(eventId, authHeaders, nextTokens)
-      if (nextTokens['form_id'] === 'pos_input_form') {
-        console.log('no stock left')
-        return false
-      }
 
-      // checkout cart
-      const res_checkout = await post({
-        url: 'https://www.mt.cm/cart',
-        form: {
-          ...nextTokens,
-          'edit_quantity[3]': 1,
-          op: 'Checkout'
-        },
-        headers: authHeaders,
-        followRedirect: false
-      })
+    // add to cart
+    await post({
+      url: 'https://www.mt.cm/system/ajax',
+      form: {
+        ...tokens,
+        input: auth.externalTicketId,
+        _triggering_element_name: 'op',
+        _triggering_element_value: 'Submit'
+      },
+      headers: authHeaders
+    })
 
-      console.log(res_checkout.body)
+    const orderNumber = await get('https://www.mt.cm/admin/commerce/pos', {
+      headers: authHeaders
+    })
 
-      const checkoutUrl = res_checkout.headers.location
-      orderId = path.basename(checkoutUrl.substring(8, checkoutUrl.length))
+    $ = cheerio.load(orderNumber.body)
+    const orderElm = $('.order-number.receipt-hide')
+    const span = orderElm.children()[0]
+    const orderId = span.children[0].data.replace('\n', '').replace(' ', '')
 
-      // get checkout url
-      const res_paymentForm = await get(checkoutUrl, {
-        headers: authHeaders
-      })
-      let $ = cheerio.load(res_paymentForm.body)
+    tokens = this.getTokens(orderNumber.body)
 
-      let form_id = $('input[name=form_id]').val()
-      let form_token = $('input[name=form_token]').val()
-      let form_build_id = $('input[name=form_build_id]').val()
+    // comp order
+    const compOrder = await post({
+      url: 'https://www.mt.cm/admin/commerce/pos/ajax/payment_discount',
+      headers: authHeaders
+    })
 
-      // add coupon to order
-      await post({
-        url: 'https://www.mt.cm/system/ajax',
-        form: {
-          form_build_id,
-          form_id,
-          form_token,
-          _triggering_element_name: 'coupon_add',
-          _triggering_element_value: 'Add coupon',
-          'commerce_coupon[coupon_code]': 'terrapin1'
-        },
-        headers: authHeaders,
-        followRedirect: false
-      })
+    tokens = this.getTokens(JSON.parse(compOrder.body)[1].output)
 
-      res_payment = await post({
-        url: `https://www.mt.cm/checkout/${orderId}`,
-        form: {
-          form_build_id,
-          form_id,
-          form_token,
-          'customer_profile_billing[commerce_customer_address][und][0][country]': 'US',
-          'customer_profile_billing[commerce_customer_address][und][0][name_line]': 'TERRAPIN',
-          'customer_profile_billing[commerce_customer_address][und][0][thoroughfare]': 'TERRAPIN',
-          'customer_profile_billing[commerce_customer_address][und][0][locality]': 'TERRAPIN',
-          'customer_profile_billing[commerce_customer_address][und][0][administrative_area]': 'AZ',
-          'customer_profile_billing[commerce_customer_address][und][0][postal_code]': 44444,
-          'customer_profile_billing[field_name_to_print][und][0][value]': 'TERRAPIN',
-          // 'customer_profile_shipping[commerce_customer_profile_copy]': 1,
-          phone_number: 1,
-          'commerce_payment[payment_method]': 'commerce_no_payment|commerce_payment_commerce_no_payment',
-          op: 'PLACE YOUR ORDER'
-        },
-        headers: authHeaders,
-        followRedirect: false
-      })
-    } while (res_payment.body && retry--)
+    await post({
+      url: 'https://www.mt.cm/admin/commerce/pos/ajax/payment_discount',
+      form: {
+        'amount': 0,
+        'currency_code': 'USD',
+        'payment_details[pos_discount][customer_name]': 'Terrapin',
+        ...tokens,
+        'op': 'Submit'
+      },
+      headers: authHeaders
+    })
 
     const res_printTickets = await get(`https://www.mt.cm/checkout/${orderId}/complete`, {
       headers: authHeaders
     })
 
-    let $ = cheerio.load(res_printTickets.body)
+    $ = cheerio.load(res_printTickets.body)
     const viewTicketUrl = $('a.btn.btn-default.form-submit').attr('href')
 
     const res_viewTickets = await get(viewTicketUrl, {
