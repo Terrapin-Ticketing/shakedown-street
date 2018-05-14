@@ -79,7 +79,7 @@ describe('Transfers', () => {
     const transfers = await Transfer.find({})
     const transfer = transfers[0]
 
-    expect(transfer.senderId).toEqual(owner._id)
+    expect(transfer.senderId._id).toEqual(owner._id)
   }, 20000)
 
   it('should get all tranfers with given evnet id', async() => {
@@ -112,6 +112,6 @@ describe('Transfers', () => {
     await TransfersInterface.routes['/transfers'].get(mockReq, mockRes)
     const actualResponseBody = mockRes._getData()
     const transfer = actualResponseBody[0]
-    expect(transfer.senderId).toEqual(owner._id)
+    expect(transfer.senderId._id).toEqual(owner._id)
   }, 20000)
 })

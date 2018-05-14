@@ -101,7 +101,7 @@ describe('Payouts', () => {
     await TicketInterface.routes['/payment/:id'].post(mockReq, mockRes)
     const payouts = await Payout.find({ isPaid: false })
     const newUser = await User.getUserByEmail(buyer)
-    expect(payouts[0]).toHaveProperty('buyerId', newUser._id)
+    expect(payouts[0].buyerId).toHaveProperty('_id', newUser._id)
   }, 20000)
 
   it('should get all unpaid payouts', async() => {

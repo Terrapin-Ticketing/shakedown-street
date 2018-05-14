@@ -2,10 +2,10 @@ import mongoose from 'mongoose'
 
 let Transfer = new mongoose.Schema({
   date: { type: Date, required: true },
-  ticketId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  senderId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  recieverId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  eventId: { type: mongoose.Schema.Types.ObjectId, required: true }
+  ticketId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Ticket' },
+  senderId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+  recieverId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+  eventId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Event' }
 })
 
 let TransferModel = mongoose.model('Transfer', Transfer)

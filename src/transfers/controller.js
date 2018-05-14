@@ -7,7 +7,7 @@ class Transfers {
   }
 
   async find(query) {
-    const transfers = await TransferModel.find(query)
+    const transfers = await TransferModel.find(query).populate(['ticketId', 'senderId', 'recieverId', 'eventId'])
     return transfers
   }
 }

@@ -8,7 +8,7 @@ class Payout {
   }
 
   async find(query) {
-    const payouts = await PayoutModel.find(query)
+    const payouts = await PayoutModel.find(query).populate(['ticketId', 'sellerId', 'buyerId', 'eventId'])
     const userInfoPayouts = []
     for (let po of payouts) {
       const buyer = await User.getUserById(po.buyerId)

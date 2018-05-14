@@ -7,15 +7,15 @@ export default {
   externalEventId: 5383, // integration id
   promoCode: 'terrapin1',
 
-  username: 'domefest',
-  password: 'dometix17',
+  username: process.env.MISSION_TIX_USERNAME,
+  password: process.env.MISSION_TIX_PASSWORD,
 
   auth: {
     apiKey: process.env.MISSION_TIX_API_KEY,
     userId: process.env.MISSION_TIX_USER_ID,
     apiKeyName: 'dome-key',
     loginUrl: process.env.MISSION_TIX_LOGIN_URL,
-    externalTicketId: 10758
+    externalTicketId: 10758 // box office ticket id
   },
 
   ticketRenderMethod: 'QR',
