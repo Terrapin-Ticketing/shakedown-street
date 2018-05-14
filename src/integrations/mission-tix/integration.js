@@ -42,7 +42,11 @@ class MissionTixTicketIntegration extends IntegrationInterface {
       headers: authHeaders
     })
     const body = JSON.parse(res.body)
-    const isValid = body.status === 'ok' && body.result_msg === 'Barcode is valid.'
+
+    const { status, result_msg, ticket_info } = body
+    const pastScans = ticket_info && parseInt(ticket_info.passed_scans)
+
+    const isValid = status === 'ok' && result_msg === 'Barcode is valid.' && pastScans === 0
     return isValid
   }
 
