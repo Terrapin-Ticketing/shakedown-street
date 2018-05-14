@@ -5,7 +5,6 @@ export default {
 
   domain: process.env.MISSION_TIX_DOMAIN,
   externalEventId: 5383, // integration id
-  promoCode: 'terrapin1',
 
   username: process.env.MISSION_TIX_USERNAME,
   password: process.env.MISSION_TIX_PASSWORD,
@@ -15,7 +14,7 @@ export default {
     userId: process.env.MISSION_TIX_USER_ID,
     apiKeyName: 'dome-key',
     loginUrl: process.env.MISSION_TIX_LOGIN_URL,
-    externalTicketId: 10758 // box office ticket id
+    externalTicketId: process.env.MISSION_TIX_EXTERNAL_TICKET_ID // box office ticket id
   },
 
   ticketRenderMethod: 'QR',
