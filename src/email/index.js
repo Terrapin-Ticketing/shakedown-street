@@ -37,7 +37,7 @@ class Emailer {
     return await sendMail(mailOptions)
   }
 
-  async sendNewUserTicketRecieved(toEmail, fromUser, ticket, token) {
+  async sendNewUserTicketRecieved(toEmail, fromUser, ticket, passwordChangeUrl) {
     let topText = 'You were transfered a ticket on Terrapin Ticketing.'
     let emailHTML = (`
           <tr>
@@ -46,9 +46,9 @@ class Emailer {
                   ${fromUser} transfered a ${ticket.event.name} to your Terrapin Ticketing account. <br /><br />
 
                   <div style="text-align: center;">
-                    <a href="${config.clientDomain}/set-password/${token}" class="btn">View it Here</a>
+                    <a href="${passwordChangeUrl}" class="btn">View it Here</a>
                   </div><br />
-                  <small>If you are unable to click the button above, copy and paste this link into your browser: ${`${config.clientDomain}/set-password/${token}`}</small>
+                  <small>If you are unable to click the button above, copy and paste this link into your browser: ${passwordChangeUrl}</small>
               </td>
           </tr>
           ${getTicketCard(ticket, config)}
