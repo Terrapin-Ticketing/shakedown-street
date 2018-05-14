@@ -71,7 +71,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
 
   async getTicketInfo() {
     return {
-      type: 'GA',
+      type: 'General Admission',
       price: 10000
     }
   }
