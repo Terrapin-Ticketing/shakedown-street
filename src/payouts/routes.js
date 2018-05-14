@@ -1,3 +1,4 @@
+import url from 'url'
 import Payouts from './controller'
 
 function checkAdminEmail(email) {
@@ -12,7 +13,9 @@ export default {
         const { user } = req.props
         const isAdmin = checkAdminEmail(user.email)
         if (!isAdmin) return res.status(401).send({ error: 'unauthorized' })
-        const payouts = await Payouts.find({ isPaid: false })
+        const urlParts = url.parse(req.url, true)
+        const query = urlParts.query
+        const payouts = await Payouts.find(query)
         res.send(payouts)
       }
     }
