@@ -2,12 +2,11 @@
   "name": "shakedown",
   "version": "1.0.0",
   "description": "refactor",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "babel-node index.js",
+    "start": "babel-node server.js",
     "populate": "babel-node bin/populate-db.js",
     "dev": "nodemon --exec npm start",
-    "1prod": "NODE_ENV=test nodemon --exec babel-node index.js",
     "prod": "pm2 start process.json --env prod",
     "test": "jest --watch --runInBand --verbose"
   },
