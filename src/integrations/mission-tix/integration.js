@@ -72,7 +72,7 @@ class MissionTixTicketIntegration extends IntegrationInterface {
   async getTicketInfo() {
     return {
       type: 'GA',
-      price: 1000
+      price: 10000
     }
   }
 
