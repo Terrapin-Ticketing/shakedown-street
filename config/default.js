@@ -8,6 +8,7 @@ let PORT = 8080
 if (!infopass) throw new Error('INFO_PASS not set')
 
 let ipAddress = getIpAddress()[0].address
+console.log('IP: ', ipAddress)
 
 module.exports = {
   port: PORT,

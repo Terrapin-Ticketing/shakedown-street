@@ -21,7 +21,7 @@ class StripeInterface {
   async createCharge(user, token, total, metadata) {
     if (!user.stripeId) user = await this.createStripeId(user)
 
-    let source = token.id
+    let source = token
     if (config.env === 'development' || config.env === 'test') {
       // source = 'tok_chargeDeclined';
       source = 'tok_visa'
