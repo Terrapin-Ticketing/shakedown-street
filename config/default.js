@@ -1,3 +1,5 @@
+require('dotenv').config() // doesn't return anything
+
 let os = require('os')
 let ifaces = os.networkInterfaces()
 let infopass = process.env.INFO_PASS
@@ -12,9 +14,9 @@ module.exports = {
   domain: `http://${ipAddress}:${PORT}`,
   env: 'development',
   stripe: {
-    secretKey: 'sk_test_uKIHGA1q5UfwysISFvt6nHto'
+    secretKey: process.env.STRIPE_SECRET_KEY
   },
-  jwtSecret: 'nershi4prez',
+  jwtSecret: process.env.JWT_SECRET,
   infopass,
   clientDomain: `http://${ipAddress}:3000`
 }

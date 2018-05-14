@@ -7,6 +7,7 @@
     "start": "babel-node index.js",
     "populate": "babel-node bin/populate-db.js",
     "dev": "nodemon --exec npm start",
+    "prod": "NODE_ENV=test nodemon --exec babel-node index.js",
     "test": "jest --watch --runInBand --verbose"
   },
   "author": "",
