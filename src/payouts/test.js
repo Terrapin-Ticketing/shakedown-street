@@ -50,6 +50,7 @@ describe('Payouts', () => {
       sellerId: seller._id,
       buyerId: buyer._id,
       ticketId: ticket._id,
+      eventId: event._id,
       isPaid: false
     })
 
@@ -122,6 +123,7 @@ describe('Payouts', () => {
         sellerId: seller._id,
         buyerId: buyer._id,
         isPaid: false,
+        eventId: event._id,
         ticketId: ticket._id
       })
     }
@@ -156,6 +158,7 @@ describe('Payouts', () => {
       sellerId: seller._id,
       buyerId: buyer._id,
       isPaid: false,
+      eventId: event._id,
       ticketId: ticket._id
     })
 
@@ -192,6 +195,7 @@ describe('Payouts', () => {
       sellerId: seller._id,
       buyerId: buyer._id,
       isPaid: false,
+      eventId: event._id,
       ticketId: ticket._id
     })
 

@@ -10,6 +10,8 @@ import { requireTicketOwner, defineIntegration/*, requireTicketIntegration, requ
 import { Email } from '../_utils/param-types'
 import stripe from '../_utils/stripe'
 
+import Transfer from '../transfers/controller'
+
 export default {
   ['/tickets']: { // this shouldn't be used, we should return tickets with the user
     get: {
@@ -96,6 +98,14 @@ export default {
         const newTicket = await Integration.transferTicket(ticket, transferToUser)
         if (!newTicket) return res.send({ error: 'error transfering ticket' })
 
+        await Transfer.create({
+          date: Date.now(),
+          senderId: user._id,
+          recieverId: transferToUser._id,
+          ticketId: ticket._id,
+          eventId: ticket.eventId
+        })
+
         if (createdNewUser) {
           Emailer.sendNewUserTicketRecieved(transferToEmail, user.email, ticket, passwordChangeUrl)
         } else {
@@ -166,8 +176,10 @@ export default {
           date: Date.now(),
           price: ticket.price,
           stripeChargeId: charge.id,
+          ticketId: newTicket._id,
           sellerId: originalOwner._id,
           buyerId: user._id,
+          eventId: event._id,
           isPaid: false
         })
 
