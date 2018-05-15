@@ -47,4 +47,6 @@ async function clearDb() {
   await mongoose.dropCollection('events')
   await mongoose.dropCollection('users')
   await mongoose.dropCollection('tickets')
+  await mongoose.dropCollection('payouts')
+  await mongoose.dropCollection('transfers')
 }
