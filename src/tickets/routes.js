@@ -168,7 +168,7 @@ export default {
           return res.send({ error: e.message })
         }
         const newTicket = await Integration.transferTicket(ticket, user)
-        if (!newTicket) return res.send({ error: 'error tranfering ticket' })
+        if (!newTicket) return res.send({ error: 'error buying ticket' })
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)

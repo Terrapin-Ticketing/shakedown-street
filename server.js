@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 registerRoutes(routes)
 
 app.listen(config.port, () => {
-  console.log('%s listening at %s', 'Shakedown Street', config.port)
+  console.log('%s listening at %s', 'Shakedown Street', config.domain)
 })
 
 // this shit is magic

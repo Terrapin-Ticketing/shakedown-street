@@ -23,7 +23,7 @@ class StripeInterface {
 
     let source = token
     if (config.env === 'development' || config.env === 'test') {
-      // source = 'tok_chargeDeclined';
+      // source = 'tok_chargeDeclined'
       source = 'tok_visa'
     }
     let charge = await stripe.charges.create({
