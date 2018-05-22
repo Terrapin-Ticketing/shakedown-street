@@ -1,14 +1,17 @@
 import url from 'url'
+import uuidv1 from 'uuid/v4'
 import Ticket from './controller'
 import User from '../users/controller'
 import Event from '../events/controller'
 import Payout from '../payouts/controller'
 import Emailer from '../email'
+
 // import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
 import { requireTicketOwner, defineIntegration/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
 import { Email } from '../_utils/param-types'
 import stripe from '../_utils/stripe'
+import redis from '../_utils/redis'
 
 import Transfer from '../transfers/controller'
 
@@ -62,6 +65,21 @@ export default {
       }
     }
   },
+  ['/tickets/:id/reserve']: {
+    get: {
+      handler: async(req, res) => {
+        const { id } = req.params
+        const ticket = await Ticket.getTicketById(id)
+        if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
+
+        if (await redis.get('reserve-token', id)) return res.send({ error: 'ticket already reserved' })
+
+        const reserveToken = uuidv1()
+        await redis.set('reserve-token', id, reserveToken, 60*15)
+        res.send({ticket, reserveToken})
+      }
+    }
+  },
   ['/tickets/:id/transfer']: {
     post: {
       middleware: [
@@ -112,7 +130,7 @@ export default {
           Emailer.sendExistingUserTicketRecieved(transferToUser, ticket)
         }
         res.send({ ticket: stripBarcodes(newTicket) })
-      }//
+      }
     }
   },
   ['/payment/:id']: {
@@ -128,14 +146,18 @@ export default {
       ],
       body: {
         token: String,
-        transferToEmail: String
+        transferToEmail: String,
+        reserveToken: String
       },
       handler: async(req, res) => {
         let { user, Integration } = req.props
         const { id } = req.params
         const ticketId = id
-        const { token, transferToEmail } = req.body
+        const { token, transferToEmail, reserveToken } = req.body
         const stripeToken = token
+
+        const savedReserveToken = await redis.get('reserve-token', ticketId)
+        if (reserveToken !== savedReserveToken) return res.send({ error: 'you must reserve ticket before you buy it' })
 
         // check if ticket has already been activated or isn't for sale
         const ticket = await Ticket.getTicketById(ticketId)

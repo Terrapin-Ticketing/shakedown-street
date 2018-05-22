@@ -10,13 +10,13 @@ class RedisCli {
   async set(namespace, key, value, timeout) {
     await new Promise((resolve) => {
       if (!timeout) return client.hset(prefixNamespace(namespace), key, value, resolve)
-      client.hset(prefixNamespace(namespace), key, value, 'EX', timeout, resolve)
+      client.hset(prefixNamespace(namespace), String(key), String(value), 'EX', timeout, resolve)
     })
   }
 
   async get(namespace, key) {
     return await new Promise((resolve) => {
-      client.hget(prefixNamespace(namespace), key, async(err, value) => {
+      client.hget(prefixNamespace(namespace), String(key), async(err, value) => {
         if (err || value === 'false') return resolve(false)
         return resolve(value)
       })

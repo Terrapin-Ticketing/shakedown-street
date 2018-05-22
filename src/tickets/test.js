@@ -139,7 +139,7 @@ describe('Ticket', () => {
       const newUser = await User.getUserByEmail('newUser@test.com')
       expect(actualResponseBody.ticket).toHaveProperty('_id', ticket._id)
       expect(actualResponseBody.ticket).toHaveProperty('ownerId', newUser._id)
-    }, 15000)
+    }, 30000)
 
     it('should purchace ticket with stripe token', async() => {
       const owner = await User.createUser('test@test.com', 'test')
@@ -154,6 +154,7 @@ describe('Ticket', () => {
 
       const buyer = await User.createUser('notTest@test.com', 'test')
 
+      // get stripe token
       const cardInfo = {
         'card[number]': 4242424242424242,
         'card[exp_month]': 12,
@@ -169,12 +170,27 @@ describe('Ticket', () => {
         }
       })
 
+      // get reserve token
+      const mockReqReserveToken = httpMocks.createRequest({
+        method: 'get',
+        url: `/tickets/${ticket._id}/reserve`,
+        params: {
+          id: ticket._id
+        }
+      })
+
+      const mockResReserveToken = httpMocks.createResponse()
+      await TicketInterface.routes['/tickets/:id/reserve'].get(mockReqReserveToken, mockResReserveToken)
+      const actualResponseBodyReserveTicket = mockResReserveToken._getData()
+      const { reserveToken } = actualResponseBodyReserveTicket
+
       const mockReq = httpMocks.createRequest({
         method: 'put',
         url: `/payment/${ticket._id}`,
         body: {
           transferToEmail: buyer.email,
-          token: res.body
+          token: res.body,
+          reserveToken
         },
         params: {
           id: ticket._id
@@ -189,7 +205,7 @@ describe('Ticket', () => {
       expect(charge).toBeTruthy()
       expect(passwordChangeUrl).toBeFalsy() // TODO: test with new user
       expect(actualResponseBody.ticket).toHaveProperty('ownerId', buyer._id)
-    }, 30000)
+    }, 35000)
 
     it('should purchace ticket by new user', async() => {
       const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
@@ -215,12 +231,27 @@ describe('Ticket', () => {
         }
       })
 
+      // get reserve token
+      const mockReqReserveToken = httpMocks.createRequest({
+        method: 'get',
+        url: `/tickets/${ticket._id}/reserve`,
+        params: {
+          id: ticket._id
+        }
+      })
+
+      const mockResReserveToken = httpMocks.createResponse()
+      await TicketInterface.routes['/tickets/:id/reserve'].get(mockReqReserveToken, mockResReserveToken)
+      const actualResponseBodyReserveTicket = mockResReserveToken._getData()
+      const { reserveToken } = actualResponseBodyReserveTicket
+
       const mockReq = httpMocks.createRequest({
         method: 'put',
         url: `/payment/${ticket._id}`,
         body: {
           transferToEmail: 'newUser@gogo.com',
-          token: res.body
+          token: res.body,
+          reserveToken
         },
         params: {
           id: ticket._id
@@ -234,5 +265,29 @@ describe('Ticket', () => {
       expect(charge).toBeTruthy()
       expect(passwordChangeUrl).toBeTruthy()
     }, 30000)
+
+    it('should issue a reserve ticket token', async() => {
+      const owner = await User.createUser('test@test.com', 'test')
+      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const ticketType = Object.keys(event.ticketTypes)[0]
+      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const buyableTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
+      await Ticket.set(buyableTicket._id, { isForSale: true })
+
+      const mockReq = httpMocks.createRequest({
+        method: 'get',
+        url: `/tickets/${buyableTicket._id}/reserve`,
+        params: {
+          id: buyableTicket._id
+        }
+      })
+
+      const mockRes = httpMocks.createResponse()
+      await TicketInterface.routes['/tickets/:id/reserve'].get(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      const { ticket, reserveToken } = actualResponseBody
+      expect(String(ticket._id)).toBe(String(buyableTicket._id))
+      expect(reserveToken).toBeDefined()
+    })
   })
 })

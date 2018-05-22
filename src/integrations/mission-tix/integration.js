@@ -174,7 +174,6 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     })
     tokens = this.getTokens(boxOffice.body)
 
-
     // add to cart
     await post({
       url: 'https://www.mt.cm/system/ajax',

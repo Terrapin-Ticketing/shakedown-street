@@ -60,5 +60,5 @@ describe('Mission Tix Ticket Intergration', () => {
     const ticket = await Ticket.createTicket(event._id, fromUser._id, barcode, price, 'GA')
     const newTicket = await MissionTix.transferTicket(ticket, toUser)
     expect(newTicket).toHaveProperty('ownerId', toUser._id)
-  }, 100000)
+  }, 35000)
 })

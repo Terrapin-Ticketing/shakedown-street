@@ -23,7 +23,6 @@ class CinciTicketIntegration extends IntegrationInterface {
   }
 
   // async isValidTicket(barcode) {
-  //
   // }
 }
 
