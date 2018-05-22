@@ -85,12 +85,27 @@ describe('Payouts', () => {
       }
     })
 
+    // get reserve token
+    const mockReqReserveToken = httpMocks.createRequest({
+      method: 'get',
+      url: `/tickets/${ticket._id}/reserve`,
+      params: {
+        id: ticket._id
+      }
+    })
+
+    const mockResReserveToken = httpMocks.createResponse()
+    await TicketInterface.routes['/tickets/:id/reserve'].get(mockReqReserveToken, mockResReserveToken)
+    const actualResponseBodyReserveTicket = mockResReserveToken._getData()
+    const { reserveToken } = actualResponseBodyReserveTicket
+
     const mockReq = httpMocks.createRequest({
       method: 'put',
       url: `/payment/${ticket._id}`,
       body: {
         transferToEmail: buyer,
-        token: JSON.parse(res.body).id
+        token: JSON.parse(res.body).id,
+        reserveToken
       },
       params: {
         id: ticket._id

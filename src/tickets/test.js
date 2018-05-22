@@ -266,6 +266,53 @@ describe('Ticket', () => {
       expect(passwordChangeUrl).toBeTruthy()
     }, 30000)
 
+    it('should not allow ticket purchace without valid reserve token', async() => {
+      const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
+      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const ticketType = Object.keys(event.ticketTypes)[0]
+      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
+      const ticket = await Ticket.set(initTicket._id, {
+        isForSale: true
+      })
+
+      const cardInfo = {
+        'card[number]': 4242424242424242,
+        'card[exp_month]': 12,
+        'card[exp_year]': 2019,
+        'card[cvc]': 123
+      }
+      const res = await post({
+        url: 'https://api.stripe.com/v1/tokens',
+        form: cardInfo,
+        headers: {
+          'Authorization': `Bearer ${secretKey}`
+        }
+      })
+
+      // get reserve token
+      const reserveToken = 'not-a-valid-token'
+
+      const mockReq = httpMocks.createRequest({
+        method: 'put',
+        url: `/payment/${ticket._id}`,
+        body: {
+          transferToEmail: 'newUser@gogo.com',
+          token: res.body,
+          reserveToken
+        },
+        params: {
+          id: ticket._id
+        }
+      })
+
+      const mockRes = httpMocks.createResponse()
+      await TicketInterface.routes['/payment/:id'].post(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.error).toBeDefined()
+    }, 30000)
+
+
     it('should issue a reserve ticket token', async() => {
       const owner = await User.createUser('test@test.com', 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
