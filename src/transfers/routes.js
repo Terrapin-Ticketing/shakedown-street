@@ -7,7 +7,7 @@ function checkAdminEmail(email) {
 }
 
 export default {
-  ['/transfers']: { // this shouldn't be used, we should return tickets with the user
+  ['/transfers']: {
     get: {
       handler: async(req, res) => {
         const { user } = req.props

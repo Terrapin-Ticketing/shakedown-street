@@ -1,4 +1,6 @@
 const { mongoose } = require('../_utils/bootstrap')
+import uuidv1 from 'uuid/v4'
+import redis from '../_utils/redis'
 
 import httpMocks from 'node-mocks-http'
 import Event from '../events/controller'
@@ -38,6 +40,43 @@ describe('Ticket', () => {
       await TicketInterface.routes['/tickets'].get(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
       expect(actualResponseBody.tickets[0]).toHaveProperty('ownerId', user._id)
+    }, 8000)
+
+    it('should get all available tickets with given query param', async() => {
+      const user = await User.createUser('test@test.com', 'test')
+      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const ticketType = Object.keys(event.ticketTypes)[0]
+      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const ticket = await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
+      await Ticket.set(ticket._id, { isForSale: true })
+
+      const mockReq = httpMocks.createRequest({
+        method: 'get',
+        url: '/tickets/available?isForSale=true'
+      })
+      const mockRes = httpMocks.createResponse()
+      await TicketInterface.routes['/tickets/available'].get(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.tickets[0]).toHaveProperty('ownerId', user._id)
+    }, 8000)
+
+    it('shouldn\'t return reserved tickets', async() => {
+      const user = await User.createUser('test@test.com', 'test')
+      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const ticketType = Object.keys(event.ticketTypes)[0]
+      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const ticket = await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
+      await Ticket.set(ticket._id, { isForSale: true })
+      await redis.set('reserve-token', ticket._id, uuidv1(), 60*15)
+
+      const mockReq = httpMocks.createRequest({
+        method: 'get',
+        url: '/tickets/available?isForSale=true'
+      })
+      const mockRes = httpMocks.createResponse()
+      await TicketInterface.routes['/tickets/available'].get(mockReq, mockRes)
+      const actualResponseBody = mockRes._getData()
+      expect(actualResponseBody.tickets.length).toEqual(0)
     }, 8000)
 
     it('should remove barcodes from tickets', async() => {

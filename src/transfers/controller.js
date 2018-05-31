@@ -1,6 +1,6 @@
 import TransferModel from './model'
 
-class Transfers {
+class Transfer {
   async create(vals) {
     const transfer = await TransferModel.create(vals)
     return transfer
@@ -12,4 +12,4 @@ class Transfers {
   }
 }
 
-export default new Transfers()
+export default new Transfer()

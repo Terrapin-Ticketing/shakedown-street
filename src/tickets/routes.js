@@ -16,14 +16,14 @@ import redis from '../_utils/redis'
 import Transfer from '../transfers/controller'
 
 export default {
-  ['/tickets']: { // this shouldn't be used, we should return tickets with the user
+  ['/tickets']: {
     get: {
       handler: async(req, res) => {
         const { user } = req.props
         const urlParts = url.parse(req.url, true)
         const query = urlParts.query
         let tickets = await Ticket.find(query)
-        // strip barcodes of tickets if not called by owner
+        // strip barcodes off tickets if not called by owner
         tickets = tickets.map((ticket) => {
           if (!user || String(ticket.ownerId) !== String(user._id)) {
             return stripBarcodes(ticket)
@@ -31,6 +31,32 @@ export default {
           return ticket
         })
         res.send({ tickets })
+      }
+    }
+  },
+  ['/tickets/available']: {
+    get: {
+      handler: async(req, res) => {
+        const { user } = req.props
+        const urlParts = url.parse(req.url, true)
+        const query = urlParts.query
+        let tickets = await Ticket.find(query)
+        // strip barcodes off tickets if not called by owner
+        tickets = tickets.map((ticket) => {
+          if (!user || String(ticket.ownerId) !== String(user._id)) {
+            return stripBarcodes(ticket)
+          }
+          return ticket
+        })
+        // remove all reserved tickets (.filter dosn't support promises)
+        const availableTickets = []
+        for (let ticket of tickets) {
+          const reserveToken = await redis.get('reserve-token', ticket._id)
+          if (!reserveToken) {
+            availableTickets.push(ticket)
+          }
+        }
+        res.send({ tickets: availableTickets })
       }
     }
   },
@@ -73,10 +99,24 @@ export default {
         if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
 
         if (await redis.get('reserve-token', id)) return res.send({ error: 'ticket already reserved' })
-
         const reserveToken = uuidv1()
         await redis.set('reserve-token', id, reserveToken, 60*15)
         res.send({ticket, reserveToken})
+      }
+    },
+    delete: {
+      handler: async(req, res) => {
+        const { id } = req.params
+        const urlParts = url.parse(req.url, true)
+        const query = urlParts.query
+        const { reserveToken } = query
+        const ticket = await Ticket.getTicketById(id)
+        if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
+
+        const savedToken = await redis.get('reserve-token', id)
+        if (savedToken !== reserveToken) return res.status(401).send({ error: 'users cant remove token that they dont have access to' })
+        await redis.set('reserve-token', id, false)
+        res.send({ticket})
       }
     }
   },
@@ -157,7 +197,7 @@ export default {
         const stripeToken = token
 
         const savedReserveToken = await redis.get('reserve-token', ticketId)
-        if (reserveToken !== savedReserveToken) return res.send({ error: 'you must reserve ticket before you buy it' })
+        if (reserveToken !== savedReserveToken) return res.send({ error: 'invalid reserve token' })
 
         // check if ticket has already been activated or isn't for sale
         const ticket = await Ticket.getTicketById(ticketId)

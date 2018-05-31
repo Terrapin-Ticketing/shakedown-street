@@ -9,15 +9,10 @@ import MissinTix from '../src/integrations/mission-tix/integration'
 
 (async function() {
   await clearDb()
-
   const cinciRegisterBarcode = await createCinciReigsterTicket()
   console.log('cinciRegisterBarcode: ', cinciRegisterBarcode)
-  const missionTixBarcode = await createMissionTixTicket()
-  console.log('missionTixBarcode:', missionTixBarcode)
   const user = await User.createUser('reeder@terrapinticketing.com', 'test')
   console.log('created user:', user.email)
-  const user2 = await User.createUser('reeder@knoesis.org', 'test')
-  console.log('created user:', user2.email)
   process.exit()
 })()
 
