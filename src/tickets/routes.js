@@ -112,10 +112,9 @@ export default {
         const { reserveToken } = query
         const ticket = await Ticket.getTicketById(id)
         if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
-
         const savedToken = await redis.get('reserve-token', id)
         if (savedToken !== reserveToken) return res.status(401).send({ error: 'users cant remove token that they dont have access to' })
-        await redis.set('reserve-token', id, false)
+        await redis.set('reserve-token', String(id), false)
         res.send({ticket})
       }
     }

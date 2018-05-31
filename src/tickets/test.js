@@ -60,6 +60,30 @@ describe('Ticket', () => {
       expect(actualResponseBody.tickets[0]).toHaveProperty('ownerId', user._id)
     }, 8000)
 
+    it('should delete reserve-token', async() => {
+      const user = await User.createUser('test@test.com', 'test')
+      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const ticketType = Object.keys(event.ticketTypes)[0]
+      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const ticket = await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
+      await Ticket.set(ticket._id, { isForSale: true })
+
+      const reserveToken = uuidv1()
+      await redis.set('reserve-token', String(ticket._id), reserveToken, 60*15)
+
+      const mockReq = httpMocks.createRequest({
+        method: 'delete',
+        url: `/tickets/${ticket._id}/reserve?reserveToken=${reserveToken}`,
+        params: {
+          id: ticket._id
+        }
+      })
+      const mockRes = httpMocks.createResponse()
+      await TicketInterface.routes['/tickets/:id/reserve'].delete(mockReq, mockRes)
+      const savedToken = await redis.get('reserve-token', String(ticket._id))
+      expect(savedToken).toEqual(false)
+    }, 8000)
+
     it('shouldn\'t return reserved tickets', async() => {
       const user = await User.createUser('test@test.com', 'test')
       const event = await Event.createEvent(cinciRegisterTestEvent)
