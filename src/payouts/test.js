@@ -103,7 +103,9 @@ describe('Payouts', () => {
       method: 'put',
       url: `/payment/${ticket._id}`,
       body: {
-        transferToEmail: buyer,
+        transferToUser: {
+          email: buyer
+        },
         token: JSON.parse(res.body).id,
         reserveToken
       },

@@ -2,6 +2,8 @@ import mongoose from 'mongoose'
 
 let UserSchema = mongoose.Schema({
   email: { type: String, index: { unique: true }, required: true },
+  firstName: { type: String },
+  lastName: { type: String },
   password: { type: String, required: true },
   tickets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }],
   payout: {

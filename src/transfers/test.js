@@ -65,7 +65,9 @@ describe('Transfers', () => {
       method: 'post',
       url: `/tickets/${ticket._id}/transfer`,
       body: {
-        transferToEmail: receiverEmail
+        transferToUser: {
+          email: receiverEmail
+        }
       },
       params: {
         id: ticket._id

@@ -9,7 +9,6 @@ import Emailer from '../email'
 // import Integrations from '../integrations'
 import stripBarcodes from '../_utils/strip-barcodes'
 import { requireTicketOwner, defineIntegration/*, requireTicketIntegration, requireCreateUser*/ } from '../_utils/route-middleware'
-import { Email } from '../_utils/param-types'
 import stripe from '../_utils/stripe'
 import redis from '../_utils/redis'
 
@@ -132,41 +131,43 @@ export default {
         })
       ],
       body: {
-        transferToEmail: Email // RequiredUser????
+        transferToUser: Object
       },
       handler: async(req, res) => {
         let { user, Integration } = req.props
-        const { transferToEmail } = req.body
+        const { transferToUser } = req.body
         const { id } = req.params
+
+        const { email, firstName, lastName } = transferToUser
 
         const ticket = await Ticket.getTicketById(id)
 
-        let transferToUser = await User.getUserByEmail(transferToEmail)
+        let existingUser = await User.getUserByEmail(email)
         let createdNewUser = false
         let passwordChangeUrl
-        if (!transferToUser) {
-          transferToUser = await User.createUser(transferToEmail, `${Math.random()}`)
-          if (!transferToUser) return res.send({ error: 'username already taken' })
-          passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
+        if (!existingUser) {
+          existingUser = await User.createUser(email, `${Math.random()}`, firstName, lastName)
+          if (!existingUser) return res.send({ error: 'username already taken' })
+          passwordChangeUrl = await User.requestChangePasswordUrl(email)
           createdNewUser = true
         }
 
         // check ticket validity
-        const newTicket = await Integration.transferTicket(ticket, transferToUser)
+        const newTicket = await Integration.transferTicket(ticket, existingUser)
         if (!newTicket) return res.send({ error: 'error transfering ticket' })
 
         await Transfer.create({
           date: Date.now(),
           senderId: user._id,
-          recieverId: transferToUser._id,
+          recieverId: existingUser._id,
           ticketId: ticket._id,
           eventId: ticket.eventId
         })
 
         if (createdNewUser) {
-          Emailer.sendNewUserTicketRecieved(transferToEmail, user.email, ticket, passwordChangeUrl)
+          Emailer.sendNewUserTicketRecieved(email, user.email, ticket, passwordChangeUrl)
         } else {
-          Emailer.sendExistingUserTicketRecieved(transferToUser, ticket)
+          Emailer.sendExistingUserTicketRecieved(existingUser, ticket)
         }
         res.send({ ticket: stripBarcodes(newTicket) })
       }
@@ -185,15 +186,17 @@ export default {
       ],
       body: {
         token: String,
-        transferToEmail: String,
+        transferToUser: Object,
         reserveToken: String
       },
       handler: async(req, res) => {
         let { user, Integration } = req.props
         const { id } = req.params
         const ticketId = id
-        const { token, transferToEmail, reserveToken } = req.body
+        const { token, transferToUser, reserveToken } = req.body
         const stripeToken = token
+
+        const { email, firstName, lastName } = transferToUser
 
         const savedReserveToken = await redis.get('reserve-token', ticketId)
         if (reserveToken !== savedReserveToken) return res.send({ error: 'invalid reserve token' })
@@ -209,9 +212,9 @@ export default {
         // create user if one doesn't exist
         let passwordChangeUrl, charge
         if (!user) {
-          user = await User.createUser(transferToEmail, `${Math.random()}`)
+          user = await User.createUser(email, `${Math.random()}`, firstName, lastName)
           if (!user) return res.send({ error: 'username already taken' })
-          passwordChangeUrl = await User.requestChangePasswordUrl(transferToEmail)
+          passwordChangeUrl = await User.requestChangePasswordUrl(email)
         }
 
         const originalOwner = await User.getUserById(ticket.ownerId)

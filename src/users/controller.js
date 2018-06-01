@@ -6,11 +6,13 @@ import redis from '../_utils/redis'
 import config from 'config'
 
 class UserController {
-  async createUser(email, password) {
+  async createUser(email, password, firstName, lastName) {
     try {
       const user = await UserModel.create({
         email: email.toLowerCase(),
-        password: saltPassword(password)
+        password: saltPassword(password),
+        firstName,
+        lastName
       })
       return user
     } catch (e) {

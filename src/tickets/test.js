@@ -188,7 +188,11 @@ describe('Ticket', () => {
         method: 'post',
         url: `/tickets/${ticket._id}/transfer`,
         body: {
-          transferToEmail: 'newUser@test.com'
+          transferToUser: {
+            firstName: 'Meg',
+            lastName: 'Griffin',
+            email: 'newUser@test.com'
+          }
         },
         params: {
           id: ticket._id
@@ -251,7 +255,11 @@ describe('Ticket', () => {
         method: 'put',
         url: `/payment/${ticket._id}`,
         body: {
-          transferToEmail: buyer.email,
+          transferToUser: {
+            email: buyer.email,
+            firstName: 'Greg',
+            lastName: 'Ormant'
+          },
           token: res.body,
           reserveToken
         },
@@ -312,7 +320,11 @@ describe('Ticket', () => {
         method: 'put',
         url: `/payment/${ticket._id}`,
         body: {
-          transferToEmail: 'newUser@gogo.com',
+          transferToUser: {
+            email: 'newUser@gogo.com',
+            firstName: 'Jermy',
+            lastName: 'Sha'
+          },
           token: res.body,
           reserveToken
         },
@@ -360,7 +372,9 @@ describe('Ticket', () => {
         method: 'put',
         url: `/payment/${ticket._id}`,
         body: {
-          transferToEmail: 'newUser@gogo.com',
+          transferToUser: {
+            email: 'newUser@gogo.com'
+          },
           token: res.body,
           reserveToken
         },
