@@ -22,6 +22,9 @@ export default {
   urlSafe: 'TestMissionTix',
 
   date: '2018-05-17',
+  startDate: '2018-05-17T01:00:00',
+  endDate: '2018-05-20T01:00:00',
+  timezone: 'EST',
   name: 'Mission Tix Test Event',
   description: 'testing terrapin ticketing domefest resale',
   venue: {

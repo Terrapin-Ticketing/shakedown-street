@@ -3,13 +3,24 @@ require('../../_utils/bootstrap')
 export default {
   domain: process.env.CINCI_REGISTER_DOMAIN,
   issueTicketRoute: '/testfest',
+  loginUrl: process.env.CINCI_REGISTER_LOGIN_URL,
 
   integrationType: 'CinciRegister',
   urlSafe: 'CinciRegisterTestEvent',
-  username: 'CINCI_REGISTER_USERNAME',
-  password: 'CINCI_REGISTER_PASSWORD',
+  username: process.env.CINCI_REGISTER_USERNAME,
+  password: process.env.CINCI_REGISTER_PASSWORD,
+
+  auth: {
+    billingNum: '_billing_3653461',
+    billingMethod: 10292,
+    rVal: 'r3653466'
+  },
 
   date: '3/4/2019',
+  startDate: '2018-03-04T01:00:00',
+  endDate: '2018-03-06T01:00:00',
+  timezone: 'EST',
+
   name: 'Cinci Register Test Event',
   description: 'an event used for testing cinci ticket integration',
   venue: {
@@ -26,6 +37,7 @@ export default {
   externalEventId: 102179, // integration id
   promoCode: 'TERRAPIN',
   totalMarkupPercent: 0.00,
+  totalStaticMarkup: 1600,
   ticketTypes: {
     'VIP 2-Day Pass': {
       paramName: 'vip_2day',

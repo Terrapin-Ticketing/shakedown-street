@@ -19,7 +19,8 @@ describe('Cinci Register Intergration', () => {
   it('should login', async() => {
     const username = process.env.CINCI_REGISTER_USERNAME
     const password = process.env.CINCI_REGISTER_PASSWORD
-    const sessionId = await CinciRegisterIntegration.login(username, password)
+    const event = await Event.createEvent(cinciRegisterTestEvent)
+    const sessionId = await CinciRegisterIntegration.login(username, password, event)
     expect(sessionId).toBeTruthy()
     expect(sessionId.length).toEqual(32)
   })

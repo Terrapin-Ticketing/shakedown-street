@@ -221,7 +221,8 @@ export default {
 
         // calculate total
         let event = await Event.getEventById(ticket.event)
-        let serviceFee = ticket.price * event.totalMarkupPercent
+        let serviceFee = ticket.price * event.totalMarkupPercent + event.totalStaticMarkup
+
         let baseTotal = serviceFee + ticket.price
         let stripeTotal = (baseTotal * 0.029) + 50
         let total = Math.ceil(baseTotal + stripeTotal)

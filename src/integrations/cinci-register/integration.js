@@ -1,4 +1,3 @@
-import config from 'config'
 import url from 'url'
 import Event from '../../events/controller'
 import Ticket from '../../tickets/controller'
@@ -10,11 +9,11 @@ import redis from '../../_utils/redis'
 import csv from 'csvtojson'
 
 class CinciRegisterIntegration extends IntegrationInterface {
-  async login(username, password) {
+  async login(username, password, event) {
     // const sessionId = await redis.get('cinci-register', 'sessionId')
     // if (sessionId || config.env !== 'test') return sessionId
 
-    const loginUrl = process.env.CINCI_REGISTER_LOGIN_URL
+    const loginUrl = event.loginUrl
     const formData = {
       username,
       password
@@ -35,9 +34,9 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const event = await Event.getEventById(eventId)
     if (!event) return false
     const { domain } = event
-    const username = process.env[event.username]
-    const password = process.env[event.password]
-    let sessionId = await this.login(username, password)
+    const username = event.username
+    const password = event.password
+    let sessionId = await this.login(username, password, event)
     let ticketInfo = await this.getTicketInfo(barcode, event)
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false
 
@@ -63,10 +62,10 @@ class CinciRegisterIntegration extends IntegrationInterface {
   }
 
   async issueTicket(event, user, ticketType) {
-    const username = process.env[event.username]
-    const password = process.env[event.password]
+    const username = event.username
+    const password = event.password
 
-    let sessionId = await this.login(username, password)
+    let sessionId = await this.login(username, password, event)
     let ticketIssueRoute = event.issueTicketRoute
     let ticketPortal = url.resolve(event.domain, ticketIssueRoute)
     let sVal = await getSValue(ticketPortal)
@@ -85,15 +84,15 @@ class CinciRegisterIntegration extends IntegrationInterface {
       zip_code: 45209,
       _billing_zip_code: 45209,
       'phone_number': [ 900, 623, 6235 ],
-      _billing_method: 10292,
+      _billing_method: event.auth.billingMethod,
       _hide_coupon: 0,
-      _billing_3653461: 0,
+      [event.auth.billingNum]: 0,
       _billing_country: 'US',
       _billing_state: 'OH',
       email_address: 'brewgrass@terrapinticketing.com',
       _email_address: 'brewgrass@terrapinticketing.com',
       'cmd=forward': 'SUBMIT ORDER',
-      r3653466: 1
+      [event.auth.rVal]: 1
     }
 
     // add ticket level to request body
@@ -135,17 +134,26 @@ class CinciRegisterIntegration extends IntegrationInterface {
     let ticket = tickets[ticketId]
     if (!ticket) return false
 
+
     let scanned = tickets[ticketId]['Scanned']
     let isScanned = scanned !== '0'
+
+    const types = await this.getTicketTypes(event._id)
+    const ticketType = ticket['Ticket Level']
+
+    if (!types[ticketType]) {
+      console.log('unsupported ticket type:', ticketType)
+      return false
+    }
 
     return ticket.Status === 'active' && !isScanned
   }
 
   // expensive
   async _getTickets(event) {
-    const username = process.env[event.username]
-    const password = process.env[event.password]
-    let sessionId = await this.login(username, password)
+    const username = event.username
+    const password = event.password
+    let sessionId = await this.login(username, password, event)
     let csvExport = (await post({
       url: `${event.domain}/merchant/products/2/manage/tickets`,
       form: {
@@ -172,6 +180,8 @@ class CinciRegisterIntegration extends IntegrationInterface {
             // set the ticket price based on the ticket level (ticket type)
             if (fields[i] === 'Ticket Level') {
               let ticketLevel = ticketEntry[fields[i]]
+              // if we don't support this ticket type, don't look it up
+              if (!event.ticketTypes[ticketLevel]) continue
               ticketEntry.price = event.ticketTypes[ticketLevel].price
               ticketEntry.type = ticketLevel
             }

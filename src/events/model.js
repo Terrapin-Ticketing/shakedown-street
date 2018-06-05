@@ -5,12 +5,17 @@ let EventSchema = new mongoose.Schema({
   integrationType: { type: String }, // eventType?
 
 
-  totalMarkupPercent: { type: Number }, // this would be nice on "ticketType"
+  totalMarkupPercent: { type: Number, required: true, default: 0.00 }, // this would be nice on "ticketType"
+  totalStaticMarkup: { type: Number, required: true, default: 0 }, // static markup for flat markup rates
 
   ticketRenderMethod: { type: String },
 
 
-  date: { type: String, required: true },
+  // date: { type: String, required: true },
+  startDate: { type: String, required: true },
+  endDate: { type: String, required: true },
+  timezone: { type: String, required: true },
+
   name: { type: String, index: { unique: true }, required: true },
   urlSafe: { type: String, index: { unique: true }, required: true },
   description: { type: String },
@@ -25,6 +30,8 @@ let EventSchema = new mongoose.Schema({
   textColor: { type: String },
   imageUrl: { type: String },
   thumbnail_image_url: { type: String },
+
+  loginUrl: { type: String },
 
   website: { type: String },
   backgroundColor: { type: String },
