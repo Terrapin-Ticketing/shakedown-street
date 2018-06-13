@@ -9,14 +9,14 @@ function prefixNamespace(namespace) {
 class RedisCli {
   async set(namespace, key, value, timeout) {
     await new Promise((resolve) => {
-      if (!timeout) return client.hset(prefixNamespace(namespace), key, value, resolve)
-      client.hset(prefixNamespace(namespace), String(key), String(value), 'EX', timeout, resolve)
+      if (!timeout) return client.set(`${prefixNamespace(namespace)}_${String(key)}`, value, resolve)
+      client.set(`${prefixNamespace(namespace)}_${String(key)}`, String(value), 'EX', timeout, resolve)
     })
   }
 
   async get(namespace, key) {
     return await new Promise((resolve) => {
-      client.hget(prefixNamespace(namespace), String(key), async(err, value) => {
+      client.get(`${prefixNamespace(namespace)}_${String(key)}`, async(err, value) => {
         if (err || value === 'false') return resolve(false)
         return resolve(value)
       })

@@ -18,7 +18,7 @@ export default {
 
   date: '3/4/2019',
   startDate: '2018-03-04T01:00:00',
-  endDate: '2018-03-06T01:00:00',
+  endDate: '2019-03-06T01:00:00',
   timezone: 'EST',
 
   name: 'Cinci Register Test Event',

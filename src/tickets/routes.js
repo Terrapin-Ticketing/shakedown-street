@@ -97,9 +97,10 @@ export default {
         const ticket = await Ticket.getTicketById(id)
         if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
 
-        if (await redis.get('reserve-token', id)) return res.send({ error: 'ticket already reserved' })
+        if (await redis.get('reserve-token', String(id))) return res.send({ error: 'ticket already reserved' })
         const reserveToken = uuidv1()
-        await redis.set('reserve-token', id, reserveToken, 60*15)
+        // await redis.set('reserve-token', id, reserveToken, 10)
+        await redis.set('reserve-token', String(id), reserveToken, 60*15)
         res.send({ticket, reserveToken})
       }
     },
@@ -111,7 +112,7 @@ export default {
         const { reserveToken } = query
         const ticket = await Ticket.getTicketById(id)
         if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
-        const savedToken = await redis.get('reserve-token', id)
+        const savedToken = await redis.get('reserve-token', String(id))
         if (savedToken !== reserveToken) return res.status(401).send({ error: 'users cant remove token that they dont have access to' })
         await redis.set('reserve-token', String(id), false)
         res.send({ticket})
