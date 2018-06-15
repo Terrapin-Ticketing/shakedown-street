@@ -4,14 +4,14 @@ import setCookie from 'set-cookie-parser'
 import queryString from 'query-string'
 
 export async function post(config) {
-  return await x({ method: 'POST', ...config })
+  return await req({ method: 'POST', ...config })
 }
 
 export async function get(url, config) {
-  return await x({ ...config, url, method: 'GET' })
+  return await req({ ...config, url, method: 'GET' })
 }
 
-async function x(config) {
+async function req(config) {
   const { url, form, json, cookieValue, headers, method, followRedirect, formData } = config
 
   const { protocol, host, port } = urlParse.parse(url)
@@ -20,6 +20,8 @@ async function x(config) {
   let jar = request.jar()
   const stringifiedCookie = queryString.stringify(cookieValue)
   let cookie = request.cookie(stringifiedCookie)
+
+  console.log('cookie', cookie)
 
   jar.setCookie(cookie, domain)
   let options = {

@@ -151,7 +151,13 @@ export default {
           if (!existingUser) return res.send({ error: 'username already taken' })
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
           createdNewUser = true
+        } else {
+          await User.set(existingUser._id, {
+            firstName,
+            lastName
+          })
         }
+
 
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, existingUser)
@@ -216,6 +222,11 @@ export default {
           user = await User.createUser(email, `${Math.random()}`, firstName, lastName)
           if (!user) return res.send({ error: 'username already taken' })
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
+        } else {
+          await User.set(user._id, {
+            firstName,
+            lastName
+          })
         }
 
         const originalOwner = await User.getUserById(ticket.ownerId)

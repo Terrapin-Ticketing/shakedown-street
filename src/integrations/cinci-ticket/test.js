@@ -1,6 +1,9 @@
 const { mongoose } = require('../../_utils/bootstrap')
 
+import Event from '../../events/controller'
+
 import CinciTicketIntegration from './integration'
+import cinciTicketTestEvent from './test-event'
 
 describe('Cinci Ticket Intergration', () => {
   beforeAll(async() => {
@@ -19,4 +22,14 @@ describe('Cinci Ticket Intergration', () => {
     expect(res).toHaveProperty('UserSession')
   })
 
+  it.only('should check valdity of barcode', async() => {
+    const barcode = '0000001860012019400002'
+    const event = await Event.createEvent(cinciTicketTestEvent)
+    const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
+    console.log('isValidTicket', isValidTicket)
+    // const username = process.env.CINCI_TICKET_USERNAME
+    // const password = process.env.CINCI_TICKET_PASSWORD
+    // const res = await CinciTicketIntegration.login(username, password)
+    // expect(res).toHaveProperty('UserSession')
+  })
 })
