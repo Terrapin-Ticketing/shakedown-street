@@ -23,7 +23,7 @@ export default {
       handler: async(req, res) => {
         const { user, event } = req.props
         const { price, ticketType } = req.body
-        if (!user) return res.status(403).send({ error: 'user must be logged in to place a bid' })
+        if (!user) return res.status(403).send('User must be logged in to place a bid')
 
 
         // get all tickets of ticket type
