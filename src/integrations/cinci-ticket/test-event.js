@@ -5,8 +5,8 @@ export default {
   issueTicketRoute: '/testfest',
   loginUrl: process.env.CINCI_REGISTER_LOGIN_URL,
 
-  integrationType: 'CinciRegister',
-  urlSafe: 'CinciRegisterTestEvent',
+  integrationType: 'CinciTicket',
+  urlSafe: 'CinciTicketTestEvent',
   username: process.env.CINCI_TICKET_USERNAME,
   password: process.env.CINCI_TICKET_PASSWORD,
 

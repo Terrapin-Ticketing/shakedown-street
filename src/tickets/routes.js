@@ -152,7 +152,7 @@ export default {
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
           createdNewUser = true
         } else {
-          await User.set(existingUser._id, {
+          existingUser = await User.set(existingUser._id, {
             firstName,
             lastName
           })
@@ -223,7 +223,7 @@ export default {
           if (!user) return res.send({ error: 'username already taken' })
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
         } else {
-          await User.set(user._id, {
+          user = await User.set(user._id, {
             firstName,
             lastName
           })
