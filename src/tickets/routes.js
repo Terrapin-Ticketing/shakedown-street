@@ -100,7 +100,7 @@ export default {
         if (await redis.get('reserve-token', String(id))) return res.send({ error: 'ticket already reserved' })
         const reserveToken = uuidv1()
         // await redis.set('reserve-token', id, reserveToken, 10)
-        await redis.set('reserve-token', String(id), reserveToken, 60*15)
+        await redis.set('reserve-token', String(id), reserveToken, 60*5)
         res.send({ticket, reserveToken})
       }
     },
