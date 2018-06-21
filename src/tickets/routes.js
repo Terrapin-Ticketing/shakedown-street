@@ -158,10 +158,12 @@ export default {
           })
         }
 
-
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, existingUser)
         if (!newTicket) return res.send({ error: 'error transfering ticket' })
+
+        // remove any reserve tokens
+        await redis.set('reserve-token', String(id), false)
 
         await Transfer.create({
           date: Date.now(),
@@ -249,6 +251,10 @@ export default {
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)
+
+        // remove any reserve tokens
+        await redis.set('reserve-token', String(ticketId), false)
+
         await Payout.create({
           date: Date.now(),
           price: ticket.price,

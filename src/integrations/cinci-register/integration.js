@@ -219,7 +219,8 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
     const newTicket = await Ticket.set(ticket._id, {
       ownerId: toUser._id,
-      barcode: newBarcode
+      barcode: newBarcode,
+      isForSale: false
     })
 
     return newTicket
