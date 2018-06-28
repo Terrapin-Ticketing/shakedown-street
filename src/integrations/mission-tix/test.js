@@ -22,7 +22,7 @@ describe('Mission Tix Ticket Intergration', () => {
     const authHeaders = await MissionTix.login(event._id)
     expect(authHeaders['dome-key']).toBeDefined()
     expect(authHeaders['auth-key']).toBeDefined()
-  })
+  }, 10000)
 
   it('should reject invalid barcode', async() => {
     const event = await Event.createEvent(missionTixTestEvent)

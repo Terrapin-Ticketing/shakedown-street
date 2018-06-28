@@ -5,7 +5,7 @@ import Event from '../../events/controller'
 import CinciTicketIntegration from './integration'
 import cinciTicketTestEvent from './test-event'
 
-describe.skip('Cinci Ticket Intergration', () => {
+describe('Cinci Ticket Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
   })
@@ -18,18 +18,23 @@ describe.skip('Cinci Ticket Intergration', () => {
   it('should login', async() => {
     const username = process.env.CINCI_TICKET_USERNAME
     const password = process.env.CINCI_TICKET_PASSWORD
-    const res = await CinciTicketIntegration.login(username, password)
-    expect(res).toHaveProperty('UserSession')
+    const rawCookies = await CinciTicketIntegration.login(username, password)
+    expect(rawCookies.includes('UserSession')).toBeTruthy()
   })
 
-  it.only('should check valdity of barcode', async() => {
+  it('should return true for valid barcode', async() => {
     const barcode = '0000001860012019400002'
     const event = await Event.createEvent(cinciTicketTestEvent)
     const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
-    console.log('isValidTicket', isValidTicket)
-    // const username = process.env.CINCI_TICKET_USERNAME
-    // const password = process.env.CINCI_TICKET_PASSWORD
-    // const res = await CinciTicketIntegration.login(username, password)
-    // expect(res).toHaveProperty('UserSession')
+    expect(isValidTicket).toBeTruthy()
   })
+
+  it('should return false for invalid barcode', async() => {
+    const barcode = 'not-a-barcode'
+    const event = await Event.createEvent(cinciTicketTestEvent)
+    const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
+    console.log('isValidTicket', isValidTicket)
+    expect(isValidTicket).toBeFalsy()
+  })
+
 })

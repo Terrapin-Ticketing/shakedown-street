@@ -35,9 +35,9 @@ describe('Payouts', () => {
   })
 
   it('should create a new payout', async() => {
+    const event = await Event.createEvent(cinciRegisterTestEvent)
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
     const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
 
@@ -61,9 +61,9 @@ describe('Payouts', () => {
 
   it('should create a pending payment when a ticket is bought', async() => {
     // buya ticket
+    const event = await Event.createEvent(cinciRegisterTestEvent)
     const buyer = 'newUser@gogo.com'
     const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
     const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
     const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
@@ -119,14 +119,14 @@ describe('Payouts', () => {
     const payouts = await Payout.find({ isPaid: false })
     const newUser = await User.getUserByEmail(buyer)
     expect(payouts[0].buyerId).toHaveProperty('_id', newUser._id)
-  }, 20000)
+  }, 30000)
 
   it('should get all unpaid payouts', async() => {
     const numPayouts = 5
+    const event = await Event.createEvent(cinciRegisterTestEvent)
     const admin = await User.createUser('reeder@terrapinticketing.com', 'test')
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
     const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
 
@@ -159,10 +159,10 @@ describe('Payouts', () => {
   })
 
   it('should update payout isPaid to true', async() => {
+    const event = await Event.createEvent(cinciRegisterTestEvent)
     const admin = await User.createUser('reeder@terrapinticketing.com', 'test')
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
     const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
 

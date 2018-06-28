@@ -43,6 +43,12 @@ async function req(config) {
         cookies[cookie.name] = cookie.value
       }
       res.cookies = cookies
+
+      let rawCookies = ''
+      for (let cookieKey in cookies) {
+        rawCookies += `${cookieKey}=${cookies[cookieKey]};`
+      }
+      res.rawCookies = rawCookies
       resolve(res)
     })
   })
