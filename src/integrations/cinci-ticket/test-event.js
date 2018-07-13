@@ -11,7 +11,8 @@ export default {
   password: process.env.CINCI_TICKET_PASSWORD,
 
   auth: {
-    areaId: 246
+    areaId: 246,
+    paymentType: 4
   },
 
   date: '3/4/2019',

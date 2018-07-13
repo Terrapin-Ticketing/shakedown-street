@@ -77,15 +77,12 @@ export default {
       handler: async(req, res) => {
         const { isForSale, price } = req.body
         const { id } = req.params
-
         const ticket = await Ticket.getTicketById(id)
-
         const newTicket = await Ticket.set(ticket._id, {
           isForSale,
           price
         })
         if (!newTicket) return res.send({ error: 'error updating ticket' })
-
         res.send({ ticket: newTicket })
       }
     }

@@ -81,23 +81,16 @@ class CinciTicketIntegration extends IntegrationInterface {
 
     const sessionKey = await this.getSessionKey(rawCookies)
     const areaId = event.auth.areaId
+    const paymentType = event.auth.paymentType
 
     const form = {
-      qpprice: 0,
-      qpqty: 2,
-      PricingCodeGroupID: 0,
       numPC: 1,
-      area: areaId, // ????
+      area: areaId,
       qty: 1,
       areatype: 1,
       ID: externalEventId,
-      // qty_246_1: 1,
-      // pc_246_1: ticketType, // TICKET TYPE
-      // numpc_246: 1,
-      // GAMultiPCCount:
       sessionKey
     }
-
     form[`qty_${areaId}_1`] = 1
     form[`pc_${areaId}_1`] = ticketType
     form[`numpc_${areaId}`] = 1
@@ -117,7 +110,8 @@ class CinciTicketIntegration extends IntegrationInterface {
     const ticketTypeId = 20943
 
     const config = {
-      url: `https://cincyticket.showare.com/admin/CallCenter_InstantBoxOfficeCheckout.asp?payment=4&amountgiven=&zipcode=${zip}&heardabout=`,
+      // url: `https://cincyticket.showare.com/admin/CallCenter_InstantBoxOfficeCheckout.asp?payment=${paymentType}&amountgiven=&zipcode=${zip}&heardabout=`,
+      url: `https://cincyticket.showare.com/admin/CallCenter_InstantBoxOfficeCheckout.asp?payment=${paymentType}&amountgiven=&zipcode=${zip}&heardabout=`,
       headers: {
         Cookie: rawCookiesWithBasketId
       },
@@ -129,18 +123,14 @@ class CinciTicketIntegration extends IntegrationInterface {
         del_coordy_0: 0,
         del_coordx_0: 0,
         del_GATicketID_0: ticketTypeId,
-        SelOrderFee: 4,
         activity: 'update',
         NumTickets: 1,
         iUpdateCounter: 0,
         sessionKey,
-        bopm: 4,
         firstname: _get(user, 'firstName', 'TerrapinFirst'),
         lastname: _get(user, 'lastName', 'TerrapinLast'),
         email: _get(user, 'email', 'info@terrapinticketing.com'),
         zipcode: zip,
-        // amountgiven:
-        // payment_comment:
         newCCCheckoutOptDefault: 0
       }
     }
