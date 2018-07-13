@@ -1,5 +1,7 @@
+import cheerio from 'cheerio'
 import IntegrationInterface from '../IntegrationInterface'
 import { post, get } from '../../_utils/http'
+import _get from 'lodash.get'
 
 class CinciTicketIntegration extends IntegrationInterface {
   async login(username, password) {
@@ -11,22 +13,29 @@ class CinciTicketIntegration extends IntegrationInterface {
     }
     const res = await post({
       url: loginUrl,
-      form: formData
+      form: formData,
+      timeout: 30000
     })
     return res.rawCookies
+  }
+
+  async getSessionKey(authCookies) {
+    const sessionKeyRes = await get('https://cincyticket.showare.com/admin/getSessionKey.asp', {
+      headers: {
+        'Cookie': authCookies
+      }
+    })
+
+    const { sessionKey } = JSON.parse(sessionKeyRes.body)
+
+    return sessionKey
   }
 
   async isValidTicket(barcode, event) {
     const { username, password } = event
     const rawCookies = await this.login(username, password)
 
-    const sessionKeyRes = await get('https://cincyticket.showare.com/admin/getSessionKey.asp', {
-      headers: {
-        'Cookie': rawCookies
-      }
-    })
-
-    const { sessionKey } = JSON.parse(sessionKeyRes.body)
+    const sessionKey = await this.getSessionKey(rawCookies)
 
     const lookupPost = await post({
       url: 'https://cincyticket.showare.com/admin/OrderList.asp',
@@ -47,8 +56,6 @@ class CinciTicketIntegration extends IntegrationInterface {
         accesscontrol: 0,
         pricingcodegroup: -1,
         SalesPerson: 0,
-        dateto: '6/27/2018',
-        datefrom: '6/27/2017',
         resaleitemstatusID: 0,
         lineitemstatus: 0,
         orderstatus: 0,
@@ -66,100 +73,99 @@ class CinciTicketIntegration extends IntegrationInterface {
     return lookupGetSearchResult.body.includes(barcode)
   }
 
+  async issueTicket(event, user, ticketType = 'REG') {
+    const externalEventId = event.externalEventId
+
+    const { username, password } = event
+    const rawCookies = await this.login(username, password)
+
+    const sessionKey = await this.getSessionKey(rawCookies)
+    const areaId = event.auth.areaId
+
+    const form = {
+      qpprice: 0,
+      qpqty: 2,
+      PricingCodeGroupID: 0,
+      numPC: 1,
+      area: areaId, // ????
+      qty: 1,
+      areatype: 1,
+      ID: externalEventId,
+      // qty_246_1: 1,
+      // pc_246_1: ticketType, // TICKET TYPE
+      // numpc_246: 1,
+      // GAMultiPCCount:
+      sessionKey
+    }
+
+    form[`qty_${areaId}_1`] = 1
+    form[`pc_${areaId}_1`] = ticketType
+    form[`numpc_${areaId}`] = 1
+
+    // 1. add to cart
+    const addToBasketRes = await post({
+      url: 'https://cincyticket.showare.com/admin/CallCenter_AddSeatsToBasket.asp',
+      headers: {
+        Cookie: rawCookies
+      },
+      form
+    })
+
+    let rawCookiesWithBasketId = `${rawCookies} ${addToBasketRes.rawCookies}`
+
+    const zip = 45044
+    const ticketTypeId = 20943
+
+    const config = {
+      url: `https://cincyticket.showare.com/admin/CallCenter_InstantBoxOfficeCheckout.asp?payment=4&amountgiven=&zipcode=${zip}&heardabout=`,
+      headers: {
+        Cookie: rawCookiesWithBasketId
+      },
+      form: {
+        del_ItemType_0: 'Ticket',
+        del_AreaType_0: 1,
+        del_performance_0: externalEventId,
+        del_area_0: areaId, // no idea what this is
+        del_coordy_0: 0,
+        del_coordx_0: 0,
+        del_GATicketID_0: ticketTypeId,
+        SelOrderFee: 4,
+        activity: 'update',
+        NumTickets: 1,
+        iUpdateCounter: 0,
+        sessionKey,
+        bopm: 4,
+        firstname: _get(user, 'firstName', 'TerrapinFirst'),
+        lastname: _get(user, 'lastName', 'TerrapinLast'),
+        email: _get(user, 'email', 'info@terrapinticketing.com'),
+        zipcode: zip,
+        // amountgiven:
+        // payment_comment:
+        newCCCheckoutOptDefault: 0
+      }
+    }
+
+    config.form[`pricingCodeGroup-${ticketTypeId}`] = 0,
+    config.form[`pricingCode-${ticketTypeId}: 0`] = 0
+
+    const buyTicketRes = await post(config)
+    let orderNumPage = cheerio.load(buyTicketRes.body)
+
+    let orderNumber = orderNumPage('#iOrderNo').attr('value')
+
+    const orderDetails = await get(`https://cincyticket.showare.com/admin/OrderDetail.asp?ID=${orderNumber}`, {
+      headers: {
+        Cookie: rawCookiesWithBasketId
+      }
+    })
+
+    const barcode = orderDetails.body.match(/\d{22}/)[0]
+    return barcode
+  }
+
   // async deactivateTicket() {
   //
   // }
-  //
-  // async issueTicket() {
-  //   // buy a ticket with cash
-  //   // look up by order number: https://cincyticket.showare.com/admin/OrderDetail.asp?ID=100156
-  //
-  // }
-  // async isValidTicket(barcode) {
-  /*
-    look up by barcode
-    POST: https://cincyticket.showare.com/admin/OrderList.asp
-  */
-  // }
 }
 
-
 export default new CinciTicketIntegration()
-
-
-
-/*
-OrderNo:
-sEvent:
-AutosEvent:
-sEventCat:
-AutosEventCat:
-sPromoter: 0
-AutosPromoter:
-PerformanceInput:
-performancedatefrom:
-performancedateto:
-itemtype: 0
-ReservationID:
-SeatLocation:
-SeatPrefix:
-SeatNo:
-AccessCode:
-orderstatus: 0
-lineitemstatus: 0
-resaleitemstatusID: 0
-datefrom: 6/14/2017
-dateto: 6/14/2018
-heardabout:
-SalesPerson: 0
-saleschannel:
-PricingCode:
-pricingcodegroup: -1
-Autopricingcodegroup:
-BarCode: 0000001860012019400002
-accesscontrol: 0
-UserID:
-BillingCompany:
-Useremail:
-BillingFirstName:
-BillingLastName:
-BillingPhone:
-BillingCountry:
-BillingState:
-BillingCity:
-BillingZipCode:
-PatronOptIn: -1
-delmethod: 0
-ShippingMethod: 0
-sUserCreated:
-soldfor:
-canceldatefrom:
-canceldateto:
-refdatefrom:
-refdateto:
-printdatefrom:
-printdateto:
-maildatefrom:
-maildateto:
-TransactionAmount:
-CCLast4Digits:
-sCCTransID:
-sPaymentMethod:
-bopm: -1
-PaymentComment:
-sortfield: o.OrderID
-sortdir: ASC
-ReportDownload:
-isDownload: 0
-activity: search
-Titel:
-Gruppe:
-TitelHaupt:
-SearchButtonPressed: true
-sessionKey:
-85100593FF2CC6F3DDF9C73B2E53AD9ACD3A48F916A9066DA550076266F35B0FE4C7DC567DE3EC0E3B1495329FE2901E8302C5FFB84AE3E7E42489FC4CAC6E9F08259F2163FD3A2A
-
-
-
-2AF8CD2B436CBBBD4C191874B336321DB9C4E4452FA129DAA550076266F35B0FE2A5ECB9AFBAF0DCF622BFD5F6B5789CC6805DB00235F876
-*/
