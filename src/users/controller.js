@@ -46,7 +46,8 @@ class UserController {
   }
 
   async changePassword(email, password) {
-    let user = await UserModel.findOneAndUpdate({ email }, {
+    let lowercasedEmail = email.toLowerCase()
+    let user = await UserModel.findOneAndUpdate({ email: lowercasedEmail }, {
       $set: {
         password: saltPassword(password)
       }
