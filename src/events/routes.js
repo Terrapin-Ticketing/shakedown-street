@@ -50,8 +50,9 @@ export default {
       handler: async(req, res) => {
         const { Integration, event } = req.props
         const { barcode } = req.body
-        const isValidTicket = await Integration.isValidTicket(barcode, event)
-        res.send({ isValidTicket })
+        const ticket = await Integration.isValidTicket(barcode, event)
+        if (!ticket) { res.status(404).send('Invalid Barcode') }
+        res.send({ ticket })
       }
     }
   },

@@ -120,9 +120,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       },
       cookieValue: { session_id: sessionId }
     })
-    // console.log('printTicketRes', printTicketRes);
     let printableTicket = printTicketRes.body
-    // console.log('printableTicket', printableTicket);
     let ticketNum = printableTicket.match(/[0-9]{16}/)[0]
 
     // success if ticket became invalid
@@ -141,12 +139,16 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const types = await this.getTicketTypes(event._id)
     const ticketType = ticket['Ticket Level']
 
+    if (ticket.Status === 'active' && !isScanned) {
+      return ticket
+    }
+
     if (!types[ticketType]) {
       console.log('unsupported ticket type:', ticketType)
       return false
     }
 
-    return ticket.Status === 'active' && !isScanned
+    return false
   }
 
   // expensive

@@ -47,7 +47,7 @@ function checkBody(req, res, body={}) {
     if (typeof body[param] === 'function') {
       // call validators
       const normalizedParam = body[param](req.body[param])
-      if (!normalizedParam) return res.status(422).send(`Validation failed for ${param}`)
+      if (!normalizedParam) return res.status(422).send(`Invalid ${param}`)
       req.body[param] = normalizedParam
     }
   }

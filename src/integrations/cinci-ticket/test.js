@@ -26,7 +26,6 @@ describe('Cinci Ticket Intergration', () => {
     const barcode = '0000001860012019400002'
     const event = await Event.createEvent(cinciTicketTestEvent)
     const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
-    console.log('isValidTicket', isValidTicket)
     // const username = process.env.CINCI_TICKET_USERNAME
     // const password = process.env.CINCI_TICKET_PASSWORD
     // const res = await CinciTicketIntegration.login(username, password)

@@ -40,8 +40,6 @@ export default {
       },
       handler: async(req, res) => {
         const { email, password } = req.body
-        console.log('email: ', email)
-
         const user = await User.login(email, password)
         if (!user) return res.status(422).send('Invalid Email or Password')
         sendToken(res, user)
