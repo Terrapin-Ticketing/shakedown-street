@@ -2,6 +2,7 @@ import cheerio from 'cheerio'
 import IntegrationInterface from '../IntegrationInterface'
 import { post, get } from '../../_utils/http'
 import _get from 'lodash.get'
+import Ticket from '../../tickets/controller'
 
 class CinciTicketIntegration extends IntegrationInterface {
   async login(username, password, event) {
@@ -16,8 +17,7 @@ class CinciTicketIntegration extends IntegrationInterface {
       form: formData,
       timeout: 30000
     })
-    // return `${res.rawCookies}BOLP=${event.externalEventId};`
-    return `${res.rawCookies}`
+    return `${res.rawCookies}BOLP=${event.externalEventId};`
   }
 
   async getSessionKey(authCookies) {
@@ -75,7 +75,7 @@ class CinciTicketIntegration extends IntegrationInterface {
     return lookupGetSearchResult.body.includes(barcode)
   }
 
-  async issueTicket(event, user, ticketType = 'REG') {
+  async issueTicket(event, user, ticketType) {
     const externalEventId = event.externalEventId
 
     const { username, password } = event
@@ -87,41 +87,26 @@ class CinciTicketIntegration extends IntegrationInterface {
 
     // 1. add to cart
     const form = {
-      qpprice: 10,
-      qpqty: 2,
-      PricingCodeGroupID: 0,
       numPC: 3,
       area: areaId,
       qty: 1,
       areatype: 1,
-      ID: Number(externalEventId),
-      qty_246_1: 1,
-      pc_246_1: ticketType,
-      numpc_246: 3,
+      ID: externalEventId,
       GAMultiPC_1: areaId,
-      qty_246_2: 0,
-      pc_246_2: '20DT',
-      qty_246_3: 0,
-      pc_246_3: 'MEMBER',
-      GAMultiPCCount: 1,
       sessionKey
     }
-    // form[`qty_${areaId}_1`] = 1
-    // form[`pc_${areaId}_1`] = ticketType
-    // form[`numpc_${areaId}`] = 3
-    console.log('rawCookies', rawCookies)
+    form[`qty_${areaId}_1`] = 1
+    form[`pc_${areaId}_1`] = ticketType
+    form[`numpc_${areaId}`] = 3
     const addToBasketRes = await post({
       url: 'https://cincyticket.showare.com/admin/CallCenter_AddSeatsToBasket.asp',
       headers: {
-        Cookie: rawCookies,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        Cookie: rawCookies
       },
       form
     })
-    let rawCookiesWithBasketId = `${rawCookies}${addToBasketRes.rawCookies}`
-    rawCookiesWithBasketId = rawCookiesWithBasketId.split(';').join('; ')
-    console.log('rawCookiesWithBasketId', rawCookiesWithBasketId)
 
+    let rawCookiesWithBasketId = `${rawCookies}${addToBasketRes.headers['set-cookie'][0]}`
     const csb = await get('https://cincyticket.showare.com/admin/CallCenter_Basket.asp?enlargebasket=x', {
       headers: {
         Cookie: rawCookiesWithBasketId
@@ -132,8 +117,6 @@ class CinciTicketIntegration extends IntegrationInterface {
       console.error('Basket Empty - Cinci Ticket')
       return false
     }
-
-    // console.log(csb.body)
 
     const zip = 45044
     const ticketTypeId = 20943
@@ -178,7 +161,6 @@ class CinciTicketIntegration extends IntegrationInterface {
       }
     })
 
-    // console.log(orderDetails.body)
     const match = orderDetails.body.match(/\d{22}/)
     if (!match) return false
 
@@ -245,9 +227,38 @@ class CinciTicketIntegration extends IntegrationInterface {
     }
   }
 
-  // async deactivateTicket() {
-  //
-  // }
+  async deactivateTicket(eventId, barcode) {
+    const externalEventId = event.externalEventId
+
+    const { username, password } = event
+    const rawCookies = await this.login(username, password, event)
+
+    const sessionKey = await this.getSessionKey(rawCookies)
+    const areaId = event.auth.areaId
+    const paymentType = event.auth.paymentType
+
+    
+
+  }
+
+  async transferTicket(ticket, toUser) {
+    if (!toUser || !ticket) return false
+    const { eventId, barcode } = ticket
+    const success = await this.deactivateTicket(eventId, barcode)
+    if (!success) return false
+    const event = await Event.getEventById(eventId)
+    if (!event) return false
+    const newBarcode = await this.issueTicket(event, toUser, ticket.type)
+    if (!newBarcode) return false
+
+    const newTicket = await Ticket.set(ticket._id, {
+      ownerId: toUser._id,
+      barcode: newBarcode,
+      isForSale: false
+    })
+
+    return newTicket
+  }
 }
 
 export default new CinciTicketIntegration()

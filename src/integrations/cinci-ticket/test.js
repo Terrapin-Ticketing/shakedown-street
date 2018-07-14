@@ -1,6 +1,7 @@
 const { mongoose } = require('../../_utils/bootstrap')
 
 import Event from '../../events/controller'
+import User from '../../users/controller'
 
 import CinciTicketIntegration from './integration'
 import cinciTicketTestEvent from './test-event'
@@ -45,9 +46,10 @@ describe('Cinci Ticket Intergration', () => {
     expect(isValidTicket).toBeFalsy()
   }, 10000)
 
-  it.only('should issue ticket', async() => {
+  it('should issue ticket', async() => {
     const event = await Event.createEvent(cinciTicketTestEvent)
-    const barcode = await CinciTicketIntegration.issueTicket(event)
+    const user = await User.createUser('test@test.com', 'test')
+    const barcode = await CinciTicketIntegration.issueTicket(event, user, 'REG')
     const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
     expect(isValidTicket).toBeTruthy()
   }, 100000)
