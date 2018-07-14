@@ -9,6 +9,8 @@ import cinciTicketTestEvent from './test-event'
 describe('Cinci Ticket Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
+    await mongoose.dropCollection('users')
+    await mongoose.dropCollection('tickets')
   })
   afterEach(async() => {
     await mongoose.dropCollection('events')
@@ -25,7 +27,7 @@ describe('Cinci Ticket Intergration', () => {
   }, 10000)
 
   it('should return true for valid barcode', async() => {
-    const barcode = '0000001860012019400002'
+    const barcode = '0222226482260290522229'
     const event = await Event.createEvent(cinciTicketTestEvent)
     const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
     expect(isValidTicket).toBeTruthy()
@@ -58,7 +60,14 @@ describe('Cinci Ticket Intergration', () => {
     const barcode = '0000001860012019400002'
     const event = await Event.createEvent(cinciTicketTestEvent)
     const ticketInfo = await CinciTicketIntegration.getTicketInfo(barcode, event)
-    console.log('ticketInfo', ticketInfo)
     expect(ticketInfo).toBeTruthy()
+  }, 100000)
+
+  it('should issue deactivate a barcode', async() => {
+    const event = await Event.createEvent(cinciTicketTestEvent)
+    const user = await User.createUser('test@test.com', 'test')
+    const barcode = await CinciTicketIntegration.issueTicket(event, user, 'REG')
+    const deactivatedSuccess = await CinciTicketIntegration.deactivateTicket(event._id, barcode)
+    expect(deactivatedSuccess).toBeTruthy()
   }, 100000)
 })

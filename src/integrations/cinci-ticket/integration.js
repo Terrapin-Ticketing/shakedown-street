@@ -3,6 +3,7 @@ import IntegrationInterface from '../IntegrationInterface'
 import { post, get } from '../../_utils/http'
 import _get from 'lodash.get'
 import Ticket from '../../tickets/controller'
+import Event from '../../events/controller'
 
 class CinciTicketIntegration extends IntegrationInterface {
   async login(username, password, event) {
@@ -72,7 +73,10 @@ class CinciTicketIntegration extends IntegrationInterface {
       }
     })
 
-    return lookupGetSearchResult.body.includes(barcode)
+    const hasBarcode = lookupGetSearchResult.body.includes(barcode)
+    const isCanceled = lookupGetSearchResult.body.includes('canceled not refunded')
+
+    return hasBarcode && !isCanceled
   }
 
   async issueTicket(event, user, ticketType) {
@@ -208,6 +212,8 @@ class CinciTicketIntegration extends IntegrationInterface {
     })
 
     const orderDetails = cheerio.load(lookupGetSearchResult.body)
+    const orderNumber = orderDetails('#iOrderNo').attr('value')
+    const ticketId = orderDetails('input[name="ItemID_1"]').attr('value')
     const ticketTypeEl = orderDetails('#TicketsTable tbody tr:nth-child(3) td:nth-child(4)').clone().html()
     const ticketType = ticketTypeEl.match(/\(([^\)]+)\)/)[1] // eslint-disable-line
 
@@ -223,22 +229,47 @@ class CinciTicketIntegration extends IntegrationInterface {
 
     return {
       price,
-      type: ticketType
+      type: ticketType,
+      orderNumber,
+      ticketId
     }
   }
 
   async deactivateTicket(eventId, barcode) {
-    const externalEventId = event.externalEventId
+    const event = await Event.findOne({ _id: eventId })
+    const { orderNumber, ticketId } = await this.getTicketInfo(barcode, event)
 
     const { username, password } = event
     const rawCookies = await this.login(username, password, event)
 
     const sessionKey = await this.getSessionKey(rawCookies)
-    const areaId = event.auth.areaId
-    const paymentType = event.auth.paymentType
 
-    
-
+    const cancelTicketRes = await post({
+      url: `https://cincyticket.showare.com/admin/OrderDetail.asp?ID=${orderNumber}&TitelHaupt=Order%20Management&Titel=Order%20Detail`,
+      headers: {
+        Cookie: rawCookies
+      },
+      form: {
+        UserID: 0,
+        DisplayOptions: 1,
+        curPrinted_1: 0,
+        ItemID_1: ticketId,
+        CsvTickets: ticketId,
+        numTicketsPrinted: 0,
+        numItems: 1,
+        iOrderNo: orderNumber,
+        activity: 'canceltickets',
+        ID: orderNumber,
+        Titel: 'Order Detail',
+        TitelHaupt: 'Order Management',
+        resendemail: 'P',
+        sPatronEmail: 'test@test.com',
+        sBillingEmail: 'test@test.com',
+        sessionKey
+      }
+    })
+    const wasSuccess = cancelTicketRes.headers.location.includes('InfoMessage=Selected+Items+were+canceled+successfully')
+    return wasSuccess
   }
 
   async transferTicket(ticket, toUser) {

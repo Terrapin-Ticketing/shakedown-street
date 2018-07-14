@@ -12,7 +12,12 @@ export default {
       handler: async(req, res) => {
         const urlParts = url.parse(req.url, true)
         const query = urlParts.query
-        const events = await Event.find(query)
+        let events = await Event.find(query)
+        events = events.map((event) => {
+          delete event.username
+          delete event.password
+          return event
+        })
         res.send({ events })
       }
     }
@@ -22,6 +27,8 @@ export default {
       handler: async(req, res) => {
         let { id } = req.params
         let event = await Event.getEventById(id)
+        delete event.username
+        delete event.password
         res.send({ event })
       }
     }
