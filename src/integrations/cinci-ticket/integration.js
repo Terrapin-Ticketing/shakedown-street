@@ -7,7 +7,7 @@ import Event from '../../events/controller'
 
 class CinciTicketIntegration extends IntegrationInterface {
   async login(username, password, event) {
-    const loginUrl = process.env.CINCI_TICKET_LOGIN_URL
+    const loginUrl = event.loginUrl
     const formData = {
       frm_login: username,
       frm_password: password,

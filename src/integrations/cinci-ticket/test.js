@@ -40,14 +40,6 @@ describe('Cinci Ticket Intergration', () => {
     expect(isValidTicket).toBeFalsy()
   }, 10000)
 
-
-  it('should return false for invalid barcode', async() => {
-    const barcode = 'not-a-barcode'
-    const event = await Event.createEvent(cinciTicketTestEvent)
-    const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
-    expect(isValidTicket).toBeFalsy()
-  }, 10000)
-
   it('should issue ticket', async() => {
     const event = await Event.createEvent(cinciTicketTestEvent)
     const user = await User.createUser('test@test.com', 'test')
@@ -56,14 +48,14 @@ describe('Cinci Ticket Intergration', () => {
     expect(isValidTicket).toBeTruthy()
   }, 100000)
 
-  it('should issue get ticket type and price from barcode', async() => {
+  it('should lookup ticket type and price from barcode', async() => {
     const barcode = '0000001860012019400002'
     const event = await Event.createEvent(cinciTicketTestEvent)
     const ticketInfo = await CinciTicketIntegration.getTicketInfo(barcode, event)
     expect(ticketInfo).toBeTruthy()
   }, 100000)
 
-  it('should issue deactivate a barcode', async() => {
+  it('should deactivate a barcode', async() => {
     const event = await Event.createEvent(cinciTicketTestEvent)
     const user = await User.createUser('test@test.com', 'test')
     const barcode = await CinciTicketIntegration.issueTicket(event, user, 'REG')
