@@ -27,9 +27,7 @@ class CinciTicketIntegration extends IntegrationInterface {
         'Cookie': authCookies
       }
     })
-
     const { sessionKey } = JSON.parse(sessionKeyRes.body)
-
     return sessionKey
   }
 
