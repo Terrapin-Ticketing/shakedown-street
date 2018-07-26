@@ -62,12 +62,4 @@ describe('Cinci Ticket Intergration', () => {
     const deactivatedSuccess = await CinciTicketIntegration.deactivateTicket(event._id, barcode)
     expect(deactivatedSuccess).toBeTruthy()
   }, 100000)
-
-  // it.only('should get all available ticket types', async() => {
-  //   const event = await Event.createEvent(cinciTicketTestEvent)
-  //   const user = await User.createUser('test@test.com', 'test')
-  //   const barcode = await CinciTicketIntegration.issueTicket(event, user, 'REG')
-  //   const deactivatedSuccess = await CinciTicketIntegration.deactivateTicket(event._id, barcode)
-  //   expect(deactivatedSuccess).toBeTruthy()
-  // })
 })
