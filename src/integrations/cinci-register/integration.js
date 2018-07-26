@@ -30,7 +30,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     return newSessionId
   }
 
-  async deactivateTicket(eventId, barcode) {
+  async deactivateTicket(eventId, barcode, status='void') {
     const event = await Event.getEventById(eventId)
     if (!event) return false
     const { domain } = event
@@ -45,7 +45,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       url: `${domain}/merchant/products/2/manage/tickets`,
       form: {
         name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
-        status: 'void',
+        status,
         scanned: ticketInfo['Scanned'],
         cmd: 'edit',
         id: ticketInfo.lookupId
@@ -59,6 +59,10 @@ class CinciRegisterIntegration extends IntegrationInterface {
     // success if ticket became invalid
     let success = !isValidTicket
     return success
+  }
+
+  async reactivateTicket(eventId, barcode) {
+    return await this.deactivateTicket(eventId, barcode, 'active')
   }
 
   async issueTicket(event, user, ticketType) {
@@ -194,10 +198,15 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
   async getTicketInfo(ticketId, event) {
     let tickets = await this._getTickets(event)
+
     return tickets[ticketId]
   }
 
   async getTicketTypes(eventId) {
+    /*
+    BETTER PLACE TO GET IT FROM:
+    */
+
     const event = await Event.getEventById(eventId)
     return event && event.ticketTypes
   }
@@ -215,7 +224,10 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const event = await Event.getEventById(eventId)
     if (!event) return false
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
-    if (!newBarcode) return false
+    if (!newBarcode) { // if issue didn't work, reactiate old ticket
+      await this.reactivateTicket(eventId, barcode)
+      return false
+    }
 
     const newTicket = await Ticket.set(ticket._id, {
       ownerId: toUser._id,

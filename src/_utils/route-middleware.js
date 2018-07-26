@@ -75,6 +75,7 @@ export function defineIntegration({ prop, findOne }) {
     let doc = docs[0] // grab first event
     if (collection === 'tickets') doc = await Event.findEventById(doc.eventId)
     const { integrationType } = doc
+    console.log('Integrations', Integrations)
     if (!Integrations[integrationType]) return res.send({ error: `invalid integration type ${integrationType}` })
     const Integration = Integrations[integrationType].integration
     _set(req, `props.${prop}`, Integration)
