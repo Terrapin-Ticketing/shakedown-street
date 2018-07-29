@@ -30,16 +30,14 @@ class CinciRegisterIntegration extends IntegrationInterface {
     return newSessionId
   }
 
-  async deactivateTicket(eventId, barcode, status='void') {
+  async deactivateTicket(eventId, barcode) {
     const event = await Event.getEventById(eventId)
-    console.log('one', eventId, barcode)
     if (!event) return false
     const { domain } = event
     const username = event.username
     const password = event.password
     let sessionId = await this.login(username, password, event)
     let ticketInfo = await this.getTicketInfo(barcode, event)
-    console.log('two', ticketInfo)
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false
 
     // all properties are required
@@ -47,7 +45,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
       url: `${domain}/merchant/products/2/manage/tickets`,
       form: {
         name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
-        status,
+        status: 'void',
         scanned: ticketInfo['Scanned'],
         cmd: 'edit',
         id: ticketInfo.lookupId
@@ -55,17 +53,33 @@ class CinciRegisterIntegration extends IntegrationInterface {
       cookieValue: { session_id: sessionId }
     })
 
-    let isValidTicket = await this.isValidTicket(
-      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event)
-
-    // success if ticket became invalid
-    let success = !isValidTicket
-    return success
+    return true
   }
 
   async reactivateTicket(eventId, barcode) {
-    console.log('reactiating ticket')
-    return await this.deactivateTicket(eventId, barcode, 'active')
+    const event = await Event.getEventById(eventId)
+    if (!event) return false
+    const { domain } = event
+    const username = event.username
+    const password = event.password
+    let sessionId = await this.login(username, password, event)
+    let ticketInfo = await this.getTicketInfo(barcode, event)
+    if (!ticketInfo || ticketInfo['Status'] !== 'void') return false
+
+    // all properties are required
+    await post({
+      url: `${domain}/merchant/products/2/manage/tickets`,
+      form: {
+        name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
+        status: 'active',
+        scanned: ticketInfo['Scanned'],
+        cmd: 'edit',
+        id: ticketInfo.lookupId
+      },
+      cookieValue: { session_id: sessionId }
+    })
+
+    return true
   }
 
   async issueTicket(event, user, ticketType) {
