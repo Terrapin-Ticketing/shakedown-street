@@ -101,6 +101,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
     // add ticket level to request body
     let reqParam = event.ticketTypes[ticketType].paramName
+    console.log('reqParam', reqParam)
     issueTicketRequestBody[reqParam] = 1
 
     // add promocode to request body
@@ -217,7 +218,6 @@ class CinciRegisterIntegration extends IntegrationInterface {
   }
 
   async transferTicket(ticket, toUser) {
-    console.log('1', ticket, toUser)
     if (!toUser || !ticket) return false
     const { eventId, barcode } = ticket
     const success = await this.deactivateTicket(eventId, barcode)
