@@ -101,14 +101,13 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
     // add ticket level to request body
     let reqParam = event.ticketTypes[ticketType].paramName
-    console.log('reqParam', reqParam)
     issueTicketRequestBody[reqParam] = 1
 
     // add promocode to request body
     issueTicketRequestBody['coupon_code'] = event.promoCode
 
     // SUBMIT this sVal ORDER
-    await post({
+    let svalPost = await post({
       url: ticketPortal,
       form: issueTicketRequestBody,
       cookieValue: { session_id: sessionId }
@@ -128,7 +127,15 @@ class CinciRegisterIntegration extends IntegrationInterface {
     // console.log('printTicketRes', printTicketRes);
     let printableTicket = printTicketRes.body
     // console.log('printableTicket', printableTicket);
-    let ticketNum = printableTicket.match(/[0-9]{16}/)[0]
+    let ticketNum
+    try {
+      ticketNum = printableTicket.match(/[0-9]{16}/)[0]
+    } catch (e) {
+      console.log('failed to create ticket')
+      console.log('sval post', svalPost.body)
+      console.log('print ticket res:', printTicketRes.body)
+      return false
+    }
 
     // success if ticket became invalid
     return ticketNum
@@ -221,13 +228,10 @@ class CinciRegisterIntegration extends IntegrationInterface {
     if (!toUser || !ticket) return false
     const { eventId, barcode } = ticket
     const success = await this.deactivateTicket(eventId, barcode)
-    console.log('2', success)
     if (!success) return false
     const event = await Event.getEventById(eventId)
-    console.log('3', event)
     if (!event) return false
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
-    console.log('4', newBarcode)
     if (!newBarcode) { // if issue didn't work, reactiate old ticket
       await this.reactivateTicket(eventId, barcode)
       return false
