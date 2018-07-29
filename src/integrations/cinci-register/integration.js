@@ -124,7 +124,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     issueTicketRequestBody['coupon_code'] = event.promoCode
 
     // SUBMIT this sVal ORDER
-    let svalPost = await post({
+    await post({
       url: ticketPortal,
       form: issueTicketRequestBody,
       cookieValue: { session_id: sessionId }
@@ -148,7 +148,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     try {
       ticketNum = printableTicket.match(/[0-9]{16}/)[0]
     } catch (e) {
-      console.log('failed checkout res:', svalPost.body)
+      console.log('failed to create ticket', ticketType)
       return false
     }
 
