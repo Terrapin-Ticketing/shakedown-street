@@ -32,6 +32,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
   async deactivateTicket(eventId, barcode, status='void') {
     const event = await Event.getEventById(eventId)
+    console.log('one')
     if (!event) return false
     const { domain } = event
     const username = event.username
@@ -40,6 +41,8 @@ class CinciRegisterIntegration extends IntegrationInterface {
     let ticketInfo = await this.getTicketInfo(barcode, event)
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false
 
+
+    console.log('two')
     // all properties are required
     const x = await post({
       url: `${domain}/merchant/products/2/manage/tickets`,
