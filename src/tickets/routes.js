@@ -156,6 +156,7 @@ export default {
         }
 
         // check ticket validity
+        console.log('0', ticket, existingUser)
         const newTicket = await Integration.transferTicket(ticket, existingUser)
         if (!newTicket) return res.send({ error: 'error transfering ticket' })
 
