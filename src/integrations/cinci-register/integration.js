@@ -32,19 +32,18 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
   async deactivateTicket(eventId, barcode, status='void') {
     const event = await Event.getEventById(eventId)
-    console.log('one')
+    console.log('one', eventId, barcode)
     if (!event) return false
     const { domain } = event
     const username = event.username
     const password = event.password
     let sessionId = await this.login(username, password, event)
     let ticketInfo = await this.getTicketInfo(barcode, event)
+    console.log('two', ticketInfo)
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false
 
-
-    console.log('two')
     // all properties are required
-    const x = await post({
+    await post({
       url: `${domain}/merchant/products/2/manage/tickets`,
       form: {
         name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
@@ -55,8 +54,6 @@ class CinciRegisterIntegration extends IntegrationInterface {
       },
       cookieValue: { session_id: sessionId }
     })
-
-    console.log('deactivate res:', x.body)
 
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event)
