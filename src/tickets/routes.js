@@ -132,6 +132,7 @@ export default {
         transferToUser: Object
       },
       handler: async(req, res) => {
+        console.log('hey we here yho')
         let { user, Integration } = req.props
         const { transferToUser } = req.body
         const { id } = req.params
