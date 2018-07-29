@@ -41,7 +41,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     if (!ticketInfo || ticketInfo['Status'] !== 'active') return false
 
     // all properties are required
-    await post({
+    const x = await post({
       url: `${domain}/merchant/products/2/manage/tickets`,
       form: {
         name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
@@ -53,6 +53,8 @@ class CinciRegisterIntegration extends IntegrationInterface {
       cookieValue: { session_id: sessionId }
     })
 
+    console.log('deactivate res:', x.body)
+
     let isValidTicket = await this.isValidTicket(
       ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event)
 
@@ -62,6 +64,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
   }
 
   async reactivateTicket(eventId, barcode) {
+    console.log('reactiating ticket')
     return await this.deactivateTicket(eventId, barcode, 'active')
   }
 
@@ -131,9 +134,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     try {
       ticketNum = printableTicket.match(/[0-9]{16}/)[0]
     } catch (e) {
-      console.log('failed to create ticket')
-      console.log('sval post', svalPost.body)
-      console.log('print ticket res:', printTicketRes.body)
+      console.log('failed checkout res:', svalPost.body)
       return false
     }
 
