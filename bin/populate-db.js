@@ -13,8 +13,8 @@ import CinciTicket from '../src/integrations/cinci-ticket/integration'
 
 (async function() {
   await clearDb()
-  const barcode = await createCinciTicket()
-  console.log('cinciTicketBarcode: ', barcode)
+  const barcode = await createCinciReigsterTicket()
+  console.log('cinci reg : ', barcode)
   const user = await User.createUser('reeder@terrapinticketing.com', 'test')
   console.log('created user:', user.email)
   process.exit()

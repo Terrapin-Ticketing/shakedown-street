@@ -217,13 +217,17 @@ class CinciRegisterIntegration extends IntegrationInterface {
   }
 
   async transferTicket(ticket, toUser) {
+    console.log('1', ticket, toUser)
     if (!toUser || !ticket) return false
     const { eventId, barcode } = ticket
     const success = await this.deactivateTicket(eventId, barcode)
+    console.log('2', success)
     if (!success) return false
     const event = await Event.getEventById(eventId)
+    console.log('3', event)
     if (!event) return false
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
+    console.log('4', newBarcode)
     if (!newBarcode) { // if issue didn't work, reactiate old ticket
       await this.reactivateTicket(eventId, barcode)
       return false
