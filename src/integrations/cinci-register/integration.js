@@ -148,7 +148,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     try {
       ticketNum = printableTicket.match(/[0-9]{16}/)[0]
     } catch (e) {
-      console.log('failed to create ticket', ticketType)
+      console.log('failed to create ticket', ticketType, event.ticketTypes[ticketType])
       return false
     }
 
