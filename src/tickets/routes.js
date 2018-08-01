@@ -239,8 +239,12 @@ export default {
         let total = Math.ceil(baseTotal + stripeTotal)
 
         try {
-          charge = await stripe.createCharge(user, stripeToken, total)
+          charge = await stripe.createCharge(user, stripeToken, total, {
+            eventName: event.name,
+            userEmail: user.email
+          })
         } catch (e) {
+          console.log('stripe error:', e.message)
           return res.send({ error: e.message })
         }
         const newTicket = await Integration.transferTicket(ticket, user)
