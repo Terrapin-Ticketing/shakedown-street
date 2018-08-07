@@ -6,16 +6,16 @@ let PORT = 8080
 
 if (!infopass) throw new Error('INFO_PASS not set')
 
-// let ipAddress = getIpAddress()[0].address
+let ipAddress = getIpAddress()[0].address
 
 module.exports = {
   port: PORT,
-  domain: `http://localhost:${PORT}`,
+  domain: `http://${ipAddress}:${PORT}`,
   env: 'development',
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY
   },
   jwtSecret: process.env.JWT_SECRET,
   infopass,
-  clientDomain: 'http://localhost:3000'
+  clientDomain: `http://${ipAddress}:3000`
 }

@@ -25,7 +25,11 @@ export async function requireTicketOwner(req, res) {
   const ticket = await Ticket.getTicketById(id)
   if (!ticket) return res.status(404).send('Ticket not found')
 
-  if (String(ticket.ownerId) !== String(user._id)) return res.status(401).send('Unauthorized')
+  console.log('String(ticket.ownerId) !== String(user._id): ', String(ticket.ownerId._id) !== String(user._id))
+  console.log(String(ticket.ownerId._id))
+  console.log(String(user._id))
+
+  if (String(ticket.ownerId._id) !== String(user._id)) return res.status(401).send('Unauthorized')
 }
 
 export async function queryCollection(collection, query) {
