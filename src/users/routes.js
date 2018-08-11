@@ -69,9 +69,12 @@ export default {
       handler: async(req, res) => {
         const { token } = req.params
         const { password } = req.body
+        console.log('token/password: ', token, password)
         const email = await redis.get('set-password', token)
+        console.log('email: ', email)
         if (!email) return res.status(404).send('invalid token')
         const user = await User.changePassword(email, password)
+        console.log('user: ', user)
         if (!user) return res.status(404).send('User not found')
         sendToken(res, user)
       }

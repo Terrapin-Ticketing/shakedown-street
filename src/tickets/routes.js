@@ -24,7 +24,7 @@ export default {
         let tickets = await Ticket.find(query)
         // strip barcodes off tickets if not called by owner
         tickets = tickets.map((ticket) => {
-          if (!user || String(ticket.ownerId) !== String(user._id)) {
+          if (!user || String(ticket.ownerId._id) !== String(user._id)) {
             return stripBarcodes(ticket)
           }
           return ticket
