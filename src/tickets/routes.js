@@ -132,50 +132,52 @@ export default {
         transferToUser: Object
       },
       handler: async(req, res) => {
-        let { user, Integration } = req.props
-        const { transferToUser } = req.body
-        const { id } = req.params
-
-        const { email, firstName, lastName } = transferToUser
-
-        const ticket = await Ticket.getTicketById(id)
-
-        let existingUser = await User.getUserByEmail(email)
-        let createdNewUser = false
-        let passwordChangeUrl
-        if (!existingUser) {
-          existingUser = await User.createUser(email, `${Math.random()}`, firstName, lastName)
-          if (!existingUser) return res.send({ error: 'username already taken' })
-          passwordChangeUrl = await User.requestChangePasswordUrl(email)
-          createdNewUser = true
-        } else {
-          existingUser = await User.set(existingUser._id, {
-            firstName,
-            lastName
-          })
-        }
-
-        // check ticket validity
-        const newTicket = await Integration.transferTicket(ticket, existingUser)
-        if (!newTicket) return res.send({ error: 'error transfering ticket' })
-
-        // remove any reserve tokens
-        await redis.set('reserve-token', String(id), false)
-
-        await Transfer.create({
-          date: Date.now(),
-          senderId: user._id,
-          recieverId: existingUser._id,
-          ticketId: ticket._id,
-          eventId: ticket.eventId
-        })
-
-        if (createdNewUser) {
-          Emailer.sendNewUserTicketRecieved(email, user.email, ticket, passwordChangeUrl)
-        } else {
-          Emailer.sendExistingUserTicketRecieved(existingUser, ticket)
-        }
-        res.send({ ticket: stripBarcodes(newTicket) })
+        return res.send({ error: 'Transfers have been disabled for this event' })
+        // let { user, Integration } = req.props
+        // const { transferToUser } = req.body
+        // const { id } = req.params
+        //
+        // const { email, firstName, lastName } = transferToUser
+        //
+        // const ticket = await Ticket.getTicketById(id)
+        //
+        // let existingUser = await User.getUserByEmail(email)
+        // let createdNewUser = false
+        // let passwordChangeUrl
+        // if (!existingUser) {
+        //   existingUser = await User.createUser(email, `${Math.random()}`, firstName, lastName)
+        //   if (!existingUser) return res.send({ error: 'username already taken' })
+        //   passwordChangeUrl = await User.requestChangePasswordUrl(email)
+        //   createdNewUser = true
+        // } else {
+        //   existingUser = await User.set(existingUser._id, {
+        //     firstName,
+        //     lastName
+        //   })
+        // }
+        //
+        // // check ticket validity
+        // const newTicket = await Integration.transferTicket(ticket, existingUser)
+        // if (!newTicket) return res.send({ error: 'error transfering ticket' })
+        //
+        // // remove any reserve tokens
+        // await redis.set('reserve-token', String(id), false)
+        //
+        // await Transfer.create({
+        //   date: Date.now(),
+        //   senderId: user._id,
+        //   recieverId: existingUser._id,
+        //   ticketId: ticket._id,
+        //   eventId: ticket.eventId,
+        //   originalBarcode: ticket.barcode
+        // })
+        //
+        // if (createdNewUser) {
+        //   Emailer.sendNewUserTicketRecieved(email, user.email, ticket, passwordChangeUrl)
+        // } else {
+        //   Emailer.sendExistingUserTicketRecieved(existingUser, ticket)
+        // }
+        // res.send({ ticket: stripBarcodes(newTicket) })
       }
     }
   },
@@ -264,7 +266,8 @@ export default {
           sellerId: originalOwner._id,
           buyerId: user._id,
           eventId: event._id,
-          isPaid: false
+          isPaid: false,
+          originalBarcode: ticket.barcode
         })
 
         return res.send({

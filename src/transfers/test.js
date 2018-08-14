@@ -81,6 +81,7 @@ describe('Transfers', () => {
     const transfers = await Transfer.find({})
     const transfer = transfers[0]
 
+    expect(transfer.originalBarcode).toEqual(barcode)
     expect(transfer.senderId._id).toEqual(owner._id)
   }, 20000)
 
