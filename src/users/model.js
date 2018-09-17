@@ -15,7 +15,8 @@ let UserSchema = mongoose.Schema({
     id: { type: String },
     source: { }, // any arbitrary document
     charges: [{ }] // all stripe charges
-  }
+  },
+  createdOn: { type: Date }
 })
 
 let UserModel = mongoose.model('User', UserSchema)

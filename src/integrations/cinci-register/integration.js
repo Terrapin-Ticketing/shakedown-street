@@ -148,7 +148,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     try {
       ticketNum = printableTicket.match(/[0-9]{16}/)[0]
     } catch (e) {
-      console.log('failed to create ticket', ticketType, event.ticketTypes[ticketType])
+      console.log('failed to create ticket', ticketType, new Date())
       return false
     }
 
@@ -248,6 +248,7 @@ class CinciRegisterIntegration extends IntegrationInterface {
     if (!event) return false
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
     if (!newBarcode) { // if issue didn't work, reactiate old ticket
+      console.log('reactivating', barcode)
       await this.reactivateTicket(eventId, barcode)
       return false
     }

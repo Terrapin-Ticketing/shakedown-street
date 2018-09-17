@@ -118,6 +118,8 @@ describe('Payouts', () => {
     await TicketInterface.routes['/payment/:id'].post(mockReq, mockRes)
     const payouts = await Payout.find({ isPaid: false })
     const newUser = await User.getUserByEmail(buyer)
+
+    expect(payouts[0].originalBarcode).toEqual(initTicket.barcode)
     expect(payouts[0].buyerId).toHaveProperty('_id', newUser._id)
   }, 30000)
 

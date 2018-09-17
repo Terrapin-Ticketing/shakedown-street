@@ -26,7 +26,7 @@ export function createRoute(routeDef) {
 
       await routeDef.handler(req, res)
     } catch (e) {
-      console.error(e.stack)
+      console.error(e.stack, new Date())
       res.sendStatus(500)
     }
   }
