@@ -1,5 +1,6 @@
 import TicketModel from './model'
 import Event from '../events/controller'
+import User from '../users/controller'
 const mongoose = require('../_utils/db').default
 
 class TicketController {
@@ -8,8 +9,10 @@ class TicketController {
     const returnTickets = []
     for (let ticket of tickets) {
       let event = await Event.getEventById(ticket.eventId)
+      let user = await User.getUserById(ticket.ownerId)
       let x = ticket.toJSON()
       x.event = event
+      x.user = user
       returnTickets.push(x)
     }
     return returnTickets
