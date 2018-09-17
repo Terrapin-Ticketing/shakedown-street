@@ -66,7 +66,7 @@ export default {
         const { id } = req.params
         let ticket = await Ticket.getTicketById(id)
         if (!ticket) return res.status(404).send('Ticket not found')
-        if (!user || String(ticket.ownerId) !== String(user._id)) {
+        if (!user || String(ticket.ownerId._id) !== String(user._id)) {
           ticket = stripBarcodes(ticket)
         }
         res.send({ ticket })
