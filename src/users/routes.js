@@ -56,7 +56,7 @@ export default {
         const user = await User.getUserByEmail(email)
         if (!user) return res.send({ error: 'user doesnt exist'})
         const passwordChangeUrl = await User.requestChangePasswordUrl(email)
-        await Emailer.sendChangePassword(email, passwordChangeUrl)
+        Emailer.sendChangePassword(email, passwordChangeUrl)
         res.send({ message: 'password change email sent' })
       }
     }

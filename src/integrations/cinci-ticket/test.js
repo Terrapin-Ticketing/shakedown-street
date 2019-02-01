@@ -6,7 +6,7 @@ import User from '../../users/controller'
 import CinciTicketIntegration from './integration'
 import cinciTicketTestEvent from './test-event'
 
-describe('Cinci Ticket Intergration', () => {
+describe.skip('Cinci Ticket Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
     await mongoose.dropCollection('users')

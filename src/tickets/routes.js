@@ -139,6 +139,7 @@ export default {
         const { email, firstName, lastName } = transferToUser
 
         const ticket = await Ticket.getTicketById(id)
+        const prevBarcode = ticket.barcode
 
         let existingUser = await User.getUserByEmail(email)
         let createdNewUser = false
@@ -167,7 +168,8 @@ export default {
           senderId: user._id,
           recieverId: existingUser._id,
           ticketId: ticket._id,
-          eventId: ticket.eventId
+          eventId: ticket.eventId,
+          prevBarcode
         })
 
         if (createdNewUser) {
@@ -175,6 +177,7 @@ export default {
         } else {
           Emailer.sendExistingUserTicketRecieved(existingUser, ticket)
         }
+
         res.send({ ticket: stripBarcodes(newTicket) })
       }
     }

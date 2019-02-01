@@ -7,7 +7,7 @@ import User from '../../users/controller'
 import MissionTix from './integration'
 import missionTixTestEvent from './test-event'
 
-describe('Mission Tix Ticket Intergration', () => {
+describe.skip('Mission Tix Ticket Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
   })

@@ -24,7 +24,7 @@ class MockIntegration extends IntegrationInterface {
   }
 
   async isValidTicket(ticketId, event) {
-    return true
+    return ticketId.toString().match(/[a-zA-Z0-9]{5}/) && ticketId.toString().length === 5
   }
 
   async getTicketTypes(eventId) {

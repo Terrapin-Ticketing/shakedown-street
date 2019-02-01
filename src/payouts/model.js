@@ -9,7 +9,7 @@ let Payout = new mongoose.Schema({
   buyerId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   eventId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Event' },
   isPaid: { type: Boolean, required: true, default: false },
-  originalBarcode: { type: String }
+  prevBarcode: { type: String }
 })
 
 let TicketEventModel = mongoose.model('Payout', Payout)

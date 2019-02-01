@@ -6,7 +6,7 @@ let Transfer = new mongoose.Schema({
   senderId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   recieverId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   eventId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Event' },
-  originalBarcode: { type: String }
+  prevBarcode: { type: String }
 })
 
 let TransferModel = mongoose.model('Transfer', Transfer)

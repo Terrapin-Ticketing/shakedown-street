@@ -4,8 +4,8 @@ import { _set } from '../_utils'
 
 import httpMocks from 'node-mocks-http'
 
-import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
-import CinciRegister from '../integrations/cinci-register/integration'
+import mockTestEvent from '../integrations/mock/test-event'
+import MockIntegration from '../integrations/mock/integration'
 
 import Transfer from './controller'
 import User from '../users/controller'
@@ -33,9 +33,9 @@ describe('Transfers', () => {
   it('should create a new transfer', async() => {
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
+    const event = await Event.createEvent(mockTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, seller, ticketType)
 
     const ticket = await Ticket.createTicket(event._id, seller._id, barcode, 1000, ticketType)
 
@@ -56,9 +56,9 @@ describe('Transfers', () => {
     // buya ticket
     const receiverEmail = 'receive@test.com'
     const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
+    const event = await Event.createEvent(mockTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
     const ticket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
 
     const mockReq = httpMocks.createRequest({
@@ -80,8 +80,7 @@ describe('Transfers', () => {
 
     const transfers = await Transfer.find({})
     const transfer = transfers[0]
-
-    expect(transfer.originalBarcode).toEqual(barcode)
+    expect(transfer.prevBarcode).toEqual(barcode)
     expect(transfer.senderId._id).toEqual(owner._id)
   }, 20000)
 
@@ -89,9 +88,9 @@ describe('Transfers', () => {
     // buya ticket
     const reciever = await User.createUser('receive@test.com', 'test')
     const owner = await User.createUser('reeder@terrapinticketing.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
+    const event = await Event.createEvent(mockTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
     const ticket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
 
     await Transfer.create({
