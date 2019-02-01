@@ -231,7 +231,6 @@ class MissionTixTicketIntegration extends IntegrationInterface {
     $ = cheerio.load(res_viewTickets.body)
 
     const barcode = $('.qr-code-token').text()
-
     return barcode
   }
   // getTicketInfo(ticketId) { throw new Error('not implemented') } // all integrations should return same format for getTicketInfo

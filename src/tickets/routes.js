@@ -24,7 +24,6 @@ export default {
         let tickets = await Ticket.find(query)
         // strip barcodes off tickets if not called by owner
         tickets = tickets.map((ticket) => {
-          if (user.email === 'kevin@terrapinticketing.com') return ticket
           if (!user || String(ticket.ownerId) !== String(user._id)) {
             return stripBarcodes(ticket)
           }

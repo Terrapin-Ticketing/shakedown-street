@@ -11,14 +11,27 @@ import MissinTix from '../src/integrations/mission-tix/integration'
 import cinciTicketTestEvent from '../src/integrations/cinci-ticket/test-event'
 import CinciTicket from '../src/integrations/cinci-ticket/integration'
 
+import mockTestEvent from '../src/integrations/mock/test-event'
+import MockIntegration from '../src/integrations/mock/integration'
+
 (async function() {
   await clearDb()
-  const barcode = await createCinciReigsterTicket()
-  console.log('cinci reg : ', barcode)
+  const barcode = await createMockTestEvent()
+  console.log('mission tix : ', barcode)
   const user = await User.createUser('reeder@terrapinticketing.com', 'test')
   console.log('created user:', user.email)
   process.exit()
 })()
+
+async function createMockTestEvent() {
+  const user = await User.createUser('mock@tt.com', 'test')
+  const event = await Event.createEvent(mockTestEvent)
+
+  const barcode = await MockIntegration.issueTicket(event, user, 'REG')
+  // drop database
+  await mongoose.dropCollection('tickets')
+  return barcode
+}
 
 async function createCinciTicket() {
   const user = await User.createUser('test1@test.com', 'test')
@@ -47,6 +60,7 @@ async function createMissionTixTicket() {
 async function createCinciReigsterTicket() {
   const user = await User.createUser('test@test.com', 'test')
   const event = await Event.createEvent(cinciRegisterTestEvent)
+  console.log(event)
   const ticketType = Object.keys(event.ticketTypes)[0]
   const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
   // drop database
