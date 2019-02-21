@@ -7,8 +7,12 @@ let dbName = `${config.env}_terrapin`
 if (config.env === 'prod') {
   dbName = 'terrapin'
 }
-
-mongoose.connect(`mongodb://localhost/${dbName}`, { promiseLibrary: bluebird }, () => {
+mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
+mongoose.connect(`mongodb://localhost/${dbName}`, {
+  promiseLibrary: bluebird,
+  useNewUrlParser: true
+}, () => {
   ready = true
 })
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'))

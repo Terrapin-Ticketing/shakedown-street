@@ -8,7 +8,7 @@
     "populate": "babel-node bin/populate-db.js",
     "dev": "nodemon --exec npm start",
     "prod": "pm2 start process.json --env prod",
-    "test": "jest --watch --runInBand --verbose"
+    "test": "jest --runInBand --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -17,7 +17,9 @@
     "testPathIgnorePatterns": [
       "node_modules",
       "config"
-    ]
+    ],
+    "testURL": "http://localhost/",
+    "testEnvironment": "node"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -50,7 +52,7 @@
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "moment": "^2.22.0",
-    "mongoose": "^5.0.13",
+    "mongoose": "^5.4.14",
     "node-fetch": "^2.1.2",
     "nodemailer": "^4.6.4",
     "query-string": "^6.0.0",
