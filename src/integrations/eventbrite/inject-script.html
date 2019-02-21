@@ -1,0 +1,36 @@
+<span id="ref"></span>
+<script>
+  document.addEventListener("DOMContentLoaded", function(e){
+    if (!window.hasRan){
+      window.hasRan=!0;
+      for (var t=document.getElementsByClassName("ticket"), n=0; n<t.length; n++) {
+        var a=t[n],
+            r=a.querySelector(".tick_num").childNodes[1].data,
+            i="https://terrapintickets.io/event/DemoFest/activate?ticketId="+(r=r.substring(1,r.length)),
+            d=a.querySelector("#ref"),
+            l=document.createElement("span"),
+            c=document.createElement("a");
+            c.setAttribute("href",i),
+            c.innerHTML="Transfer/Sell";
+        var o=document.createElement("span");
+            o.innerHTML=" with Terrapin Ticketing",
+            l.appendChild(c),
+            l.appendChild(o),
+            d.appendChild(l);
+        var s=document.createElement("p");
+            s.innerHTML="Link not working? "+i,
+            s.style.fontSize="x-small",
+            d.appendChild(s)
+          }
+        }
+      }
+    );
+</script>
+
+
+<!--
+
+<span id="ref"></span>
+<script>document.addEventListener("DOMContentLoaded",function(e){if(!window.hasRan){window.hasRan=!0;for(var t=document.getElementsByClassName("ticket"),n=0;n<t.length;n++){var a=t[n],r=a.querySelector(".tick_num").childNodes[1].data,i="https://terrapintickets.io/event/DemoFest/activate?ticketId="+(r=r.substring(1,r.length)),d=a.querySelector("#ref"),l=document.createElement("span"),c=document.createElement("a");c.setAttribute("href",i),c.innerHTML="Transfer/Sell";var o=document.createElement("span");o.innerHTML=" with Terrapin Ticketing",l.appendChild(c),l.appendChild(o),d.appendChild(l);var s=document.createElement("p");s.innerHTML="Link not working? "+i,s.style.fontSize="x-small",d.appendChild(s)}}});</script>
+
+-->
