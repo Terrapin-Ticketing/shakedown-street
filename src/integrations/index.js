@@ -1,9 +1,11 @@
 import CinciRegister from './cinci-register'
 import MissionTix from './mission-tix'
-import TerrapinTicketing from './terrapin-ticketing'
+import CinciTicket from './cinci-ticket'
+import Mock from './mock'
 
 export default {
   CinciRegister,
   MissionTix,
-  TerrapinTicketing
+  CinciTicket,
+  Mock
 }

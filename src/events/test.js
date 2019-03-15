@@ -4,7 +4,7 @@ import redis from '../_utils/redis'
 import httpMocks from 'node-mocks-http'
 
 import EventInterface from '.'
-import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
+import mockTestEvent from '../integrations/mock/test-event'
 
 import Event from './controller'
 
@@ -12,7 +12,7 @@ describe('Events', () => {
   describe('routes', () => {
     beforeAll(async() => {
       await mongoose.dropCollection('events')
-      await Event.createEvent(cinciRegisterTestEvent)
+      await Event.createEvent(mockTestEvent)
     })
     afterAll(async() => {
       await mongoose.dropCollection('events')
@@ -24,7 +24,7 @@ describe('Events', () => {
     })
 
     it('should get event by id', async() => {
-      const testEvent = cinciRegisterTestEvent
+      const testEvent = mockTestEvent
       testEvent.urlSafe = 'TESTING'
       const event = await Event.createEvent(testEvent)
       const mockReq = httpMocks.createRequest({
@@ -42,7 +42,7 @@ describe('Events', () => {
 
     it('should get event using query string', async() => {
       const urlSafe = 'urlSafeName'
-      const testEvent = cinciRegisterTestEvent
+      const testEvent = mockTestEvent
       testEvent.urlSafe = urlSafe
       await Event.createEvent(testEvent)
       const mockReq = httpMocks.createRequest({
@@ -55,32 +55,32 @@ describe('Events', () => {
       expect(actualResponseBody.events[0]).toHaveProperty('urlSafe', urlSafe)
     })
 
-    it('should activate a valid cinci register ticket', async() => {
+    it('should activate a valid ticket', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'POST',
-        url: `/${cinciRegisterTestEvent.urlSafe}/activate`,
+        url: `/${mockTestEvent.urlSafe}/activate`,
         body: {
           email: 'test@email.com',
-          barcode: '7132317763492225'
+          barcode: '12345'
         },
         params: {
-          urlSafe: cinciRegisterTestEvent.urlSafe
+          urlSafe: mockTestEvent.urlSafe
         }
       })
       const mockRes = httpMocks.createResponse()
       await EventInterface.routes['/:urlSafe/activate'].post(mockReq, mockRes)
       const actualResponseBody = mockRes._getData()
-      expect(actualResponseBody.ticket).toHaveProperty('barcode', '7132317763492225')
+      expect(actualResponseBody.ticket).toHaveProperty('barcode', '12345')
       expect(actualResponseBody.passwordChangeUrl).toBeTruthy()
     }, 10000)
 
     it('should return error for invalid event', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'POST',
-        url: `/${cinciRegisterTestEvent.urlSafe}/activate`,
+        url: `/${mockTestEvent.urlSafe}/activate`,
         body: {
           email: 'test@email.com',
-          barcode: '7132317763492225'
+          barcode: '12345'
         },
         params: {
           urlSafe: 'invalidevent'
@@ -96,13 +96,13 @@ describe('Events', () => {
       // intial request to activate the ticket
       const mockReq = httpMocks.createRequest({
         method: 'POST',
-        url: `/${cinciRegisterTestEvent.urlSafe}/activate`,
+        url: `/${mockTestEvent.urlSafe}/activate`,
         body: {
           email: 'test@email.com',
-          barcode: '7132317763492225'
+          barcode: '12345'
         },
         params: {
-          urlSafe: cinciRegisterTestEvent.urlSafe
+          urlSafe: mockTestEvent.urlSafe
         }
       })
       const mockRes = httpMocks.createResponse()
@@ -111,13 +111,13 @@ describe('Events', () => {
       // second request to ensure tickets with the same barcode can't be uploaded more than once
       const mockReq2 = httpMocks.createRequest({
         method: 'POST',
-        url: `/${cinciRegisterTestEvent.urlSafe}/activate`,
+        url: `/${mockTestEvent.urlSafe}/activate`,
         body: {
           email: 'test@email.com',
-          barcode: '7132317763492225'
+          barcode: '12345'
         },
         params: {
-          urlSafe: cinciRegisterTestEvent.urlSafe
+          urlSafe: mockTestEvent.urlSafe
         }
       })
       const mockRes2 = httpMocks.createResponse()
@@ -129,13 +129,13 @@ describe('Events', () => {
     it('shouldn\'t activate an invalid barcode', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'POST',
-        url: `/${cinciRegisterTestEvent.urlSafe}/activate`,
+        url: `/${mockTestEvent.urlSafe}/activate`,
         body: {
           email: 'test@email.com',
           barcode: 'not-valid-barcode'
         },
         params: {
-          urlSafe: cinciRegisterTestEvent.urlSafe
+          urlSafe: mockTestEvent.urlSafe
         }
       })
       const mockRes = httpMocks.createResponse()
@@ -148,12 +148,12 @@ describe('Events', () => {
     it('shouldn\'t validate an invalid barcode', async() => {
       const mockReq = httpMocks.createRequest({
         method: 'POST',
-        url: `/${cinciRegisterTestEvent.urlSafe}/validate`,
+        url: `/${mockTestEvent.urlSafe}/validate`,
         body: {
           barcode: 'not-valid-barcode'
         },
         params: {
-          urlSafe: cinciRegisterTestEvent.urlSafe
+          urlSafe: mockTestEvent.urlSafe
         }
       })
       const mockRes = httpMocks.createResponse()

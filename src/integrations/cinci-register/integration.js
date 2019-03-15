@@ -53,12 +53,33 @@ class CinciRegisterIntegration extends IntegrationInterface {
       cookieValue: { session_id: sessionId }
     })
 
-    let isValidTicket = await this.isValidTicket(
-      ticketInfo['Ticket Number'].substring(1, ticketInfo['Ticket Number'].length), event)
+    return true
+  }
 
-    // success if ticket became invalid
-    let success = !isValidTicket
-    return success
+  async reactivateTicket(eventId, barcode) {
+    const event = await Event.getEventById(eventId)
+    if (!event) return false
+    const { domain } = event
+    const username = event.username
+    const password = event.password
+    let sessionId = await this.login(username, password, event)
+    let ticketInfo = await this.getTicketInfo(barcode, event)
+    if (!ticketInfo || ticketInfo['Status'] !== 'void') return false
+
+    // all properties are required
+    await post({
+      url: `${domain}/merchant/products/2/manage/tickets`,
+      form: {
+        name: ticketInfo['Ticket Holder'] || 'Terrapin Ticketing',
+        status: 'active',
+        scanned: ticketInfo['Scanned'],
+        cmd: 'edit',
+        id: ticketInfo.lookupId
+      },
+      cookieValue: { session_id: sessionId }
+    })
+
+    return true
   }
 
   async issueTicket(event, user, ticketType) {
@@ -121,7 +142,14 @@ class CinciRegisterIntegration extends IntegrationInterface {
       cookieValue: { session_id: sessionId }
     })
     let printableTicket = printTicketRes.body
-    let ticketNum = printableTicket.match(/[0-9]{16}/)[0]
+    // console.log('printableTicket', printableTicket);
+    let ticketNum
+    try {
+      ticketNum = printableTicket.match(/[0-9]{16}/)[0]
+    } catch (e) {
+      console.log('failed to create ticket', ticketType, new Date())
+      return false
+    }
 
     // success if ticket became invalid
     return ticketNum
@@ -196,10 +224,15 @@ class CinciRegisterIntegration extends IntegrationInterface {
 
   async getTicketInfo(ticketId, event) {
     let tickets = await this._getTickets(event)
+
     return tickets[ticketId]
   }
 
   async getTicketTypes(eventId) {
+    /*
+    BETTER PLACE TO GET IT FROM:
+    */
+
     const event = await Event.getEventById(eventId)
     return event && event.ticketTypes
   }
@@ -217,11 +250,16 @@ class CinciRegisterIntegration extends IntegrationInterface {
     const event = await Event.getEventById(eventId)
     if (!event) return false
     const newBarcode = await this.issueTicket(event, toUser, ticket.type)
-    if (!newBarcode) return false
+    if (!newBarcode) { // if issue didn't work, reactiate old ticket
+      console.log('reactivating', barcode)
+      await this.reactivateTicket(eventId, barcode)
+      return false
+    }
 
     const newTicket = await Ticket.set(ticket._id, {
       ownerId: toUser._id,
-      barcode: newBarcode
+      barcode: newBarcode,
+      isForSale: false
     })
 
     return newTicket

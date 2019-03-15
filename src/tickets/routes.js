@@ -77,9 +77,7 @@ export default {
       handler: async(req, res) => {
         const { isForSale, price } = req.body
         const { id } = req.params
-
         const ticket = await Ticket.getTicketById(id)
-
         const newTicket = await Ticket.set(ticket._id, {
           isForSale,
           price
@@ -100,7 +98,7 @@ export default {
         if (await redis.get('reserve-token', String(id))) return res.status(403).send('Ticket already reserved')
         const reserveToken = uuidv1()
         // await redis.set('reserve-token', id, reserveToken, 10)
-        await redis.set('reserve-token', String(id), reserveToken, 60*15)
+        await redis.set('reserve-token', String(id), reserveToken, 60*5)
         res.send({ticket, reserveToken})
       }
     },
@@ -142,6 +140,7 @@ export default {
         const { email, firstName, lastName } = transferToUser
 
         const ticket = await Ticket.getTicketById(id)
+        const prevBarcode = ticket.barcode
 
         let existingUser = await User.getUserByEmail(email)
         let createdNewUser = false
@@ -152,23 +151,26 @@ export default {
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
           createdNewUser = true
         } else {
-          await User.set(existingUser._id, {
+          existingUser = await User.set(existingUser._id, {
             firstName,
             lastName
           })
         }
 
-
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, existingUser)
         if (!newTicket) return res.status(500).send('Error transfering ticket (Code: Need a Miracle)')
+
+        // remove any reserve tokens
+        await redis.set('reserve-token', String(id), false)
 
         await Transfer.create({
           date: Date.now(),
           senderId: user._id,
           recieverId: existingUser._id,
           ticketId: ticket._id,
-          eventId: ticket.eventId
+          eventId: ticket.eventId,
+          prevBarcode
         })
 
         if (createdNewUser) {
@@ -176,6 +178,7 @@ export default {
         } else {
           Emailer.sendExistingUserTicketRecieved(existingUser, ticket)
         }
+
         res.send({ ticket: stripBarcodes(newTicket) })
       }
     }
@@ -223,7 +226,7 @@ export default {
           if (!user) return res.status(409).send('Username already taken')
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
         } else {
-          await User.set(user._id, {
+          user = await User.set(user._id, {
             firstName,
             lastName
           })
@@ -240,7 +243,10 @@ export default {
         let total = Math.ceil(baseTotal + stripeTotal)
 
         try {
-          charge = await stripe.createCharge(user, stripeToken, total)
+          charge = await stripe.createCharge(user, stripeToken, total, {
+            eventName: event.name,
+            userEmail: user.email
+          })
         } catch (e) {
           return res.status(503).send(e.message)
         }
@@ -249,6 +255,10 @@ export default {
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)
+
+        // remove any reserve tokens
+        await redis.set('reserve-token', String(ticketId), false)
+
         await Payout.create({
           date: Date.now(),
           price: ticket.price,

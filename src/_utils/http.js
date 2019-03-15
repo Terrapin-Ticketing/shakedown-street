@@ -12,7 +12,7 @@ export async function get(url, config) {
 }
 
 async function req(config) {
-  const { url, form, json, cookieValue, headers, method, followRedirect, formData } = config
+  const { url, form, json, cookieValue, headers, method, followRedirect, formData, timeout } = config
 
   const { protocol, host, port } = urlParse.parse(url)
   const domain = port ? `${protocol}//${host}:${port}` : `${protocol}//${host}`
@@ -30,7 +30,8 @@ async function req(config) {
     form,
     headers,
     formData,
-    followRedirect
+    followRedirect,
+    timeout
   }
 
   return await new Promise((resolve, reject) => { // eslint-disable-line
@@ -41,6 +42,12 @@ async function req(config) {
         cookies[cookie.name] = cookie.value
       }
       res.cookies = cookies
+
+      let rawCookies = ''
+      for (let cookieKey in cookies) {
+        rawCookies += `${cookieKey}=${cookies[cookieKey]};`
+      }
+      res.rawCookies = rawCookies
       resolve(res)
     })
   })

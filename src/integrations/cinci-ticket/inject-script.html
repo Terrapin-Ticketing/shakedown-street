@@ -7,7 +7,9 @@
     if (isBarcode && !hasRan) {
       var barcode = innerHTML
       var newLink = document.createElement("a");
-      newLink.setAttribute('href', 'http://localhost:3000/CincyTicketTest/activate?barcode=' + barcode);
+
+      // newLink.setAttribute('href', 'http://localhost:3000/CincyTicketTest/activate?barcode=' + barcode);
+      newLink.setAttribute('href', 'https://terrapintickets.io/CincyTicketTest/activate?barcode=' + barcode);
 
       var text = document.createTextNode("transfer or sell");
       newLink.appendChild(text)

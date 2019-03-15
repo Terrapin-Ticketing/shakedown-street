@@ -7,7 +7,7 @@ import User from '../../users/controller'
 import MissionTix from './integration'
 import missionTixTestEvent from './test-event'
 
-describe('Mission Tix Ticket Intergration', () => {
+describe.skip('Mission Tix Ticket Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
   })
@@ -22,7 +22,7 @@ describe('Mission Tix Ticket Intergration', () => {
     const authHeaders = await MissionTix.login(event._id)
     expect(authHeaders['dome-key']).toBeDefined()
     expect(authHeaders['auth-key']).toBeDefined()
-  })
+  }, 10000)
 
   it('should reject invalid barcode', async() => {
     const event = await Event.createEvent(missionTixTestEvent)

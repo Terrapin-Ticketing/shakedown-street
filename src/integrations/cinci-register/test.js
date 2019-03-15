@@ -7,7 +7,7 @@ import User from '../../users/controller'
 
 import cinciRegisterTestEvent from './test-event'
 
-describe('Cinci Register Intergration', () => {
+describe.skip('Cinci Register Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
   })

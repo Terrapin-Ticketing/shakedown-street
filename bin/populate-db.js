@@ -1,19 +1,49 @@
 const { mongoose } = require('../src/_utils/bootstrap')
 import Event from '../src/events/controller'
 import User from '../src/users/controller'
+
 import cinciRegisterTestEvent from '../src/integrations/cinci-register/test-event'
 import CinciRegister from '../src/integrations/cinci-register/integration'
 
 import missionTixTestEvent from '../src/integrations/mission-tix/test-event'
 import MissinTix from '../src/integrations/mission-tix/integration'
 
+import cinciTicketTestEvent from '../src/integrations/cinci-ticket/test-event'
+import CinciTicket from '../src/integrations/cinci-ticket/integration'
+
+import mockTestEvent from '../src/integrations/mock/test-event'
+import MockIntegration from '../src/integrations/mock/integration'
+
 (async function() {
   await clearDb()
-  const cinciRegisterBarcode = await createCinciReigsterTicket()
-  console.log('cinciRegisterBarcode: ', cinciRegisterBarcode)
+  const barcode = await createMockTestEvent()
+  console.log('mission tix : ', barcode)
   const user = await User.createUser('reeder@terrapinticketing.com', 'test')
   process.exit()
 })()
+
+async function createMockTestEvent() {
+  const user = await User.createUser('mock@tt.com', 'test')
+  const event = await Event.createEvent(mockTestEvent)
+
+  const barcode = await MockIntegration.issueTicket(event, user, 'REG')
+  // drop database
+  await mongoose.dropCollection('tickets')
+  return barcode
+}
+
+async function createCinciTicket() {
+  const user = await User.createUser('test1@test.com', 'test')
+  const event = await Event.createEvent(cinciTicketTestEvent)
+
+  console.log('event', event)
+
+  const barcode = await CinciTicket.issueTicket(event, user, 'REG')
+  // drop database
+  await mongoose.dropCollection('users')
+  await mongoose.dropCollection('tickets')
+  return barcode
+}
 
 async function createMissionTixTicket() {
   const user = await User.createUser('test1@test.com', 'test')
@@ -29,6 +59,7 @@ async function createMissionTixTicket() {
 async function createCinciReigsterTicket() {
   const user = await User.createUser('test@test.com', 'test')
   const event = await Event.createEvent(cinciRegisterTestEvent)
+  console.log(event)
   const ticketType = Object.keys(event.ticketTypes)[0]
   const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
   // drop database

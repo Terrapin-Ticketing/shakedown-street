@@ -306,6 +306,7 @@ let transporter = nodemailer.createTransport({
 })
 
 async function sendMail(mailOptions) {
+  if (process.env.NODE_ENV === 'test') return
   return await new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, function(err, info) {
       if (err) return reject(err)

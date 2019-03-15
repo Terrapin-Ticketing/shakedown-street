@@ -8,8 +8,8 @@ import httpMocks from 'node-mocks-http'
 
 import { post } from '../_utils/http'
 
-import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
-import CinciRegister from '../integrations/cinci-register/integration'
+import mockTestEvent from '../integrations/mock/test-event'
+import MockIntegration from '../integrations/mock/integration'
 
 import Payout from './controller'
 import User from '../users/controller'
@@ -35,11 +35,11 @@ describe('Payouts', () => {
   })
 
   it('should create a new payout', async() => {
+    const event = await Event.createEvent(mockTestEvent)
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, seller, ticketType)
 
     const ticket = await Ticket.createTicket(event._id, seller._id, barcode, 1000, ticketType)
 
@@ -61,11 +61,11 @@ describe('Payouts', () => {
 
   it('should create a pending payment when a ticket is bought', async() => {
     // buya ticket
+    const event = await Event.createEvent(mockTestEvent)
     const buyer = 'newUser@gogo.com'
     const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
     const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
     const ticket = await Ticket.set(initTicket._id, {
       isForSale: true
@@ -119,16 +119,16 @@ describe('Payouts', () => {
     const payouts = await Payout.find({ isPaid: false })
     const newUser = await User.getUserByEmail(buyer)
     expect(payouts[0].buyerId).toHaveProperty('_id', newUser._id)
-  }, 20000)
+  }, 30000)
 
   it('should get all unpaid payouts', async() => {
     const numPayouts = 5
+    const event = await Event.createEvent(mockTestEvent)
     const admin = await User.createUser('reeder@terrapinticketing.com', 'test')
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, seller, ticketType)
 
     const ticket = await Ticket.createTicket(event._id, seller._id, barcode, 1000, ticketType)
 
@@ -159,12 +159,12 @@ describe('Payouts', () => {
   })
 
   it('should update payout isPaid to true', async() => {
+    const event = await Event.createEvent(mockTestEvent)
     const admin = await User.createUser('reeder@terrapinticketing.com', 'test')
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, seller, ticketType)
 
     const ticket = await Ticket.createTicket(event._id, seller._id, barcode, 1000, ticketType)
 
@@ -199,9 +199,9 @@ describe('Payouts', () => {
     const admin = await User.createUser('not-reeder@terrapinticketing.com', 'test')
     const seller = await User.createUser('seller@test.com', 'test')
     const buyer = await User.createUser('buyer@test.com', 'test')
-    const event = await Event.createEvent(cinciRegisterTestEvent)
+    const event = await Event.createEvent(mockTestEvent)
     const ticketType = Object.keys(event.ticketTypes)[0]
-    const barcode = await CinciRegister.issueTicket(event, seller, ticketType)
+    const barcode = await MockIntegration.issueTicket(event, seller, ticketType)
 
     const ticket = await Ticket.createTicket(event._id, seller._id, barcode, 1000, ticketType)
 

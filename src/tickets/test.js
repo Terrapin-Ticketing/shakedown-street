@@ -5,8 +5,8 @@ import redis from '../_utils/redis'
 import httpMocks from 'node-mocks-http'
 import Event from '../events/controller'
 import User from '../users/controller'
-import cinciRegisterTestEvent from '../integrations/cinci-register/test-event'
-import CinciRegister from '../integrations/cinci-register/integration'
+import mockTestEvent from '../integrations/mock/test-event'
+import MockIntegration from '../integrations/mock/integration'
 import config from 'config'
 import { post } from '../_utils/http'
 import { _set } from '../_utils'
@@ -28,9 +28,9 @@ describe('Ticket', () => {
 
     it('should get all tickets with given query param', async() => {
       const user = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const cinciRegisterBarcode = await MockIntegration.issueTicket(event, user, ticketType)
       await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
       const mockReq = httpMocks.createRequest({
         method: 'get',
@@ -44,9 +44,9 @@ describe('Ticket', () => {
 
     it('should get all available tickets with given query param', async() => {
       const user = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const cinciRegisterBarcode = await MockIntegration.issueTicket(event, user, ticketType)
       const ticket = await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
       await Ticket.set(ticket._id, { isForSale: true })
 
@@ -62,9 +62,9 @@ describe('Ticket', () => {
 
     it('should delete reserve-token', async() => {
       const user = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const cinciRegisterBarcode = await MockIntegration.issueTicket(event, user, ticketType)
       const ticket = await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
       await Ticket.set(ticket._id, { isForSale: true })
 
@@ -86,9 +86,9 @@ describe('Ticket', () => {
 
     it('shouldn\'t return reserved tickets', async() => {
       const user = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const cinciRegisterBarcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const cinciRegisterBarcode = await MockIntegration.issueTicket(event, user, ticketType)
       const ticket = await Ticket.createTicket(event._id, user._id, cinciRegisterBarcode, 1000, ticketType)
       await Ticket.set(ticket._id, { isForSale: true })
       await redis.set('reserve-token', ticket._id, uuidv1(), 60*15)
@@ -105,11 +105,11 @@ describe('Ticket', () => {
 
     it('should remove barcodes from tickets', async() => {
       const user = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
 
       for (let n of new Array(3)) { // eslint-disable-line
-        const barcode = await CinciRegister.issueTicket(event, user, ticketType)
+        const barcode = await MockIntegration.issueTicket(event, user, ticketType)
         await Ticket.createTicket(event._id, user._id, barcode, 1000, ticketType)
       }
 
@@ -125,10 +125,10 @@ describe('Ticket', () => {
 
     it('should update owned ticket', async() => {
       const user = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
 
-      const barcode = await CinciRegister.issueTicket(event, user, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, user, ticketType)
       const ticket = await Ticket.createTicket(event._id, user._id, barcode, 1000, ticketType)
 
       const mockReq = httpMocks.createRequest({
@@ -153,10 +153,10 @@ describe('Ticket', () => {
       const owner = await User.createUser('test@test.com', 'test')
       const imposter = await User.createUser('notTest@test.com', 'test')
 
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
 
-      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
       const ticket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
 
       const mockReq = httpMocks.createRequest({
@@ -179,9 +179,9 @@ describe('Ticket', () => {
 
     it('should transfer ticket to new user', async() => {
       const owner = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
       const ticket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
 
       const mockReq = httpMocks.createRequest({
@@ -210,10 +210,10 @@ describe('Ticket', () => {
 
     it('should purchace ticket with stripe token', async() => {
       const owner = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
       if (!owner) console.log('no owner:', owner)
-      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
       const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
       const ticket = await Ticket.set(initTicket._id, {
         isForSale: true
@@ -280,9 +280,9 @@ describe('Ticket', () => {
 
     it('should purchace ticket by new user', async() => {
       const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
       const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
       const ticket = await Ticket.set(initTicket._id, {
         isForSale: true
@@ -343,9 +343,9 @@ describe('Ticket', () => {
 
     it('should not allow ticket purchace without valid reserve token', async() => {
       const owner = await User.createUser(`test@test${Math.random()}.com`, 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
       const initTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
       const ticket = await Ticket.set(initTicket._id, {
         isForSale: true
@@ -392,9 +392,9 @@ describe('Ticket', () => {
 
     it('should issue a reserve ticket token', async() => {
       const owner = await User.createUser('test@test.com', 'test')
-      const event = await Event.createEvent(cinciRegisterTestEvent)
+      const event = await Event.createEvent(mockTestEvent)
       const ticketType = Object.keys(event.ticketTypes)[0]
-      const barcode = await CinciRegister.issueTicket(event, owner, ticketType)
+      const barcode = await MockIntegration.issueTicket(event, owner, ticketType)
       const buyableTicket = await Ticket.createTicket(event._id, owner._id, barcode, 1000, ticketType)
       await Ticket.set(buyableTicket._id, { isForSale: true })
 
