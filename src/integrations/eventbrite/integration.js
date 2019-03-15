@@ -5,8 +5,7 @@ import { post, get } from '../../_utils/http'
 class MockIntegration extends IntegrationInterface {
   async login(apiKey, password, event) {
     // eid=56017677381
-    const username = 'me'
-    const url = `https://www.eventbriteapi.com/v3/users/${username}/events/?token=${apiKey}`
+    const url = `https://www.eventbriteapi.com/v3/users/me/events/?token=${apiKey}`
     // const url = `https://www.eventbriteapi.com/v3/users/me/?token=${apiKey}`
 
     return event.auth.apiKey
