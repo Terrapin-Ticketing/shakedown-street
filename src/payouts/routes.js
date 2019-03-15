@@ -12,7 +12,7 @@ export default {
       handler: async(req, res) => {
         const { user } = req.props
         const isAdmin = checkAdminEmail(user.email)
-        if (!isAdmin) return res.status(401).send({ error: 'unauthorized' })
+        if (!isAdmin) return res.status(401).send('Unauthorized')
         const urlParts = url.parse(req.url, true)
         const query = urlParts.query
         const payouts = await Payouts.find(query)
@@ -26,7 +26,7 @@ export default {
         const { user } = req.props
         const { id } = req.params
         const isAdmin = checkAdminEmail(user.email)
-        if (!isAdmin) return res.status(401).send({ error: 'unauthorized' })
+        if (!isAdmin) return res.status(401).send('Unauthorized')
         const payout = await Payouts.setIsPaidById(id)
         res.send(payout)
       }

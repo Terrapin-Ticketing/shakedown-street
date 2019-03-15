@@ -12,7 +12,6 @@ import MissinTix from '../src/integrations/mission-tix/integration'
   const cinciRegisterBarcode = await createCinciReigsterTicket()
   console.log('cinciRegisterBarcode: ', cinciRegisterBarcode)
   const user = await User.createUser('reeder@terrapinticketing.com', 'test')
-  console.log('created user:', user.email)
   process.exit()
 })()
 

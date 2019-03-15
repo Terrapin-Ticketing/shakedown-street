@@ -24,7 +24,7 @@ export default {
         let tickets = await Ticket.find(query)
         // strip barcodes off tickets if not called by owner
         tickets = tickets.map((ticket) => {
-          if (!user || String(ticket.ownerId) !== String(user._id)) {
+          if (!user || String(ticket.ownerId._id) !== String(user._id)) {
             return stripBarcodes(ticket)
           }
           return ticket
@@ -65,8 +65,8 @@ export default {
         const { user } = req.props
         const { id } = req.params
         let ticket = await Ticket.getTicketById(id)
-        if (!ticket) return res.send({ error: 'ticket not found' })
-        if (!user || String(ticket.ownerId) !== String(user._id)) {
+        if (!ticket) return res.status(404).send('Ticket not found')
+        if (!user || String(ticket.ownerId._id) !== String(user._id)) {
           ticket = stripBarcodes(ticket)
         }
         res.send({ ticket })
@@ -84,7 +84,7 @@ export default {
           isForSale,
           price
         })
-        if (!newTicket) return res.send({ error: 'error updating ticket' })
+        if (!newTicket) return res.status(500).send('Error updating ticket')
 
         res.send({ ticket: newTicket })
       }
@@ -95,9 +95,9 @@ export default {
       handler: async(req, res) => {
         const { id } = req.params
         const ticket = await Ticket.getTicketById(id)
-        if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
+        if (!ticket || !ticket.isForSale) return res.status(403).send('Unable to reserve ticket')
 
-        if (await redis.get('reserve-token', String(id))) return res.send({ error: 'ticket already reserved' })
+        if (await redis.get('reserve-token', String(id))) return res.status(403).send('Ticket already reserved')
         const reserveToken = uuidv1()
         // await redis.set('reserve-token', id, reserveToken, 10)
         await redis.set('reserve-token', String(id), reserveToken, 60*15)
@@ -111,9 +111,9 @@ export default {
         const query = urlParts.query
         const { reserveToken } = query
         const ticket = await Ticket.getTicketById(id)
-        if (!ticket || !ticket.isForSale) return res.send({ error: 'unable to reserve ticket' })
+        if (!ticket || !ticket.isForSale) return res.status(403).send('Unable to reserve ticket')
         const savedToken = await redis.get('reserve-token', String(id))
-        if (savedToken !== reserveToken) return res.status(401).send({ error: 'users cant remove token that they dont have access to' })
+        if (savedToken !== reserveToken) return res.status(401).send('Users cant remove token that they dont have access to')
         await redis.set('reserve-token', String(id), false)
         res.send({ticket})
       }
@@ -148,7 +148,7 @@ export default {
         let passwordChangeUrl
         if (!existingUser) {
           existingUser = await User.createUser(email, `${Math.random()}`, firstName, lastName)
-          if (!existingUser) return res.send({ error: 'username already taken' })
+          if (!existingUser) return res.status(409).send('There is an already an account with that username')
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
           createdNewUser = true
         } else {
@@ -161,7 +161,7 @@ export default {
 
         // check ticket validity
         const newTicket = await Integration.transferTicket(ticket, existingUser)
-        if (!newTicket) return res.send({ error: 'error transfering ticket' })
+        if (!newTicket) return res.status(500).send('Error transfering ticket (Code: Need a Miracle)')
 
         await Transfer.create({
           date: Date.now(),
@@ -206,21 +206,21 @@ export default {
         const { email, firstName, lastName } = transferToUser
 
         const savedReserveToken = await redis.get('reserve-token', ticketId)
-        if (reserveToken !== savedReserveToken) return res.send({ error: 'invalid reserve token' })
+        if (reserveToken !== savedReserveToken) return res.status(404).send('Invalid reserve token')
 
         // check if ticket has already been activated or isn't for sale
         const ticket = await Ticket.getTicketById(ticketId)
-        if (!ticket || !ticket.isForSale) return res.send({ error: 'invalid ticket' })
+        if (!ticket || !ticket.isForSale) return res.status(403).send('Invalid ticket')
 
         // requireTicketIntegration
         const isValidTicket = await Integration.isValidTicket(ticket.barcode, ticket.event)
-        if (!isValidTicket) return res.send({ error: 'Invalid Ticket ID' })
+        if (!isValidTicket) return res.status(404).send('Invalid Ticket ID')
 
         // create user if one doesn't exist
         let passwordChangeUrl, charge
         if (!user) {
           user = await User.createUser(email, `${Math.random()}`, firstName, lastName)
-          if (!user) return res.send({ error: 'username already taken' })
+          if (!user) return res.status(409).send('Username already taken')
           passwordChangeUrl = await User.requestChangePasswordUrl(email)
         } else {
           await User.set(user._id, {
@@ -242,10 +242,10 @@ export default {
         try {
           charge = await stripe.createCharge(user, stripeToken, total)
         } catch (e) {
-          return res.send({ error: e.message })
+          return res.status(503).send(e.message)
         }
         const newTicket = await Integration.transferTicket(ticket, user)
-        if (!newTicket) return res.send({ error: 'error buying ticket' })
+        if (!newTicket) return res.status(500).send('Error transfering ticket (Code: Need a Miracle)')
 
         // don't use 'await' here because we want to return immediately
         Emailer.sendSoldTicketEmail(originalOwner, newTicket)

@@ -43,11 +43,11 @@ async function executeMiddleware(req, res, middleware=[]) {
 
 function checkBody(req, res, body={}) {
   for (let param in body) {
-    if (!req.body[param]) return res.send({ error: `missing param: ${param}` })
+    if (!req.body[param]) return res.status(422).send(`Missing: ${param}`)
     if (typeof body[param] === 'function') {
       // call validators
       const normalizedParam = body[param](req.body[param])
-      if (!normalizedParam) return res.send({ error: `validation failed for ${param}` })
+      if (!normalizedParam) return res.status(422).send(`Invalid ${param}`)
       req.body[param] = normalizedParam
     }
   }
