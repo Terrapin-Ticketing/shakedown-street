@@ -12,6 +12,7 @@ class MockIntegration extends IntegrationInterface {
   }
 
   async deactivateTicket(eventId, barcode) {
+    // manual cycle through method
     return true
   }
 
@@ -28,7 +29,14 @@ class MockIntegration extends IntegrationInterface {
     return text
   }
 
+  async getTicketsByOrderId(orderId, event) {
+    const apiKey = event.auth.apiKey;
+    const response = await get(`https://www.eventbriteapi.com/v3/orders/${orderId}/?token=${apiKey}&expand=attendees`);
+    return JSON.parse(response.body);
+  }
+
   async isValidTicket(ticketId, event) {
+    // use order number
     return ticketId.toString().match(/[a-zA-Z0-9]{5}/) && ticketId.toString().length === 5
   }
 

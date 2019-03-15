@@ -18,24 +18,26 @@ describe('Cinci Ticket Intergration', () => {
     await mongoose.dropCollection('tickets')
   })
 
-  it.only('should login', async() => {
+  it('should login', async() => {
     const event = await Event.createEvent(testEventConfig)
-
-    const apiKey = 'DJNFCLSHCLWR22XSYZ73'
-
     const rawCookies = await EventBriteIntegration.login(apiKey, '', event)
-
-
     // expect(rawCookies.includes('UserSession')).toBeTruthy()
   }, 10000)
 
+  it.only('should return true for valid orderNumber', async() => {
+    const event = await Event.createEvent(testEventConfig)
+    const orderNumber = '916100082'
+    const orders = await EventBriteIntegration.getTicketsByOrderId(orderNumber, event)
+    console.log('orders', JSON.stringify(orders.attendees, null, '  '))
+    // expect(isValidTicket).toBeTruthy()
+  }, 10000)
+
   // it('should return true for valid barcode', async() => {
-  //   const barcode = '0222226482260290522229'
+  //   const barcode = 'not-a-barcode'
   //   const event = await Event.createEvent(cinciTicketTestEvent)
   //   const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
-  //   expect(isValidTicket).toBeTruthy()
+  //   expect(isValidTicket).toBeFalsy()
   // }, 10000)
-  //
   // it('should return false for invalid barcode', async() => {
   //   const barcode = 'not-a-barcode'
   //   const event = await Event.createEvent(cinciTicketTestEvent)

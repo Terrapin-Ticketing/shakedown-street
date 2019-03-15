@@ -1,0 +1,15 @@
+hidden ticket type -> promo code
+
+// give money back through donation tickets
+
+communicate refund to user
+
+can get barcodes from endpoints:
+    - attendee
+
+
+1. take order number
+2. retreive order by ordernumber with the attendee expansion
+3. display all tickets (i.e barcodes) associated with
+4. have them pick one
+5. 
