@@ -27,8 +27,8 @@ describe('Cinci Ticket Intergration', () => {
   it.only('should return true for valid orderNumber', async() => {
     const event = await Event.createEvent(testEventConfig)
     const orderNumber = '916100082'
-    const orders = await EventBriteIntegration.getTicketsByOrderId(orderNumber, event)
-    console.log('orders', JSON.stringify(orders.attendees, null, '  '))
+    const att = await EventBriteIntegration.getTicketsByOrderId(orderNumber, event)
+    console.log(JSON.stringify(att, null, '  '))
     // expect(isValidTicket).toBeTruthy()
   }, 10000)
 

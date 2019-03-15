@@ -32,7 +32,8 @@ class MockIntegration extends IntegrationInterface {
   async getTicketsByOrderId(orderId, event) {
     const apiKey = event.auth.apiKey;
     const response = await get(`https://www.eventbriteapi.com/v3/orders/${orderId}/?token=${apiKey}&expand=attendees`);
-    return JSON.parse(response.body);
+    const body = JSON.parse(response.body)
+    return body.attendees.map(a => a.barcodes);
   }
 
   async isValidTicket(ticketId, event) {
