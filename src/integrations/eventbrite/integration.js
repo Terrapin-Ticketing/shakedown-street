@@ -41,7 +41,7 @@ class EventbriteIntegration extends IntegrationInterface {
     return !!(await this.getTicketById(barcode, event))
   }
 
-  async getTicketById(barcode, event) {
+  async getOrderByBarcode(barcode, event) {
     const apiKey = await this.login(event);
     const getOrdersPage = async () => {
       const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/orders?token=${apiKey}`)
@@ -52,11 +52,20 @@ class EventbriteIntegration extends IntegrationInterface {
       for (let order of ordersPage.orders) {
         order = await this.getOrderById(order.id, event);
         for (const t of order.tickets) {
-          if (t.barcodes.find(bc => bc.barcode === barcode)) return t
+          if (t.barcodes.find(bc => bc.barcode === barcode)) return order
         }
       }
       ordersPage = await getOrdersPage()
     } while (ordersPage.pagination.has_more_items)
+    return false
+  }
+
+  async getTicketById(barcode, event, orderId=null) {
+    const order = orderId ? await this.getOrderById(orderId, event) : await this.getOrderByBarcode(barcode, event)
+    if (!order || !order.tickets) return false;
+    for (const t of order.tickets) {
+      if (t.barcodes.find(bc => bc.barcode === barcode)) return t
+    }
     return false
   }
 

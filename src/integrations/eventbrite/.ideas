@@ -29,6 +29,9 @@ orders programmatically. We would like to drop an iframe on our site to allow gu
 for face value. This discourages fake credit cards since "selling" a ticket only refunds the original
 owner. This is especially useful for passes like Parking, VIP Upgrade and RV.
 
+It would be nice to put a link on their ticket to transfer their ticket. Problem with this is we would need to manage
+accounts... I guess we already do.
+
 It would be nice if we could move a ticket from one eventbrite "account" to another
 
 It would be nice if we could give the scanner a message if the ticket was sold through TT. I guess kevin
