@@ -12,4 +12,36 @@ can get barcodes from endpoints:
 2. retreive order by ordernumber with the attendee expansion
 3. display all tickets (i.e barcodes) associated with
 4. have them pick one
-5. 
+5.
+
+
+
+
+
+Eventbrite EMAIL:
+
+We need the Eventbrite Order Service API to be able to do partial refunds for guests.
+We also need to be able to transfer ownership of ticket holders. In our system, when someone
+transfers a ticket we disable their barcodes and grant a brand new one to the transferree.
+This ensures no one can reuse barcodes. By issuing new tickets each time it exchanges hands we can ensure
+customers a valid ticket when they get to the gates. This also means we need to be able to create
+orders programmatically. We would like to drop an iframe on our site to allow guests to sell their tickets
+for face value. This discourages fake credit cards since "selling" a ticket only refunds the original
+owner. This is especially useful for passes like Parking, VIP Upgrade and RV.
+
+It would be nice if we could move a ticket from one eventbrite "account" to another
+
+It would be nice if we could give the scanner a message if the ticket was sold through TT. I guess kevin
+and I could just check. We can check the history of all the ticket buys/sells. We can even tell them that
+their ticket got refunded.
+
+We can make a one stop lookup system.
+
+
+We feel we have a new and innovative way for users to exchange tickets online.
+
+
+
+Transfers:!!! can only be done through eventbrite !!!! !!
+
+The reason we issue new tickets is because we don't

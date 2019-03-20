@@ -52,6 +52,13 @@ describe('Eventbrite Intergration', () => {
     expect(eventInfo).toBeTruthy()
   }, 100000)
 
+  it('should lookup ticket types from eventbrite', async () => {
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const ticketTypes = await EventBriteIntegration.getTicketTypes(event)
+    expect(ticketTypes[0]).toBeTruthy();
+  }, 100000)
+
+
 
   // it.only('should lookup ticket type and price from barcode', async () => {
   //   const barcode = '9161000821147688597001'
@@ -61,6 +68,8 @@ describe('Eventbrite Intergration', () => {
   // }, 100000)
 
 
+  // PROGRAMMATIC ORDERS
+  //
   // it('should issue ticket', async() => {
   //   const event = await Event.createEvent(cinciTicketTestEvent)
   //   const user = await User.createUser('test@test.com', 'test')
@@ -70,6 +79,7 @@ describe('Eventbrite Intergration', () => {
   // }, 100000)
   //
 
+  // REFUND
   //
   // it('should deactivate a barcode', async() => {
   //   const event = await Event.createEvent(cinciTicketTestEvent)

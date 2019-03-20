@@ -57,15 +57,11 @@ class MockIntegration extends IntegrationInterface {
     return isFound
   }
 
-  async getTicketTypes(eventId) {
-    // const apiKey = await this.login(event);
-    // const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/?token=${apiKey}`);
-    // const event = JSON.parse(res.body)
-    // console.log('event', event)
-    // BETTER PLACE TO GET IT FROM:
-    // */
-    // const event = await Event.getEventById(eventId)
-    // return event && event.ticketTypes
+  async getTicketTypes(event) {
+    const apiKey = await this.login(event);
+    const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/ticket_classes?token=${apiKey}`);
+    const ticketTypes = JSON.parse(res.body)
+    return ticketTypes.ticket_classes;
   }
 
   async getEventInfo(event) {

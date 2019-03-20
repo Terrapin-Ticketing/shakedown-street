@@ -19,6 +19,7 @@ export default {
   endDate: '2019-03-06T01:00:00',
   timezone: 'EST',
 
+  // we should also get all this from the source
   name: 'Mock event',
   description: 'an event used for testing',
   venue: {
@@ -36,30 +37,36 @@ export default {
   promoCode: 'MOCK_CODE',
   totalMarkupPercent: 0.00,
   totalStaticMarkup: 1600,
-  ticketTypes: {
-    'VIP 2-Day Pass': {
-      paramName: 'vip_2day',
-      price: 1000
-    },
-    'VIP Single Day 12/1': {
-      paramName: 'vip_single_day_121',
-      price: 0
-    },
-    'VIP Single Day 12/2': {
-      paramName: 'vip_single_day_122',
-      price: 0
-    },
-    'General Admission Two-Day Pass': {
-      paramName: 'general_admission',
-      price: 0
-    },
-    'General Admission Single Day 12/1': {
-      paramName: 'gen_121',
-      price: 0
-    },
-    'General Admission Single Day 12/2': {
-      paramName: 'gen_122',
-      price: 0
-    }
-  }
+
+
+  // I refuse to do ticket types like this. We should always look them up from the
+  // source
+  //
+
+  // ticketTypes: {
+  //   'VIP 2-Day Pass': {
+  //     paramName: 'vip_2day',
+  //     price: 1000
+  //   },
+  //   'VIP Single Day 12/1': {
+  //     paramName: 'vip_single_day_121',
+  //     price: 0
+  //   },
+  //   'VIP Single Day 12/2': {
+  //     paramName: 'vip_single_day_122',
+  //     price: 0
+  //   },
+  //   'General Admission Two-Day Pass': {
+  //     paramName: 'general_admission',
+  //     price: 0
+  //   },
+  //   'General Admission Single Day 12/1': {
+  //     paramName: 'gen_121',
+  //     price: 0
+  //   },
+  //   'General Admission Single Day 12/2': {
+  //     paramName: 'gen_122',
+  //     price: 0
+  //   }
+  // }
 }
