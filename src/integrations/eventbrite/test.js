@@ -52,20 +52,25 @@ describe('Eventbrite Intergration', () => {
     expect(eventInfo).toBeTruthy()
   }, 100000)
 
-  it('should lookup ticket types from eventbrite', async () => {
+  it('should lookup all current ticket types from eventbrite', async () => {
     const event = await Event.createEvent(eventBriteTestEventConfig)
     const ticketTypes = await EventBriteIntegration.getTicketTypes(event)
     expect(ticketTypes[0]).toBeTruthy();
   }, 100000)
 
+  it('should lookup ticket by barcode from private method', async () => {
+    const barcode = '9161000821147688597001'
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const ticket = await EventBriteIntegration.getTicketById(barcode, event)
+    expect(ticket).toHaveProperty('barcodes');
+  }, 100000)
 
-
-  // it.only('should lookup ticket type and price from barcode', async () => {
-  //   const barcode = '9161000821147688597001'
-  //   const event = await Event.createEvent(eventBriteTestEventConfig)
-  //   const ticketInfo = await EventBriteIntegration.getTicketInfo(barcode, event)
-  //   expect(ticketInfo).toBeTruthy()
-  // }, 100000)
+  it('should lookup ticket by barcode from public method', async () => {
+    const barcode = '9161000821147688597001'
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const ticketInfo = await EventBriteIntegration.getTicketInfo(barcode, event)
+    expect(ticketInfo).toBeTruthy()
+  }, 100000)
 
 
   // PROGRAMMATIC ORDERS

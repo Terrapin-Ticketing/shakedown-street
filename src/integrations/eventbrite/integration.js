@@ -3,7 +3,7 @@ import Event from '../../events/controller'
 import IntegrationInterface from '../IntegrationInterface'
 import { post, get } from '../../_utils/http'
 
-class MockIntegration extends IntegrationInterface {
+class EventbriteIntegration extends IntegrationInterface {
   async login(event) {
     return event.auth.apiKey
   }
@@ -38,23 +38,26 @@ class MockIntegration extends IntegrationInterface {
   }
 
   async isValidTicket(barcode, event) {
+    return !!(await this.getTicketById(barcode, event))
+  }
+
+  async getTicketById(barcode, event) {
     const apiKey = await this.login(event);
     const getOrdersPage = async () => {
       const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/orders?token=${apiKey}`)
       return JSON.parse(res.body)
     }
     let ordersPage = await getOrdersPage()
-    let isFound = false
     do {
       for (let order of ordersPage.orders) {
-        if (isFound) break;
         order = await this.getOrderById(order.id, event);
-        const barcodes = _.flatten(order.tickets.map(t => t.barcodes.map(a => a.barcode)))
-        isFound = !!barcodes.find(bc => bc === barcode);
+        for (const t of order.tickets) {
+          if (t.barcodes.find(bc => bc.barcode === barcode)) return t
+        }
       }
       ordersPage = await getOrdersPage()
-    } while (ordersPage.pagination.has_more_items && !isFound)
-    return isFound
+    } while (ordersPage.pagination.has_more_items)
+    return false
   }
 
   async getTicketTypes(event) {
@@ -71,29 +74,17 @@ class MockIntegration extends IntegrationInterface {
     return eventbriteEvent
   }
 
-  async getTicketInfo(ticketId) {
-    //   curl -X POST   https://www.eventbriteapi.com/v3/events/{event_id}/ticket_classes/   -H 'Authorization: Bearer apiKey'   -H "Accept: application/json"
-    // -d '{
-    //       "ticket_class": {
-    //           "name": "VIP",
-    //           "quantity_total": 100,
-    //           "cost": "USD,1000"
-    //           }
-    //       }'
-
-    // https://www.eventbriteapi.com/v3/events/{event_id}/orders
-    // -- returns barcodes
-    // notice that /events became /orders
-
-    // https://www.eventbriteapi.com/v3/orders/{order_id}/
+  async getTicketInfo(barcode, event) {
+    const ticket =  await this.getTicketById(barcode, event)
     return {
-      id: ticketId,
-      discrip: 'looks like i matter a lot',
-      type: 'someType', // idk why we rely on this,
-      price: 10
+      id: ticket.id,
+      price: ticket.costs,
+      checkedIn: ticket.checked_in,
+      status: ticket.status,
+      orderId: ticket.order_id,
+      type: ticket.ticket_class_name,
+      typeId: ticket.ticket_class_id
     }
   }
-
-  // async transferTicket // on inteface
 }
-export default new MockIntegration()
+export default new EventbriteIntegration()
