@@ -1,17 +1,15 @@
+import _ from 'lodash'
 import Event from '../../events/controller'
 import IntegrationInterface from '../IntegrationInterface'
 import { post, get } from '../../_utils/http'
 
 class MockIntegration extends IntegrationInterface {
-  async login(apiKey, password, event) {
-    // eid=56017677381
-    const url = `https://www.eventbriteapi.com/v3/users/me/events/?token=${apiKey}`
-    // const url = `https://www.eventbriteapi.com/v3/users/me/?token=${apiKey}`
-
+  async login(event) {
     return event.auth.apiKey
   }
 
   async deactivateTicket(eventId, barcode) {
+    // manual cycle through method
     return true
   }
 
@@ -28,31 +26,57 @@ class MockIntegration extends IntegrationInterface {
     return text
   }
 
-  async isValidTicket(ticketId, event) {
-    return ticketId.toString().match(/[a-zA-Z0-9]{5}/) && ticketId.toString().length === 5
+  async getOrderById(orderId, event) {
+    const apiKey = await this.login(event);
+    const res = await get(`https://www.eventbriteapi.com/v3/orders/${orderId}/?token=${apiKey}&expand=attendees`);
+    const order = JSON.parse(res.body)
+    return {
+      orderId,
+      name: order.name,
+      tickets: order.attendees
+    }
+  }
+
+  async isValidTicket(barcode, event) {
+    const apiKey = await this.login(event);
+    const getOrdersPage = async () => {
+      const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/orders?token=${apiKey}`)
+      return JSON.parse(res.body)
+    }
+    let ordersPage = await getOrdersPage()
+    let isFound = false
+    do {
+      for (let order of ordersPage.orders) {
+        if (isFound) break;
+        order = await this.getOrderById(order.id, event);
+        const barcodes = _.flatten(order.tickets.map(t => t.barcodes.map(a => a.barcode)))
+        isFound = !!barcodes.find(bc => bc === barcode);
+      }
+      ordersPage = await getOrdersPage()
+    } while (ordersPage.pagination.has_more_items && !isFound)
+    return isFound
   }
 
   async getTicketTypes(eventId) {
-    /*
-    BETTER PLACE TO GET IT FROM:
-    */
-    const event = await Event.getEventById(eventId)
-    return event && event.ticketTypes
+    // const apiKey = await this.login(event);
+    // const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/?token=${apiKey}`);
+    // const event = JSON.parse(res.body)
+    // console.log('event', event)
+    // BETTER PLACE TO GET IT FROM:
+    // */
+    // const event = await Event.getEventById(eventId)
+    // return event && event.ticketTypes
   }
 
-  async getEventInfo(eventId) {
-    // const x = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/`, {
-    //   headers: {
-    //     'Authorization': `Bearer ${apiKey}`
-    //   }
-    // })
-
-    const event = await Event.getEventById(eventId)
-    return event
+  async getEventInfo(event) {
+    const apiKey = await this.login(event);
+    const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/?token=${apiKey}`);
+    const eventbriteEvent = JSON.parse(res.body)
+    return eventbriteEvent
   }
 
   async getTicketInfo(ticketId) {
-    //   curl -X POST   https://www.eventbriteapi.com/v3/events/{event_id}/ticket_classes/   -H 'Authorization: Bearer PERSONAL_OAUTH_TOKEN'   -H "Accept: application/json"
+    //   curl -X POST   https://www.eventbriteapi.com/v3/events/{event_id}/ticket_classes/   -H 'Authorization: Bearer apiKey'   -H "Accept: application/json"
     // -d '{
     //       "ticket_class": {
     //           "name": "VIP",

@@ -11,7 +11,7 @@ export default {
   password: process.env.CINCI_REGISTER_PASSWORD,
 
   auth: {
-    apiKey: 'DJNFCLSHCLWR22XSYZ73'
+    apiKey: process.env.EVENTBRITE_API_KEY
   },
 
   date: 'do I even do anything?',

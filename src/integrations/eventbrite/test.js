@@ -4,9 +4,9 @@ import Event from '../../events/controller'
 import User from '../../users/controller'
 
 import EventBriteIntegration from './integration'
-import testEventConfig from './test-event'
+import eventBriteTestEventConfig from './test-event'
 
-describe('Cinci Ticket Intergration', () => {
+describe('Eventbrite Intergration', () => {
   beforeAll(async() => {
     await mongoose.dropCollection('events')
     await mongoose.dropCollection('users')
@@ -18,31 +18,49 @@ describe('Cinci Ticket Intergration', () => {
     await mongoose.dropCollection('tickets')
   })
 
-  it.only('should login', async() => {
-    const event = await Event.createEvent(testEventConfig)
-
-    const apiKey = 'DJNFCLSHCLWR22XSYZ73'
-
-    const rawCookies = await EventBriteIntegration.login(apiKey, '', event)
-
-
-    // expect(rawCookies.includes('UserSession')).toBeTruthy()
+  it('should login', async() => {
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const apiKey = await EventBriteIntegration.login(event);
+    expect(apiKey).toEqual(event.auth.apiKey);
   }, 10000)
 
-  // it('should return true for valid barcode', async() => {
-  //   const barcode = '0222226482260290522229'
-  //   const event = await Event.createEvent(cinciTicketTestEvent)
-  //   const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
-  //   expect(isValidTicket).toBeTruthy()
-  // }, 10000)
-  //
-  // it('should return false for invalid barcode', async() => {
-  //   const barcode = 'not-a-barcode'
-  //   const event = await Event.createEvent(cinciTicketTestEvent)
-  //   const isValidTicket = await CinciTicketIntegration.isValidTicket(barcode, event)
-  //   expect(isValidTicket).toBeFalsy()
-  // }, 10000)
-  //
+  it('should return order by orderId', async() => {
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const orderNumber = '916100082'
+    const order = await EventBriteIntegration.getOrderById(orderNumber, event)
+    expect(order).toBeTruthy()
+    expect(order).toHaveProperty('tickets')
+  }, 10000)
+
+  it('should return true for valid barcode', async() => {
+    const barcode = '9161000821147688597001'
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const isValidTicket = await EventBriteIntegration.isValidTicket(barcode, event)
+    expect(isValidTicket).toEqual(true);
+  }, 10000)
+
+  it('should return false for invalid barcode', async() => {
+    const barcode = 'not-a-barcode'
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const isValidTicket = await EventBriteIntegration.isValidTicket(barcode, event)
+    expect(isValidTicket).toBeFalsy()
+  }, 10000)
+
+  it('should lookup event details from eventbrite', async() => {
+    const event = await Event.createEvent(eventBriteTestEventConfig)
+    const eventInfo = await EventBriteIntegration.getEventInfo(event)
+    expect(eventInfo).toBeTruthy()
+  }, 100000)
+
+
+  // it.only('should lookup ticket type and price from barcode', async () => {
+  //   const barcode = '9161000821147688597001'
+  //   const event = await Event.createEvent(eventBriteTestEventConfig)
+  //   const ticketInfo = await EventBriteIntegration.getTicketInfo(barcode, event)
+  //   expect(ticketInfo).toBeTruthy()
+  // }, 100000)
+
+
   // it('should issue ticket', async() => {
   //   const event = await Event.createEvent(cinciTicketTestEvent)
   //   const user = await User.createUser('test@test.com', 'test')
@@ -51,12 +69,7 @@ describe('Cinci Ticket Intergration', () => {
   //   expect(isValidTicket).toBeTruthy()
   // }, 100000)
   //
-  // it('should lookup ticket type and price from barcode', async() => {
-  //   const barcode = '0000001860012019400002'
-  //   const event = await Event.createEvent(cinciTicketTestEvent)
-  //   const ticketInfo = await CinciTicketIntegration.getTicketInfo(barcode, event)
-  //   expect(ticketInfo).toBeTruthy()
-  // }, 100000)
+
   //
   // it('should deactivate a barcode', async() => {
   //   const event = await Event.createEvent(cinciTicketTestEvent)
