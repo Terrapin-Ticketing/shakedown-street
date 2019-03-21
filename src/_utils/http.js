@@ -21,8 +21,6 @@ async function req(config) {
   const stringifiedCookie = queryString.stringify(cookieValue)
   let cookie = request.cookie(stringifiedCookie)
 
-  // console.log('cookie', cookie)
-
   jar.setCookie(cookie, domain)
   let options = {
     method,

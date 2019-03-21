@@ -24,7 +24,29 @@ class MockIntegration extends IntegrationInterface {
   }
 
   async isValidTicket(ticketId, event) {
-    return ticketId.toString().match(/[a-zA-Z0-9]{5}/) && ticketId.toString().length === 5
+    if (ticketId.toString().match(/[a-zA-Z0-9]{5}/) && ticketId.toString().length === 5) {
+      return {
+        id: 12345,
+        price: 10,
+        barcode: 'abc12345',
+        type: 'General Admission',
+        isForSale: true,
+        descrip: 'blah',
+        eventId: {
+          name: 'Domefest',
+          urlSafe: 'mockevent',
+          startDate: '2018-03-04T01:00:00',
+          _id: '5c5e441106e8b161e389c1ae',
+          venue: {
+            name: 'Legend Valley',
+            address: '999 Fun Time',
+            city: 'Theland',
+            state: 'OH',
+            zip: '43215'
+          }
+        }
+      }
+    }
   }
 
   async getTicketTypes(eventId) {

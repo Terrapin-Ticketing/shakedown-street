@@ -13,7 +13,7 @@ export default {
         const { user } = req.props
         if (!user) return res.status(401).send({ error: 'unauthorized' })
         const isAdmin = checkAdminEmail(user.email)
-        if (!isAdmin) return res.status(401).send({ error: 'unauthorized' })
+        if (!isAdmin) return res.status(401).send('Unauthorized')
 
         const urlParts = url.parse(req.url, true)
         const query = urlParts.query
