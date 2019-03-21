@@ -14,14 +14,27 @@ import CinciTicket from '../src/integrations/cinci-ticket/integration'
 import mockTestEvent from '../src/integrations/mock/test-event'
 import MockIntegration from '../src/integrations/mock/integration'
 
+import eventbriteTestEvent from '../src/integrations/eventbrite/test-event'
+import EventbriteIntegration from '../src/integrations/eventbrite/integration'
+
 (async function() {
   await clearDb()
-  const barcode = await createMockTestEvent()
+  const barcode = await createEventbriteEvent()
   console.log('mission tix : ', barcode)
-  const user = await User.createUser('reeder@terrapinticketing.com', 'test')
+  const user = await User.createUser('michaelEventbrite@tt.com', 'test')
   console.log('created user:', user.email)
   process.exit()
 })()
+
+async function createEventbriteEvent() {
+  const user = await User.createUser('kevinEventbrite@tt.com', 'test')
+  const event = await Event.createEvent(eventbriteTestEvent)
+
+  const orderId = await EventbriteIntegration.issueTicket(event, user, 'REG')
+  // drop database
+  await mongoose.dropCollection('tickets')
+  return orderId
+}
 
 async function createMockTestEvent() {
   const user = await User.createUser('mock@tt.com', 'test')

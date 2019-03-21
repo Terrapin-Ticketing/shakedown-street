@@ -14,10 +14,6 @@ can get barcodes from endpoints:
 4. have them pick one
 5.
 
-
-
-
-
 Eventbrite EMAIL:
 
 We need the Eventbrite Order Service API to be able to do partial refunds for guests.

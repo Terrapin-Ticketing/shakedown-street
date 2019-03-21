@@ -18,12 +18,7 @@ class EventbriteIntegration extends IntegrationInterface {
   }
 
   async issueTicket(event, user, ticketType) {
-    var text = ''
-    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    for (let i = 0; i < 5; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length))
-    }
-    return text
+    return '916100082'
   }
 
   async getOrderById(orderId, event) {
