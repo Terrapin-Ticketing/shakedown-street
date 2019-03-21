@@ -20,7 +20,7 @@ import EventbriteIntegration from '../src/integrations/eventbrite/integration'
 (async function() {
   await clearDb()
   const barcode = await createEventbriteEvent()
-  console.log('mission tix : ', barcode)
+  console.log('eventbrite : ', barcode)
   const user = await User.createUser('michaelEventbrite@tt.com', 'test')
   console.log('created user:', user.email)
   process.exit()
