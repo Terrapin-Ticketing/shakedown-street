@@ -6,7 +6,7 @@ export default {
   loginUrl: process.env.CINCI_REGISTER_LOGIN_URL,
 
   integrationType: 'Eventbrite',
-  urlSafe: 'domefest2019',
+  urlSafe: 'domefest',
 
   username: process.env.CINCI_REGISTER_USERNAME,
   password: process.env.CINCI_REGISTER_PASSWORD,
