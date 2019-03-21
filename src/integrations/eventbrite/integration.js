@@ -43,7 +43,7 @@ class EventbriteIntegration extends IntegrationInterface {
 
   async getOrderByBarcode(barcode, event) {
     const apiKey = await this.login(event);
-    const getOrdersPage = async () => {
+    const getOrdersPage = async() => {
       const res = await get(`https://www.eventbriteapi.com/v3/events/${event.externalEventId}/orders?token=${apiKey}`)
       return JSON.parse(res.body)
     }
@@ -84,7 +84,7 @@ class EventbriteIntegration extends IntegrationInterface {
   }
 
   async getTicketInfo(barcode, event) {
-    const ticket =  await this.getTicketById(barcode, event)
+    const ticket = await this.getTicketById(barcode, event)
     return {
       id: ticket.id,
       price: ticket.costs,

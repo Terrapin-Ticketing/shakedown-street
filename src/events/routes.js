@@ -33,6 +33,35 @@ export default {
       }
     }
   },
+  ['/:urlSafe/orderId/validate']: {
+    post: {
+      middleware: [
+        definePropFromDb({
+          prop: 'event',
+          findOne: {
+            collection: 'events',
+            query: { urlSafe: 'params.urlSafe' }
+          }
+        }),
+        defineIntegration({
+          prop: 'Integration',
+          findOne: {
+            collection: 'events',
+            query: { urlSafe: 'params.urlSafe' }
+          }
+        })
+      ],
+      body: {
+        orderId: String
+      },
+      handler: async(req, res) => {
+        const { Integration, event } = req.props
+        const { orderId } = req.body
+        const order = await Integration.getOrderById(orderId, event)
+        res.send(order)
+      }
+    }
+  },
   ['/:urlSafe/validate']: {
     post: {
       middleware: [
