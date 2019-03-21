@@ -1,5 +1,5 @@
-import MockIntegration from './integration'
+import Eventbrite from './integration'
 
 export default {
-  integration: MockIntegration
+  integration: Eventbrite
 }
