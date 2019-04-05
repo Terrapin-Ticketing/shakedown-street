@@ -146,8 +146,11 @@ export default {
 
         // create new ticket
         const newTicket = await Ticket.createTicket(eventId, userId, barcode, price, type)
-
-        Emailer.sendTicketActivated(user, newTicket)
+        // console.log('user', user)
+        Emailer.sendTicketActivated(user, {
+          ...newTicket,
+          event
+        })
 
         res.send({
           ticket: newTicket,

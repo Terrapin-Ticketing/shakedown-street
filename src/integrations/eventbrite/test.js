@@ -20,8 +20,8 @@ describe('Eventbrite Intergration', () => {
 
   it('should login', async() => {
     const event = await Event.createEvent(eventBriteTestEventConfig)
-    const apiKey = await EventBriteIntegration.login(event);
-    expect(apiKey).toEqual(event.auth.apiKey);
+    const apiKey = await EventBriteIntegration.login(event)
+    expect(apiKey).toEqual(event.auth.apiKey)
   }, 10000)
 
   it('should return order by orderId', async() => {
@@ -36,7 +36,7 @@ describe('Eventbrite Intergration', () => {
     const barcode = '9161000821147688597001'
     const event = await Event.createEvent(eventBriteTestEventConfig)
     const isValidTicket = await EventBriteIntegration.isValidTicket(barcode, event)
-    expect(isValidTicket).toEqual(true);
+    expect(isValidTicket).toEqual(true)
   }, 10000)
 
   it('should return false for invalid barcode', async() => {
@@ -52,20 +52,20 @@ describe('Eventbrite Intergration', () => {
     expect(eventInfo).toBeTruthy()
   }, 100000)
 
-  it('should lookup all current ticket types from eventbrite', async () => {
+  it('should lookup all current ticket types from eventbrite', async() => {
     const event = await Event.createEvent(eventBriteTestEventConfig)
     const ticketTypes = await EventBriteIntegration.getTicketTypes(event)
-    expect(ticketTypes[0]).toBeTruthy();
+    expect(ticketTypes[0]).toBeTruthy()
   }, 100000)
 
-  it('should lookup ticket by barcode from private method', async () => {
+  it('should lookup ticket by barcode from private method', async() => {
     const barcode = '9161000821147688597001'
     const event = await Event.createEvent(eventBriteTestEventConfig)
     const ticket = await EventBriteIntegration.getTicketById(barcode, event)
-    expect(ticket).toHaveProperty('barcodes');
+    expect(ticket).toHaveProperty('barcodes')
   }, 100000)
 
-  it('should lookup ticket by barcode from public method', async () => {
+  it('should lookup ticket by barcode from public method', async() => {
     const barcode = '9161000821147688597001'
     const event = await Event.createEvent(eventBriteTestEventConfig)
     const ticketInfo = await EventBriteIntegration.getTicketInfo(barcode, event)
